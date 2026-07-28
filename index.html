@@ -2268,5 +2268,158 @@ function ebTextoInforme(){
   document.addEventListener('DOMContentLoaded',function(){ loadTheme(); loadLogo(); medRefreshHeader(); });
 })();
 </script>
+<!-- ═══ Auditoría individual (Laboratorio) ═══ -->
+<style>
+#ee-audit .ee-modal-box{max-width:780px;max-height:90vh;overflow:auto;}
+.eea-note{font-size:.72rem;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;margin-bottom:12px;line-height:1.5;}
+.eea-sec{font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+.eea-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;}
+.eea-card{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 12px;position:relative;}
+.eea-card .v{font-size:1.3rem;font-weight:800;line-height:1.1;}
+.eea-card .l{font-size:.64rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;margin-top:3px;}
+.eea-card .s{font-size:.62rem;color:var(--text2);margin-top:2px;}
+.eea-dot{position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;}
+.eea-row{margin-bottom:6px;}
+.eea-row .top{display:flex;justify-content:space-between;font-size:.76rem;color:var(--text);margin-bottom:2px;}
+.eea-bar{height:6px;background:var(--border2);border-radius:4px;overflow:hidden;}
+.eea-bar>i{display:block;height:100%;}
+.eea-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:560px){.eea-cols{grid-template-columns:1fr;}}
+</style>
+<div class="ee-modal" id="ee-audit" onclick="if(event.target===this)eeAuditClose()">
+  <div class="ee-modal-box">
+    <h3>🔬 Auditoría individual <button class="x" onclick="eeAuditClose()">✕</button></h3>
+    <div id="ee-audit-body"></div>
+  </div>
+</div>
+<script>
+/* ═══ Laboratorio: panel de auditoría individual (lee 'ecoestres_informes') ═══ */
+(function(){
+  function recs(){ try{ var a=JSON.parse(localStorage.getItem('ecoestres_informes')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function F(r,id){ if(!r)return ''; if(r.vals&&r.vals[id]!=null)return r.vals[id]; if(r[id]!=null)return r[id]; if(r.campos&&r.campos[id]!=null)return r.campos[id]; return ''; }
+  function num(x){ var n=parseFloat(String(x).replace(',','.')); return isNaN(n)?null:n; }
+  function BULL(r){ return (r&&(r.bull||(r.vals&&r.vals.bull)))||null; }
+  function arr(r,k){ var v=(r&&(r[k]||(r.vals&&r.vals[k])))||[]; return Array.isArray(v)?v:[]; }
+  function pct(n,t){ return t?Math.round(n/t*100):0; }
+  function semHigh(p,g,w){ return p>=g?'var(--green)':p>=w?'var(--yellow)':'var(--red)'; }
+  function semLow(p,g,w){ return p<=g?'var(--green)':p<=w?'var(--yellow)':'var(--red)'; }
+  var SEGT=(typeof SEGS!=='undefined')?SEGS:null;
+  function wmsiPico(r){ var b=BULL(r); if(!b||!b.pico)return null; var s=0,c=0; b.pico.forEach(function(st){ if(st>0){s+=st;c++;} }); return c?s/c:null; }
+  function bullEdited(r){ var b=BULL(r); if(!b)return false; return ['basal','pico','recup'].some(function(ph){ return Array.isArray(b[ph])&&b[ph].some(function(st){return st!==1;}); }); }
+  function pasPico(r){ var v=String(F(r,'b-pa-pico')||''); var m=v.match(/\d+/); return m?parseInt(m[0],10):null; }
+
+  function card(v,l,s,color){ return '<div class="eea-card">'+(color?'<span class="eea-dot" style="background:'+color+'"></span>':'')+'<div class="v" style="color:'+(color||'var(--text)')+'">'+v+'</div><div class="l">'+l+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>'; }
+  function dist(entries){ var tot=entries.reduce(function(a,b){return a+b.n;},0)||1; return entries.map(function(e){ var p=pct(e.n,tot); return '<div class="eea-row"><div class="top"><span>'+e.label+'</span><strong>'+e.n+' · '+p+'%</strong></div><div class="eea-bar"><i style="width:'+p+'%;background:'+(e.color||'var(--accent2)')+'"></i></div></div>'; }).join(''); }
+
+  function compute(){
+    var R=recs(), T=R.length;
+    var A={T:T};
+    // VOLUMEN
+    var now=new Date(); var months=[]; for(var i=5;i>=0;i--){ var d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push({key:d.toISOString().slice(0,7), label:['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()]+' '+String(d.getFullYear()).slice(2)}); }
+    months.forEach(function(m){ m.n=0; });
+    R.forEach(function(r){ var f=String(F(r,'p-fecha')||''); var k=f.slice(0,7); var mm=months.find(function(x){return x.key===k;}); if(mm)mm.n++; });
+    A.months=months;
+    var estMap={ejercicio:'Esfuerzo',dobutamina:'Dobutamina',dipiridamol:'Dipiridamol',adenosina:'Adenosina'};
+    var est={Esfuerzo:0,Dobutamina:0,Dipiridamol:0,Adenosina:0,'Sin dato':0};
+    R.forEach(function(r){ var v=F(r,'p-estres'); est[estMap[v]||'Sin dato']++; });
+    A.est=est;
+    // RESULTADOS
+    var res={pos:0,neg:0,inc:0,via:0}; R.forEach(function(r){ var v=F(r,'res-global'); if(res[v]!=null)res[v]++; });
+    A.res=res;
+    var sint=0; R.forEach(function(r){ var v=F(r,'b-sintomas'); if(v&&v!=='no')sint++; });
+    A.sint=sint;
+    var completado=0, interrump=0, motivos={}; R.forEach(function(r){ var v=String(F(r,'b-stop')||'').trim(); if(!v)return; if(v==='Protocolo completado'||v==='FC objetivo alcanzada')completado++; else interrump++; motivos[v]=(motivos[v]||0)+1; });
+    A.completado=completado; A.interrump=interrump; A.protTot=completado+interrump;
+    var mtop=Object.keys(motivos).sort(function(a,b){return motivos[b]-motivos[a];})[0]; A.motivoTop=mtop?(mtop+' ('+motivos[mtop]+')'):'—';
+    // CALIDAD
+    var maxTest=0; R.forEach(function(r){ var ad=F(r,'b-adec'); if(ad==='si'){maxTest++;return;} var fm=num(F(r,'b-fc-max')),ft=num(F(r,'b-fc-teo')); if(fm&&ft&&ft>0&&fm/ft>=0.85)maxTest++; });
+    A.maxTest=maxTest;
+    var metsArr=[]; R.forEach(function(r){ var m=num(F(r,'b-mets')); if(m!=null)metsArr.push(m); }); A.mets=metsArr.length?(metsArr.reduce(function(a,b){return a+b;},0)/metsArr.length):null;
+    var dp=0; R.forEach(function(r){ if(num(F(r,'b-fc-max'))!=null&&pasPico(r)!=null)dp++; }); A.dp=dp;
+    var imgs=0; R.forEach(function(r){ if(arr(r,'estImg').some(Boolean)||arr(r,'ecgImg').some(Boolean))imgs++; }); A.imgs=imgs;
+    var bulls=0; R.forEach(function(r){ if(bullEdited(r))bulls++; }); A.bulls=bulls;
+    var infs=0; R.forEach(function(r){ if(String(F(r,'informe-txt')||'').trim().length>10)infs++; }); A.infs=infs;
+    var wmArr=[]; R.forEach(function(r){ var w=wmsiPico(r); if(w!=null)wmArr.push(w); }); A.wmsi=wmArr.length?(wmArr.reduce(function(a,b){return a+b;},0)/wmArr.length):null;
+    // HALLAZGOS
+    var fevi={'Normal ≥55':0,'Leve 45-54':0,'Reducida 35-44':0,'Severa <35':0,'Sin dato':0};
+    R.forEach(function(r){ var f=num(F(r,'c-fevi-bas')); if(f==null)fevi['Sin dato']++; else if(f>=55)fevi['Normal ≥55']++; else if(f>=45)fevi['Leve 45-54']++; else if(f>=35)fevi['Reducida 35-44']++; else fevi['Severa <35']++; });
+    A.fevi=fevi;
+    var altPico=0, terr={LAD:0,RCA:0,LCx:0}; R.forEach(function(r){ var b=BULL(r); if(!b||!b.pico)return; var any=false; b.pico.forEach(function(st,i){ if(st>1){ any=true; if(SEGT&&SEGT[i])terr[SEGT[i].ter]=(terr[SEGT[i].ter]||0)+1; } }); if(any)altPico++; });
+    A.altPico=altPico; A.terr=terr;
+    var terrTop=Object.keys(terr).sort(function(a,b){return terr[b]-terr[a];})[0]; A.terrTop=(terr[terrTop]>0)?(terrTop+' ('+terr[terrTop]+' seg.)'):'—';
+    var psapHi=0; R.forEach(function(r){ var p=num(F(r,'p-psap-bas'))||num(F(r,'eb-psap')); if(p!=null&&p>40)psapHi++; }); A.psapHi=psapHi;
+    // BRECHAS
+    var sinInf=0,sinBull=0; R.forEach(function(r){ if(String(F(r,'informe-txt')||'').trim().length<=10)sinInf++; if(!bullEdited(r))sinBull++; }); A.sinInf=sinInf; A.sinBull=sinBull;
+    var cutoff=new Date(); cutoff.setMonth(cutoff.getMonth()-6); var cutStr=cutoff.toISOString().slice(0,10);
+    var pac={}; R.forEach(function(r){ var key=(String(F(r,'p-hc')||'').trim().toLowerCase())||(String(F(r,'p-nombre')||'').trim().toLowerCase()); if(!key)key='__anon_'+(r.id||Math.random()); var f=String(F(r,'p-fecha')||''); if(!pac[key]||f>pac[key])pac[key]=f; });
+    var pacKeys=Object.keys(pac); A.pacTotal=pacKeys.length; A.sinSeg=pacKeys.filter(function(k){ var f=pac[k]; return !f||f<cutStr; }).length;
+    return A;
+  }
+
+  window.eeAuditClose=function(){ var m=document.getElementById('ee-audit'); if(m)m.classList.remove('open'); };
+  window.eeAuditOpen=function(){
+    var A; try{ A=compute(); }catch(e){ A=null; }
+    var body=document.getElementById('ee-audit-body'); if(!body)return;
+    if(!A){ body.innerHTML='<div class="eea-note">No se pudo calcular la auditoría.</div>'; }
+    else{
+      var T=A.T;
+      var h='';
+      h+='<div class="eea-note">Auditoría calculada en este equipo desde <code>localStorage[\'ecoestres_informes\']</code>. '+(T?('<strong>'+T+'</strong> estudio(s) guardado(s).'):'No hay estudios guardados aún en esa clave — los indicadores se mostrarán cuando existan.')+' Semáforos según umbrales de calidad razonables.</div>';
+      // VOLUMEN
+      h+='<div class="eea-sec">Volumen</div>';
+      h+='<div class="eea-grid" style="margin-bottom:10px">'+card(T,'Estudios totales','')+card((function(){var s=0;A.months.forEach(function(m){s+=m.n;});return s;})(),'Últimos 6 meses','')+'</div>';
+      h+='<div class="eea-cols"><div><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">Estudios por mes</div>'+dist(A.months.map(function(m){return {label:m.label,n:m.n,color:'var(--accent2)'};}))+'</div>';
+      h+='<div><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">Tipo de estrés</div>'+dist([['Esfuerzo','var(--green)'],['Dobutamina','var(--accent)'],['Dipiridamol','var(--amber)'],['Adenosina','var(--lad)'],['Sin dato','var(--text2)']].map(function(e){return {label:e[0],n:A.est[e[0]],color:e[1]};}))+'</div></div>';
+      // RESULTADOS
+      h+='<div class="eea-sec">Resultados</div>';
+      h+='<div class="eea-grid">'
+        +card(pct(A.res.pos,T)+'%','Positivos isquemia',A.res.pos+'/'+T,'var(--red)')
+        +card(pct(A.res.neg,T)+'%','Negativos',A.res.neg+'/'+T,'var(--green)')
+        +card(pct(A.res.inc,T)+'%','Indeterminados',A.res.inc+'/'+T,'var(--yellow)')
+        +card(pct(A.res.via,T)+'%','Viabilidad presente',A.res.via+'/'+T,'var(--accent2)')
+        +card(pct(A.sint,T)+'%','Con síntomas',A.sint+'/'+T,'var(--amber)')
+        +'</div>';
+      h+='<div class="eea-cols" style="margin-top:10px"><div><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">Protocolo</div>'
+        +dist([{label:'Completado',n:A.completado,color:'var(--green)'},{label:'Interrumpido',n:A.interrump,color:'var(--red)'}])+'</div>'
+        +'<div><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">Motivo finalización más frecuente</div><div class="eea-card"><div class="v" style="font-size:1rem">'+A.motivoTop+'</div></div></div></div>';
+      // CALIDAD
+      var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T);
+      var wm=A.wmsi; var wmColor=wm==null?'var(--text2)':wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)';
+      h+='<div class="eea-sec">Calidad</div>';
+      h+='<div class="eea-grid">'
+        +card(pMax+'%','FC objetivo (máxima)',A.maxTest+'/'+T,semHigh(pMax,85,70))
+        +card(A.mets!=null?A.mets.toFixed(1):'—','METs promedio','')
+        +card(pDp+'%','Doble producto reg.',A.dp+'/'+T,semHigh(pDp,85,60))
+        +card(pImg+'%','Con imágenes',A.imgs+'/'+T,semHigh(pImg,85,60))
+        +card(pBull+'%','Con Bull’s Eye',A.bulls+'/'+T,semHigh(pBull,85,60))
+        +card(pInf+'%','Con informe narrativo',A.infs+'/'+T,semHigh(pInf,85,60))
+        +card(wm!=null?wm.toFixed(2):'—','WMSI prom. pico','',wmColor)
+        +'</div>';
+      // HALLAZGOS
+      h+='<div class="eea-sec">Hallazgos</div>';
+      h+='<div class="eea-cols"><div><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">FEVI basal</div>'
+        +dist([['Normal ≥55','var(--green)'],['Leve 45-54','var(--yellow)'],['Reducida 35-44','var(--amber)'],['Severa <35','var(--red)'],['Sin dato','var(--text2)']].map(function(e){return {label:e[0],n:A.fevi[e[0]],color:e[1]};}))+'</div>'
+        +'<div class="eea-grid" style="align-content:start">'
+        +card(pct(A.altPico,T)+'%','Alt. motilidad pico',A.altPico+'/'+T,'var(--amber)')
+        +card(A.terrTop,'Territorio más frecuente','')
+        +card(pct(A.psapHi,T)+'%','PSAP basal >40',A.psapHi+'/'+T,A.psapHi>0?'var(--amber)':'var(--green)')
+        +'</div></div>';
+      // BRECHAS
+      var pSinInf=pct(A.sinInf,T),pSinBull=pct(A.sinBull,T),pSinSeg=pct(A.sinSeg,A.pacTotal);
+      h+='<div class="eea-sec">Brechas</div>';
+      h+='<div class="eea-grid">'
+        +card(A.sinInf,'Sin informe narrativo',pSinInf+'%',semLow(pSinInf,10,30))
+        +card(A.sinBull,'Sin Bull’s Eye',pSinBull+'%',semLow(pSinBull,10,30))
+        +card(A.sinSeg,'Pacientes sin seguim. 6m',(A.pacTotal?pSinSeg+'% de '+A.pacTotal:'—'),semLow(pSinSeg,10,30))
+        +'</div>';
+      body.innerHTML=h;
+    }
+    var m=document.getElementById('ee-audit'); if(m)m.classList.add('open');
+  };
+  /* El botón Laboratorio (fijo, borde derecho, var(--accent2)) abre esta auditoría */
+  window.eeLab=function(){ eeAuditOpen(); };
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-audit'); if(m&&m.classList.contains('open'))eeAuditClose(); } });
+})();
+</script>
 </body>
 </html>
