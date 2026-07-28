@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EcoEstrés Smart — CeiboMed</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root {
   --bg:#0D1117; --bg2:#161B22; --bg3:#1C2333; --bg4:#212840;
@@ -157,6 +158,11 @@ tr:last-child td{border-bottom:none;} tr:hover td{background:rgba(255,255,255,.0
   border:none;background:var(--red);color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .img-add-lbl{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--text2);pointer-events:none;}
 .img-add-lbl span{font-size:24px;}
+.img-slot.has-img{flex-direction:column;justify-content:flex-start;}
+.img-pdf-ctrls{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;background:var(--bg2);border-top:1px solid var(--border);box-sizing:border-box;}
+.img-pdf-ctrls .img-inc{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent2);cursor:pointer;white-space:nowrap;}
+.img-pdf-ctrls .img-lbl{flex:1;min-width:0;padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:11px;font-family:inherit;outline:none;}
+.img-pdf-ctrls .img-lbl:focus{border-color:var(--accent2);}
 .pop{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
   padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:500;min-width:200px;display:none;}
 .pop.open{display:block;}
@@ -293,18 +299,15 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 </header>
 <nav class="sidebar" id="sidebar">
-  <div class="nav-section">Estudio</div>
-  <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
   <div class="nav-item" onclick="goTo('paciente')"><span class="ni">👤</span> Paciente</div>
-  <div class="nav-item" onclick="goTo('protocolo')"><span class="ni">📋</span> Protocolo ABCD-FLPR</div>
+  <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
+  <div class="nav-item" onclick="goTo('ecg')"><span class="ni">📈</span> ECG / Arritmias</div>
   <div class="nav-item" onclick="goTo('bullo')"><span class="ni">🎯</span> Bull's Eye 17 seg</div>
-  <div class="nav-section">Análisis</div>
   <div class="nav-item" onclick="goTo('criterios')"><span class="ni">⚡</span> Criterios de positividad</div>
   <div class="nav-item" onclick="goTo('territorio')"><span class="ni">🗺️</span> Territorio vascular</div>
   <div class="nav-item" onclick="goTo('viabilidad')"><span class="ni">❤️</span> Viabilidad (bifásico)</div>
   <div class="nav-item" onclick="goTo('cfvr')"><span class="ni">🩸</span> CFVR / Strain</div>
-  <div class="nav-item" onclick="goTo('ecg')"><span class="ni">📈</span> ECG / Arritmias</div>
-  <div class="nav-section">Informe</div>
+  <div class="nav-item" onclick="goTo('protocolo')"><span class="ni">📋</span> Protocolo ABCD-FLPR</div>
   <div class="nav-item" onclick="goTo('imagenes')"><span class="ni">🖼️</span> Imágenes</div>
   <div class="nav-item" onclick="goTo('informe')"><span class="ni">📝</span> Informe narrativo</div>
   <div class="nav-item" onclick="goTo('config')"><span class="ni">⚙️</span> Configuración</div>
@@ -317,17 +320,16 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   <div class="page-sub">Evaluación estructural y funcional pre-estrés. Completa antes de iniciar el protocolo.</div>
 
   <div class="tabs" id="ecobasal-tabs">
-    <button class="tab-btn active" onclick="ebTab('vi',this)">VI / Sist.</button>
-    <button class="tab-btn" onclick="ebTab('diast',this)">Diástole</button>
-    <button class="tab-btn" onclick="ebTab('vd',this)">VD</button>
-    <button class="tab-btn" onclick="ebTab('ai-ad',this)">AI / AD</button>
-    <button class="tab-btn" onclick="ebTab('aorta',this)">Aorta</button>
+    <button class="tab-btn active" onclick="ebTab('ai-ao',this)">AI / AO</button>
+    <button class="tab-btn" onclick="ebTab('vi-vd',this)">VI / VD</button>
+    <button class="tab-btn" onclick="ebTab('ad-vci',this)">AD / VCI</button>
+    <button class="tab-btn" onclick="ebTab('doppler',this)">Doppler</button>
     <button class="tab-btn" onclick="ebTab('valvulas',this)">Válvulas</button>
     <button class="tab-btn" onclick="ebTab('pericardio',this)">Pericardio</button>
   </div>
 
   <!-- VI / SISTÓLICA -->
-  <div class="tab-pane active" id="ebtab-vi">
+  <div class="tab-pane" id="ebtab-vi" data-ebg="vi-vd">
     <div class="grid2">
       <div class="card">
         <div class="card-head">📐 Dimensiones VI (Modo M / 2D)</div>
@@ -395,7 +397,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 
   <!-- DIASTÓLICA -->
-  <div class="tab-pane" id="ebtab-diast">
+  <div class="tab-pane" id="ebtab-diast" data-ebg="doppler">
     <div class="grid2">
       <div class="card">
         <div class="card-head">🌊 Doppler transmitral</div>
@@ -405,7 +407,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
             <div class="fg"><label>Onda A (cm/s)</label><input type="number" id="eb-a" step="0.1" placeholder="60" oninput="ebCalcDiast()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Relación E/A</label><input type="number" id="eb-ea" readonly placeholder="—"></div>
+            <div class="fg"><label>Relación E/A</label><input type="number" id="eb-ea" readonly placeholder="—"><div id="eb-ea-res" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
             <div class="fg"><label>Tiempo desaceleración E (ms)</label><input type="number" id="eb-td" placeholder="200" oninput="ebCalcDiast()"></div>
           </div>
           <div class="fg"><label>TRIV (ms)</label><input type="number" id="eb-triv" placeholder="80"></div>
@@ -422,7 +424,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           </div>
           <div class="grid2">
             <div class="fg"><label>e' promedio (cm/s)</label><input type="number" id="eb-e-prom" readonly placeholder="—"></div>
-            <div class="fg"><label>Relación E/e promedio</label><input type="number" id="eb-eeprom" readonly placeholder="—"></div>
+            <div class="fg"><label>Relación E/e promedio</label><input type="number" id="eb-eeprom" readonly placeholder="—"><div id="eb-eeprom-res" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
           </div>
           <div class="grid2">
             <div class="fg"><label>E/e' septal</label><input type="number" id="eb-ee-sep" readonly placeholder="—"></div>
@@ -455,7 +457,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 
   <!-- VD -->
-  <div class="tab-pane" id="ebtab-vd">
+  <div class="tab-pane" id="ebtab-vd" data-ebg="vi-vd">
     <div class="grid2">
       <div class="card">
         <div class="card-head">📐 Dimensiones VD</div>
@@ -489,7 +491,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 
   <!-- AI / AD -->
-  <div class="tab-pane" id="ebtab-ai-ad">
+  <div class="tab-pane active" id="ebtab-ai" data-ebg="ai-ao">
     <div class="grid2">
       <div class="card">
         <div class="card-head">🫁 Aurícula Izquierda</div>
@@ -508,7 +510,12 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           <div class="note-box" style="margin-top:8px">ℹ️ Vol. AI indexado normal: ≤34 mL/m². &gt;34: leve. &gt;41: moderado. &gt;48: severo.</div>
         </div>
       </div>
+    </div>
+  </div>
 
+  <!-- AD / VCI -->
+  <div class="tab-pane" id="ebtab-ad" data-ebg="ad-vci">
+    <div class="grid2">
       <div class="card">
         <div class="card-head">🫁 Aurícula Derecha</div>
         <div class="card-body">
@@ -532,7 +539,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 
   <!-- AORTA -->
-  <div class="tab-pane" id="ebtab-aorta">
+  <div class="tab-pane active" id="ebtab-aorta" data-ebg="ai-ao">
     <div class="card">
       <div class="card-head">🩸 Aorta</div>
       <div class="card-body">
@@ -556,7 +563,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 
   <!-- VÁLVULAS -->
-  <div class="tab-pane" id="ebtab-valvulas">
+  <div class="tab-pane" id="ebtab-valvulas" data-ebg="valvulas">
     <div class="grid2">
       <!-- MITRAL -->
       <div class="card">
@@ -687,7 +694,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   </div>
 
   <!-- PERICARDIO -->
-  <div class="tab-pane" id="ebtab-pericardio">
+  <div class="tab-pane" id="ebtab-pericardio" data-ebg="pericardio">
     <div class="card">
       <div class="card-head">🫧 Pericardio</div>
       <div class="card-body">
@@ -745,12 +752,30 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           <div class="fg"><label>HC / ID</label><input id="p-hc" placeholder="123456"></div>
         </div>
         <div class="grid3">
-          <div class="fg"><label>Fecha de nacimiento</label><input type="date" id="p-fnac" oninput="calcEdad()"></div>
+          <div class="fg"><label>Fecha de nacimiento</label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="p-fnac-dia" min="1" max="31" placeholder="Día" oninput="calcEdad()" style="width:72px">
+              <select id="p-fnac-mes" onchange="calcEdad()" style="flex:1">
+                <option value="">Mes</option>
+                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+              </select>
+              <input type="number" id="p-fnac-anio" min="1900" max="2100" placeholder="Año" oninput="calcEdad()" style="width:92px">
+            </div>
+          </div>
           <div class="fg"><label>Edad (años)</label><input type="number" id="p-edad" placeholder="55" oninput="onEdadChange()"></div>
           <div class="fg"><label>Sexo</label><select id="p-sexo" onchange="ptpCad()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
         </div>
-        <div class="grid2">
+        <div class="grid3">
+          <div class="fg"><label>Peso (kg)</label><input type="number" id="p-peso" step="0.1" placeholder="70" oninput="calcAntro();if(typeof calcDobuDosis==='function')calcDobuDosis()"></div>
+          <div class="fg"><label>Talla (cm)</label><input type="number" id="p-talla" step="0.1" placeholder="170" oninput="calcAntro()"></div>
+          <div class="fg"><label>IMC (kg/m²)</label><input type="number" id="p-imc" readonly placeholder="—"></div>
+        </div>
+        <div class="grid3">
           <div class="fg"><label>Fecha del estudio</label><input type="date" id="p-fecha"></div>
+          <div class="fg"><label>Fecha de solicitud</label><input type="date" id="p-fecha-sol"></div>
           <div class="fg"><label>Médico solicitante</label><input id="p-medico" placeholder="Dr. Pérez"></div>
         </div>
         <div class="fg"><label>Indicación clínica</label>
@@ -793,17 +818,28 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card">
         <div class="card-head">🏃 Tipo de estrés y protocolo</div>
         <div class="card-body">
-          <div class="fg"><label>Protocolo</label>
-            <select id="p-estres" onchange="onEstresChange()">
-              <option value="ejercicio">Ejercicio (treadmill / bicicleta)</option>
+          <div class="fg"><label>Tipo de estrés</label>
+            <select id="p-estres" onchange="onEstresChange();peSyncFromEstres()">
+              <option value="ejercicio">Esfuerzo físico</option>
               <option value="dobutamina">Dobutamina</option>
               <option value="dipiridamol">Dipiridamol</option>
-              <option value="adenosina">Adenosina</option>
             </select>
           </div>
+          <div class="fg" id="pe-proto-row" style="margin-top:6px;display:none"><label>Protocolo (esfuerzo)</label>
+            <select id="pe-proto" onchange="peSetProto(this.value)">
+              <option value="bruce">Bruce</option>
+              <option value="bruce_mod">Bruce modificado</option>
+              <option value="naughton">Naughton</option>
+              <option value="astrand">Åstrand (bicicleta)</option>
+              <option value="ramp">RAMP</option>
+            </select>
+          </div>
+          <div style="margin-top:8px">
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px">Etapas — nombres editables (alimentan el Bull's Eye y la tabla ECG)</label>
+            <div id="pe-stages"></div>
+          </div>
           <div id="dobu-wrap" style="display:none">
-            <div class="note-box">ℹ️ Dobutamina: 5→10→20→30→40 mcg/kg/min (etapas de 3 min). Atropina hasta 1mg si no alcanza FC objetivo.</div>
-            <div class="fg" style="margin-top:6px"><label>Peso (kg)</label><input type="number" id="p-peso" placeholder="70" oninput="calcDobuDosis()"></div>
+            <div class="note-box">ℹ️ Dobutamina: 5→10→20→30→40 mcg/kg/min (etapas de 3 min). Atropina hasta 1mg si no alcanza FC objetivo. El peso se toma de los datos antropométricos del paciente.</div>
           </div>
           <div id="dipiri-wrap" style="display:none">
             <div class="note-box">ℹ️ Dipiridamol: 0.56 mg/kg en 4min → esperar 4min → 0.28 mg/kg adicional si no hay respuesta (total 0.84 mg/kg en 10min).</div>
@@ -968,94 +1004,12 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 
 <!-- ═══ BULL'S EYE ═══ -->
 <div class="page" id="page-bullo">
-  <div class="page-title">🎯 Bull's Eye — 17 segmentos AHA</div>
-  <div class="page-sub">Click para ciclar • Click derecho para selección directa • WMSI automático.</div>
-  <div class="tabs" id="bull-tabs">
-    <button class="tab-btn active" onclick="switchBullTab('basal',this)">Basal</button>
-    <button class="tab-btn" onclick="switchBullTab('pico',this)">Pico estrés</button>
-    <button class="tab-btn" onclick="switchBullTab('recup',this)">Recuperación</button>
-    <button class="tab-btn" onclick="switchBullTab('comp',this)">Comparativa ×3</button>
-  </div>
-  <div class="tab-pane active" id="bull-tab-basal"><div class="card"><div class="card-body">
-    <div class="bull-wrap">
-      <div class="bull-legend">
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#6B7280"></div>No eval. (0)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#22C55E"></div>Normal (1)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#EAB308"></div>Hipokinesia (2)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#F97316"></div>Akinesia (3)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#8B5CF6"></div>Diskinesia (4)</div>
-      </div>
-      <div style="font-size:10px;color:var(--text3);text-align:center">Click = ciclar · Click derecho = selección directa</div>
-      <svg id="bull-svg-basal" viewBox="0 0 340 340" width="300" height="300" style="cursor:pointer;flex-shrink:0"></svg>
-      <div class="wmsi-box"><div class="wmsi-lbl">WMSI Basal</div><div class="wmsi-val" id="wmsi-val-basal">—</div><div class="wmsi-cat" id="wmsi-cat-basal"></div></div>
-    </div>
-    <div class="btn-row" style="justify-content:center">
-      <button class="btn btn-ghost" onclick="resetBull('basal')">↺ Reiniciar</button>
-      <button class="btn btn-ghost" onclick="setAllBull('basal',1)">Todo normal</button>
-    </div>
-  </div></div></div>
-
-  <div class="tab-pane" id="bull-tab-pico"><div class="card"><div class="card-body">
-    <div class="bull-wrap">
-      <div class="bull-legend">
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#6B7280"></div>No eval. (0)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#22C55E"></div>Normal (1)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#EAB308"></div>Hipokinesia (2)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#F97316"></div>Akinesia (3)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#8B5CF6"></div>Diskinesia (4)</div>
-      </div>
-      <div style="font-size:10px;color:var(--text3);text-align:center">Click = ciclar · Click derecho = selección directa</div>
-      <svg id="bull-svg-pico" viewBox="0 0 340 340" width="300" height="300" style="cursor:pointer;flex-shrink:0"></svg>
-      <div class="wmsi-box"><div class="wmsi-lbl">WMSI Pico</div><div class="wmsi-val" id="wmsi-val-pico">—</div><div class="wmsi-cat" id="wmsi-cat-pico"></div></div>
-    </div>
-    <div class="btn-row" style="justify-content:center">
-      <button class="btn btn-ghost" onclick="resetBull('pico')">↺ Reiniciar</button>
-      <button class="btn btn-ghost" onclick="copyBull('basal','pico')">Copiar desde basal</button>
-    </div>
-  </div></div></div>
-
-  <div class="tab-pane" id="bull-tab-recup"><div class="card"><div class="card-body">
-    <div class="bull-wrap">
-      <div class="bull-legend">
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#6B7280"></div>No eval. (0)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#22C55E"></div>Normal (1)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#EAB308"></div>Hipokinesia (2)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#F97316"></div>Akinesia (3)</div>
-        <div class="bull-leg-item"><div class="bull-dot" style="background:#8B5CF6"></div>Diskinesia (4)</div>
-      </div>
-      <div style="font-size:10px;color:var(--text3);text-align:center">Click = ciclar · Click derecho = selección directa</div>
-      <svg id="bull-svg-recup" viewBox="0 0 340 340" width="300" height="300" style="cursor:pointer;flex-shrink:0"></svg>
-      <div class="wmsi-box"><div class="wmsi-lbl">WMSI Recuperación</div><div class="wmsi-val" id="wmsi-val-recup">—</div><div class="wmsi-cat" id="wmsi-cat-recup"></div></div>
-    </div>
-    <div class="btn-row" style="justify-content:center">
-      <button class="btn btn-ghost" onclick="resetBull('recup')">↺ Reiniciar</button>
-      <button class="btn btn-ghost" onclick="copyBull('pico','recup')">Copiar desde pico</button>
-    </div>
-  </div></div></div>
-
-  <div class="tab-pane" id="bull-tab-comp"><div class="card"><div class="card-body">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase">BASAL</div>
-        <svg id="bull-comp-basal" viewBox="0 0 340 340" width="220" height="220" style="cursor:default"></svg>
-        <div class="wmsi-box" style="margin-top:8px;padding:7px 12px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:20px" id="wmsi-comp-basal">—</div></div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase">PICO ESTRÉS</div>
-        <svg id="bull-comp-pico" viewBox="0 0 340 340" width="220" height="220" style="cursor:default"></svg>
-        <div class="wmsi-box" style="margin-top:8px;padding:7px 12px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:20px" id="wmsi-comp-pico">—</div></div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:8px;text-transform:uppercase">RECUPERACIÓN</div>
-        <svg id="bull-comp-recup" viewBox="0 0 340 340" width="220" height="220" style="cursor:default"></svg>
-        <div class="wmsi-box" style="margin-top:8px;padding:7px 12px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:20px" id="wmsi-comp-recup">—</div></div>
-      </div>
-    </div>
-    <div id="comp-delta" style="margin-top:14px;text-align:center;font-size:13px;color:var(--text2)"></div>
-  </div></div></div>
+  <div class="page-title">🎯 Bull's Eye — vistas por etapa</div>
+  <div class="page-sub">4 cámaras · 2 cámaras · 3 cámaras · eje corto (papilar) · Bull's Eye 17 seg — por etapa. Click en cualquier segmento para ciclar el estado; click derecho = selección directa.</div>
+  <div class="tabs" id="bull-tabs" style="flex-wrap:wrap"></div>
+  <div id="bull-panes"></div>
 </div>
 
-<!-- ═══ CRITERIOS ═══ -->
 <div class="page" id="page-criterios">
   <div class="page-title">⚡ Criterios de positividad</div>
   <div class="page-sub">Evaluación automática en tiempo real a partir de los datos ingresados.</div>
@@ -1191,37 +1145,47 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   <div class="card"><div class="card-head">📋 Registro ECG por etapa</div><div class="card-body">
     <div style="overflow-x:auto">
       <table>
-        <tr><th>Etapa</th><th>FC (lpm)</th><th>PA (mmHg)</th><th>Ritmo</th><th>ST</th><th>Comentario</th></tr>
+        <tr><th>Etapa</th><th>FC (lpm)</th><th>PA (mmHg)</th><th>Doble producto</th><th>Ritmo</th><th>ST</th><th>Síntomas</th><th>Comentario</th></tr>
         <tr><td style="font-weight:600">Basal</td>
-          <td><input type="number" id="ecg-fc-bas" placeholder="70" class="mini"></td>
-          <td><input id="ecg-pa-bas" placeholder="130/80" class="mini"></td>
+          <td><input type="number" id="ecg-fc-bas" placeholder="70" class="mini" oninput="ecgCalcDP('bas')"></td>
+          <td><input id="ecg-pa-bas" placeholder="130/80" class="mini" oninput="ecgCalcDP('bas')"></td>
+          <td><input id="ecg-dp-bas" readonly class="mini" placeholder="—" title="FC × PAS"></td>
           <td><select id="ecg-rit-bas" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>Flutter</option><option>MP</option><option>Otro</option></select></td>
           <td><select id="ecg-st-bas" class="mini" style="width:auto"><option>Normal</option><option>Depresión</option><option>Elevación</option><option>Inespecífico</option></select></td>
+          <td><select id="ecg-sint-bas" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
           <td><input id="ecg-com-bas" placeholder="…" class="mini"></td>
         </tr>
         <tr><td style="font-weight:600;color:var(--amber)">Estrés bajo</td>
-          <td><input type="number" id="ecg-fc-low" placeholder="100" class="mini"></td>
-          <td><input id="ecg-pa-low" placeholder="150/85" class="mini"></td>
+          <td><input type="number" id="ecg-fc-low" placeholder="100" class="mini" oninput="ecgCalcDP('low')"></td>
+          <td><input id="ecg-pa-low" placeholder="150/85" class="mini" oninput="ecgCalcDP('low')"></td>
+          <td><input id="ecg-dp-low" readonly class="mini" placeholder="—" title="FC × PAS"></td>
           <td><select id="ecg-rit-low" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>TVNS</option><option>Otro</option></select></td>
           <td><select id="ecg-st-low" class="mini" style="width:auto"><option>Normal</option><option>Depresión</option><option>Elevación</option><option>Inespecífico</option></select></td>
+          <td><select id="ecg-sint-low" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
           <td><input id="ecg-com-low" placeholder="…" class="mini"></td>
         </tr>
         <tr><td style="font-weight:600;color:var(--accent)">Pico</td>
-          <td><input type="number" id="ecg-fc-pic" placeholder="145" class="mini"></td>
-          <td><input id="ecg-pa-pic" placeholder="185/90" class="mini"></td>
+          <td><input type="number" id="ecg-fc-pic" placeholder="145" class="mini" oninput="ecgCalcDP('pic')"></td>
+          <td><input id="ecg-pa-pic" placeholder="185/90" class="mini" oninput="ecgCalcDP('pic')"></td>
+          <td><input id="ecg-dp-pic" readonly class="mini" placeholder="—" title="FC × PAS"></td>
           <td><select id="ecg-rit-pic" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>TVNS</option><option>TV</option><option>Otro</option></select></td>
           <td><select id="ecg-st-pic" class="mini" style="width:auto"><option>Normal</option><option>Depresión ≥1mm</option><option>Depresión ≥2mm</option><option>Elevación ≥1mm</option><option>Inespecífico</option></select></td>
+          <td><select id="ecg-sint-pic" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
           <td><input id="ecg-com-pic" placeholder="…" class="mini"></td>
         </tr>
         <tr><td style="font-weight:600;color:var(--accent2)">Recuperación</td>
-          <td><input type="number" id="ecg-fc-rec" placeholder="85" class="mini"></td>
-          <td><input id="ecg-pa-rec" placeholder="140/80" class="mini"></td>
+          <td><input type="number" id="ecg-fc-rec" placeholder="85" class="mini" oninput="ecgCalcDP('rec')"></td>
+          <td><input id="ecg-pa-rec" placeholder="140/80" class="mini" oninput="ecgCalcDP('rec')"></td>
+          <td><input id="ecg-dp-rec" readonly class="mini" placeholder="—" title="FC × PAS"></td>
           <td><select id="ecg-rit-rec" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>Otro</option></select></td>
           <td><select id="ecg-st-rec" class="mini" style="width:auto"><option>Normal</option><option>Depresión persiste</option><option>Normaliza</option><option>Elevación persiste</option></select></td>
+          <td><select id="ecg-sint-rec" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
           <td><input id="ecg-com-rec" placeholder="…" class="mini"></td>
         </tr>
       </table>
     </div>
+    <div id="ecg-dp-res" style="font-size:11px;font-weight:600;margin-top:8px"></div>
+    <div class="note-box" style="margin-top:6px">ℹ️ Doble producto = FC × PAS (mmHg·lpm). Refleja el consumo miocárdico de O₂. En el pico, un DP &gt;25.000 indica estrés miocárdico adecuado; &lt;20.000 sugiere estudio submáximo (revisar si alcanzó FC objetivo).</div>
     <div class="fg" style="margin-top:12px"><label>Descripción global de arritmias</label>
       <textarea id="ecg-arritmias" placeholder="Extrasistolia ventricular aislada. TVNS en pico (3 latidos, 170 lpm)…" rows="2"></textarea>
     </div>
@@ -1255,8 +1219,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   <div class="page-title">📝 Informe narrativo</div>
   <div class="page-sub">Generación automática a partir de todos los módulos.</div>
   <div class="card" style="margin-bottom:14px"><div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
-    <button class="btn btn-teal" onclick="generarInforme()">📝 Generar informe</button>
-    <button class="btn btn-ghost" onclick="imprimirInforme()">🖨️ Imprimir</button>
+    <button class="btn btn-teal" onclick="generarPDFCompleto()">📄 Generar PDF (vista previa)</button>
+    <button class="btn btn-ghost" onclick="generarInforme()">📝 Generar texto</button>
     <button class="btn btn-ghost" onclick="copiarInforme()">📋 Copiar texto</button>
   </div></div>
   <div class="card"><div class="card-head">📄 Texto del informe</div><div class="card-body">
@@ -1310,11 +1274,16 @@ const SEGS=[
 const SEG_LABELS=['No eval.','Normal','Hipokinesia','Akinesia','Diskinesia'];
 const SEG_COLORS=['#6B7280','#22C55E','#EAB308','#F97316','#8B5CF6'];
 const TER_COLORS={LAD:'#3B82F6',RCA:'#EF4444',LCx:'#22C55E'};
-let bull={basal:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1)};
-let bullInited={basal:false,pico:false,recup:false};
+let bull={basal:Array(17).fill(1),low:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1),extra:Array(17).fill(1)};
+let bullInited={basal:false,low:false,pico:false,recup:false,extra:false};
+let bvInclude={};                 // etapa -> incluir en PDF/informe
+let bullExtra={active:false,name:'Etapa opcional'};
 let popPhase=null,popIdx=-1;
 let ecgImg=[null,null],ecgImgCount=2,ecgImgActive=0;
 let estImg=[null,null],estImgCount=2,estImgActive=0;
+let ecgImgMeta=[],estImgMeta=[];
+function imgMetaEnsure(kind){const arr=kind==='ecg'?ecgImg:estImg;const meta=kind==='ecg'?ecgImgMeta:estImgMeta;while(meta.length<arr.length)meta.push({inc:true,lbl:''});return meta;}
+function imgMetaSet(kind,idx,field,val){const meta=imgMetaEnsure(kind);if(!meta[idx])meta[idx]={inc:true,lbl:''};meta[idx][field]=val;}
 let dobuData={};
 const KEY='ecoestres_smart_v1';
 
@@ -1328,7 +1297,7 @@ function recolectarEstado(){
   const vals={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
-  return{vals,bull,ecgImg,ecgImgCount,estImg,estImgCount,dobuData};
+  return{vals,bull,ecgImg,ecgImgCount,estImg,estImgCount,ecgImgMeta,estImgMeta,dobuData,peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
 }
 function cargarEstado(){
   let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
@@ -1337,10 +1306,18 @@ function cargarEstado(){
     const s=JSON.parse(raw);
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
     if(s.bull)bull=s.bull;
+    ['basal','low','pico','recup','extra'].forEach(function(k){ if(!Array.isArray(bull[k]))bull[k]=Array(17).fill(1); });
     if(s.ecgImg){ecgImg=s.ecgImg;ecgImgCount=s.ecgImgCount||2;}
     if(s.estImg){estImg=s.estImg;estImgCount=s.estImgCount||2;}
+    if(Array.isArray(s.ecgImgMeta))ecgImgMeta=s.ecgImgMeta;
+    if(Array.isArray(s.estImgMeta))estImgMeta=s.estImgMeta;
     if(s.dobuData)dobuData=s.dobuData;
+    if(s.peState&&typeof peState!=='undefined')peState=s.peState;
+    if(s.bvInclude)bvInclude=s.bvInclude;
+    if(s.bullExtra)bullExtra=s.bullExtra;
   }catch(e){}
+  if(typeof peInit==='function')peInit();
+  if(typeof bvBuild==='function')bvBuild();
   actualizarUI();
 }
 function guardarConfig(){
@@ -1351,12 +1328,15 @@ function guardarConfig(){
 }
 function nuevoEstudio(){
   if(!confirm('¿Limpiar todos los datos del estudio actual?'))return;
-  bull={basal:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1)};
-  bullInited={basal:false,pico:false,recup:false};
-  ecgImg=[null,null];ecgImgCount=2;estImg=[null,null];estImgCount=2;dobuData={};
+  bull={basal:Array(17).fill(1),low:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1),extra:Array(17).fill(1)};
+  bullInited={basal:false,low:false,pico:false,recup:false,extra:false};
+  bvInclude={}; bullExtra={active:false,name:'Etapa opcional'};
+  if(typeof bvBuild==='function')bvBuild();
+  ecgImg=[null,null];ecgImgCount=2;estImg=[null,null];estImgCount=2;ecgImgMeta=[];estImgMeta=[];dobuData={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.readOnly)return;if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>el.checked=false);
   const fd=document.getElementById('p-fecha');if(fd)fd.value=new Date().toISOString().slice(0,10);
+  if(typeof peReset==='function')peReset();
   actualizarUI();
 }
 function exportarDatos(){
@@ -1403,14 +1383,21 @@ function actualizarUI(){
   calcEdad();calcFCpct();onEstresChange();ptpCad();
   ['basal','pico','recup'].forEach(p=>{if(bullInited[p])renderBull(p);});
   ecgImgRender();estImgRender();renderDobuTable();
+  if(typeof ecgCalcDP==='function')['bas','low','pic','rec'].forEach(k=>ecgCalcDP(k));
+  if(typeof ebSyncDerived==='function')ebSyncDerived();
   const inst=document.getElementById('cfg-inst')?.value||'GREMEDA';
   const ciudad=document.getElementById('cfg-ciudad')?.value||'';
   document.getElementById('hdr-inst').textContent=[inst,ciudad].filter(Boolean).join(' · ');
 }
 
 function calcEdad(){
-  const fnac=document.getElementById('p-fnac')?.value;if(!fnac)return;
-  const age=Math.floor((Date.now()-new Date(fnac))/(365.25*24*3600*1000));
+  const d=+document.getElementById('p-fnac-dia')?.value||0;
+  const m=+document.getElementById('p-fnac-mes')?.value||0;
+  const y=+document.getElementById('p-fnac-anio')?.value||0;
+  if(!d||!m||!y||y<1000)return;
+  const fnac=new Date(y,m-1,d);
+  if(fnac.getFullYear()!==y||fnac.getMonth()!==m-1||fnac.getDate()!==d)return; // fecha inválida
+  const age=Math.floor((Date.now()-fnac.getTime())/(365.25*24*3600*1000));
   if(age>0&&age<130){document.getElementById('p-edad').value=age;onEdadChange();}
 }
 function onEdadChange(){
@@ -1439,6 +1426,19 @@ function calcDobuDosis(){
   const p=+document.getElementById('p-peso')?.value||0;
   const el=document.getElementById('dobu-dosis-max');
   if(p&&el)el.value='5→10→20→30→40 mcg/kg/min (peso: '+p+'kg)';
+}
+function calcAntro(){
+  const p=+document.getElementById('p-peso')?.value||0;
+  const t=+document.getElementById('p-talla')?.value||0;
+  const imcEl=document.getElementById('p-imc');
+  if(p&&t){
+    const m=t/100; const imc=+(p/(m*m)).toFixed(1);
+    if(imcEl)imcEl.value=imc;
+    // SC (Mosteller): autocompleta eb-sc si está vacío
+    const sc=+Math.sqrt(p*t/3600).toFixed(2);
+    const scEl=document.getElementById('eb-sc');
+    if(scEl&&!scEl.value){scEl.value=sc;if(typeof ebCalcMasa==='function')ebCalcMasa();}
+  } else if(imcEl){imcEl.value='';}
 }
 function onFeviChange(){evalCriterios();updateWMSIresumen();}
 
@@ -1695,13 +1695,22 @@ function updateViabConclusion(sv){
 
 // IMÁGENES
 function compress(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{let w=im.width,h=im.height,ratio=Math.min(900/w,700/h,1);w=Math.round(w*ratio);h=Math.round(h*ratio);const cv=document.createElement('canvas');cv.width=w;cv.height=h;const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,w,h);c.drawImage(im,0,0,w,h);cb(cv.toDataURL('image/jpeg',.7));};im.src=r.result;};r.readAsDataURL(file);}
-function renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVal,counts){
+function renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVal,counts,kind){
   const cb=document.getElementById(countId);
   if(cb)cb.innerHTML=(counts||[2,4,6,8]).map(n=>`<button class="btn btn-ghost" style="padding:5px 12px;${countVal===n?'background:var(--accent2);color:#fff;border-color:var(--accent2);':''}" onclick="${countSetter}(${n})">${n}</button>`).join('')+`<button class="btn btn-ghost" style="padding:5px 12px" onclick="${countSetter}(null)">＋</button>`;
   const grid=document.getElementById(gridId);if(!grid)return;grid.innerHTML='';
+  const meta=kind?imgMetaEnsure(kind):null;
   imgArr.forEach((slot,idx)=>{
     const cell=document.createElement('div');cell.className='img-slot'+(slot?' has-img':'');cell.dataset.idx=idx;
-    if(slot){cell.setAttribute('draggable','true');cell.innerHTML=`<img src="${slot}"><button class="img-remove" onclick="${removeFn}(${idx})">✕</button>`;}
+    if(slot){
+      const m=meta&&meta[idx]?meta[idx]:{inc:true,lbl:''};
+      let ctrls='';
+      if(kind){ ctrls=`<div class="img-pdf-ctrls" onclick="event.stopPropagation()">`
+        +`<label class="img-inc"><input type="checkbox" ${m.inc!==false?'checked':''} onchange="imgMetaSet('${kind}',${idx},'inc',this.checked)"> PDF</label>`
+        +`<input class="img-lbl" value="${(m.lbl||'').replace(/"/g,'&quot;')}" placeholder="Etapa/etiqueta" oninput="imgMetaSet('${kind}',${idx},'lbl',this.value)">`
+        +`</div>`; }
+      cell.setAttribute('draggable','true');cell.innerHTML=`<img src="${slot}"><button class="img-remove" onclick="${removeFn}(${idx})">✕</button>`+ctrls;
+    }
     else{cell.innerHTML=`<div class="img-add-lbl"><span>➕</span>Agregar</div>`;cell.onclick=()=>pickFn(idx);}
     cell.addEventListener('dragstart',e=>{if(slot)e.dataTransfer.setData('text/plain',String(idx));});
     cell.addEventListener('dragover',e=>e.preventDefault());
@@ -1709,12 +1718,12 @@ function renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVa
     grid.appendChild(cell);
   });
 }
-function ecgImgRender(){while(ecgImg.length<ecgImgCount)ecgImg.push(null);renderImgGrid('ecg-img-grid',ecgImg,'ecg-img-count-btns',ecgImgPick,ecgImgRemove,'setEcgImgCount',ecgImgCount,[2,4,6,8]);}
+function ecgImgRender(){while(ecgImg.length<ecgImgCount)ecgImg.push(null);renderImgGrid('ecg-img-grid',ecgImg,'ecg-img-count-btns',ecgImgPick,ecgImgRemove,'setEcgImgCount',ecgImgCount,[2,4,6,8],'ecg');}
 function setEcgImgCount(n){ecgImgCount=n||ecgImg.length+1;while(ecgImg.length<ecgImgCount)ecgImg.push(null);ecgImgRender();}
 function ecgImgPick(idx){ecgImgActive=idx;document.getElementById('ecg-img-file').click();}
 function ecgImgChosen(e){const f=e.target.files[0];if(f)compress(f,d=>{ecgImg[ecgImgActive]=d;ecgImgRender();});e.target.value='';}
 function ecgImgRemove(idx){ecgImg[idx]=null;ecgImgRender();}
-function estImgRender(){while(estImg.length<estImgCount)estImg.push(null);renderImgGrid('est-img-grid',estImg,'est-img-count-btns',estImgPick,estImgRemove,'setEstImgCount',estImgCount,[2,4,6,8,10]);}
+function estImgRender(){while(estImg.length<estImgCount)estImg.push(null);renderImgGrid('est-img-grid',estImg,'est-img-count-btns',estImgPick,estImgRemove,'setEstImgCount',estImgCount,[2,4,6,8,10],'est');}
 function setEstImgCount(n){estImgCount=n||estImg.length+1;while(estImg.length<estImgCount)estImg.push(null);estImgRender();}
 function estImgPick(idx){estImgActive=idx;document.getElementById('est-img-file').click();}
 function estImgChosen(e){const f=e.target.files[0];if(f)compress(f,d=>{estImg[estImgActive]=d;estImgRender();});e.target.value='';}
@@ -1768,6 +1777,11 @@ function generarInforme(){
   if(stop)prot+=' Suspensión: '+stop+'.';if(sint&&sint!=='Sin síntomas')prot+=' Síntomas: '+sint+'.';
   p.push(prot);
   if(ecgBas||ecgEst){let el='ECG: '+(ecgBas&&ecgBas!=='Normal'?'Basal: '+ecgBas+'. ':'Basal normal. ')+(ecgEst&&ecgEst!=='Sin cambios significativos'?'Estrés: '+ecgEst+'. ':'Sin cambios ECG. ');if(arritmias)el+=arritmias+'.';p.push(el);}
+  const dpPic=(()=>{const fc=+gv('ecg-fc-pic')||0;const pas=parseInt(((gv('ecg-pa-pic')||'').split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;return fc&&pas?fc*pas:0;})();
+  if(dpPic)p.push('Doble producto pico: '+dpPic.toLocaleString('es-AR')+' mmHg·lpm ('+(dpPic>=25000?'estrés miocárdico adecuado':dpPic>=20000?'estrés submáximo':'estrés insuficiente')+').');
+  {const sintLbl={bas:'basal',low:'estrés bajo',pic:'pico',rec:'recuperación'};
+   const sintList=['bas','low','pic','rec'].map(k=>{const v=gv('ecg-sint-'+k);return v&&v!=='ninguno'?sintLbl[k]+': '+v:null;}).filter(Boolean);
+   if(sintList.length)p.push('Síntomas por etapa — '+sintList.join('; ')+'.');}
   p.push('');p.push('MOTILIDAD PARIETAL:');
   if(wmsiB!==null)p.push('— Basal: WMSI '+wmsiB+(feviB?' (FEVI '+feviB+'%)':'')+'.') ;
   if(wmsiP!==null){if(segs.length===0)p.push('— Pico: sin alteraciones. WMSI '+wmsiP+(feviP?' (FEVI '+feviP+'%)':'')+'.');else{const an=segs.map(s=>SEG_LABELS[s.st].toLowerCase()+' seg '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')').join('; ');p.push('— Pico: '+an+'. WMSI '+wmsiP+(feviP?' (FEVI '+feviP+'%)':'')+'.');}}
@@ -1829,6 +1843,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     ['eb-vp-grad','input',ebEvalVP],
   ];
   ebListeners.forEach(([id,ev,fn])=>document.getElementById(id)?.addEventListener(ev,fn));
+  document.getElementById('eb-diast-grado')?.addEventListener('change',ebSyncDerived);
+  ebInitAutoFill();
 
   ['da','cd','cx'].forEach(a=>{
     document.getElementById('cfvr-'+a+'-bas')?.addEventListener('input',()=>calcCFVR(a));
@@ -1839,9 +1855,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ═══════════════════════════════════════════════════════════
 // ECO BASAL — FUNCIONES
 // ═══════════════════════════════════════════════════════════
-function ebTab(id, el){
-  document.querySelectorAll('#page-ecobasal .tab-pane').forEach(p=>p.classList.remove('active'));
-  document.getElementById('ebtab-'+id).classList.add('active');
+function ebTab(group, el){
+  document.querySelectorAll('#page-ecobasal .tab-pane').forEach(p=>p.classList.toggle('active', p.dataset.ebg===group));
   document.querySelectorAll('#ecobasal-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 }
@@ -1889,6 +1904,7 @@ function ebEvalFEVI(){
   if(v>=55){el.style.color='var(--green)';el.textContent='✅ FEVI conservada (≥55%)';}
   else if(v>=40){el.style.color='var(--amber)';el.textContent='⚠️ FEVI levemente reducida (40–54%) — HFmrEF';}
   else{el.style.color='var(--red)';el.textContent='❌ FEVI reducida (<40%) — HFrEF';}
+  ebSyncDerived();
 }
 
 function ebCalcSimpson(){
@@ -1916,10 +1932,8 @@ function ebCalcSimpson(){
     // Sync to main FEVI fields if empty
     const mainFevi=document.getElementById('eb-fevi');
     if(mainFevi&&!mainFevi.value){mainFevi.value=fevi;ebEvalFEVI();}
-    // Sync to protocolo FEVI basal
-    const cFeviBas=document.getElementById('c-fevi-bas');
-    if(cFeviBas&&!cFeviBas.value){cFeviBas.value=fevi;onFeviChange();}
   }
+  ebSyncDerived();
 }
 
 function ebEvalGLS(){
@@ -1967,6 +1981,21 @@ function ebCalcDiast(){
     else if(ea>=0.8&&ea<=2&&td>=160&&td<=200){cls='tag-green';txt='Normal (E/A 0.8–2, TD 160–200ms)';}
     if(txt) classEl.innerHTML=`<span class="tag ${cls}" style="font-size:12px;padding:4px 12px">${txt}</span>`;
   }
+  // Interpretación en tiempo real bajo cada variable
+  var eaRes=document.getElementById('eb-ea-res');
+  if(eaRes){ if(!ea){eaRes.textContent='';}
+    else if(ea<0.8){eaRes.style.color='var(--amber)';eaRes.textContent='⚠️ E/A <0.8 — relajación alterada';}
+    else if(ea<=1.5){eaRes.style.color='var(--green)';eaRes.textContent='✅ E/A 0.8–1.5 — dentro de lo normal';}
+    else if(ea<2){eaRes.style.color='var(--amber)';eaRes.textContent='⚠️ E/A 1.5–2 — evaluar pseudonormalización';}
+    else{eaRes.style.color='var(--red)';eaRes.textContent='❌ E/A ≥2 — patrón restrictivo';}
+  }
+  var eepRes=document.getElementById('eb-eeprom-res');
+  if(eepRes){ if(!eeprom){eepRes.textContent='';}
+    else if(eeprom<=10){eepRes.style.color='var(--green)';eepRes.textContent="✅ E/e' ≤10 — presiones de llenado normales";}
+    else if(eeprom<=14){eepRes.style.color='var(--amber)';eepRes.textContent="⚠️ E/e' 10–14 — zona gris (borderline)";}
+    else{eepRes.style.color='var(--red)';eepRes.textContent="❌ E/e' >14 — presiones de llenado elevadas";}
+  }
+  ebSyncDerived();
 }
 
 function ebEvalVD(){
@@ -2054,10 +2083,70 @@ function ebCalcPSAP(){
     else if(psap<=50){res.style.color='var(--amber)';res.textContent='⚠️ HTP leve (36–50 mmHg)';}
     else if(psap<=70){res.style.color='var(--amber)';res.textContent='⚠️ HTP moderada (51–70 mmHg)';}
     else{res.style.color='var(--red)';res.textContent='❌ HTP severa (>70 mmHg)';}}
-    // Sync to Protocolo PSAP basal
-    const psapBas=document.getElementById('p-psap-bas');
-    if(psapBas&&!psapBas.value)psapBas.value=psap;
   }
+  ebSyncDerived();
+}
+
+// ═══ PRECARGA AUTOMÁTICA — valores derivados de Eco Basal → fases siguientes ═══
+// Rellena un campo destino solo si está vacío o si aún conserva un valor autocompletado
+// (no pisa lo que el médico escribió a mano).
+function ebAutoFill(dstId,val,cb){
+  var el=document.getElementById(dstId); if(!el)return;
+  if(val===''||val==null)return; if(typeof val==='number'&&isNaN(val))return;
+  // Si ya muestra el valor derivado (p. ej. tras recargar un estudio), lo adopta como
+  // autocompletado para que futuras ediciones del basal sigan propagándose.
+  if(String(el.value)===String(val)){el.dataset.ebAuto='1';return;}
+  if(el.value===''||el.dataset.ebAuto==='1'){
+    el.value=val; if(cb)cb(); el.dataset.ebAuto='1';
+  }
+}
+function ebSyncDerived(){
+  if(typeof document==='undefined')return;
+  // FEVI basal: prioridad al valor manual (eb-fevi); si no, Simpson biplano
+  var fevi=(document.getElementById('eb-fevi')||{}).value||(document.getElementById('eb-fevi-simpson')||{}).value||'';
+  if(fevi!==''){
+    ebAutoFill('c-fevi-bas',fevi,typeof onFeviChange==='function'?onFeviChange:null);
+    var kb=document.getElementById('kpi-fevi-bas-val');
+    if(kb&&(kb.dataset.ebAuto==='1'||kb.textContent===''||kb.textContent==='—')){kb.textContent=fevi;kb.dataset.ebAuto='1';}
+  }
+  // PSAP basal: desde velocidad de tricúspide (eb-it-vmax) + VCI/PAD → eb-psap
+  var psap=(document.getElementById('eb-psap')||{}).value||'';
+  if(psap!=='')ebAutoFill('p-psap-bas',psap);
+  // E/e' promedio basal → E/e' basal en Protocolo
+  var eeprom=(document.getElementById('eb-eeprom')||{}).value||'';
+  if(eeprom!=='')ebAutoFill('p-ee-bas',eeprom,typeof evalEE==='function'?evalEE:null);
+  // Patrón diastólico basal (grado manual, si se eligió)
+  var grado=(document.getElementById('eb-diast-grado')||{}).value||'';
+  if(grado){ if(grado==='gr3b')grado='gr3'; ebAutoFill('p-diast',grado); }
+}
+// Al editar a mano un campo destino, se libera del autocompletado
+function ebInitAutoFill(){
+  ['c-fevi-bas','p-psap-bas','p-ee-bas','p-diast'].forEach(function(id){
+    var el=document.getElementById(id); if(!el)return;
+    el.addEventListener(el.tagName==='SELECT'?'change':'input',function(){el.dataset.ebAuto='0';});
+  });
+}
+
+// ═══ ECG — Doble producto (FC × PAS) por etapa ═══
+function ecgCalcDP(k){
+  var fc=+((document.getElementById('ecg-fc-'+k)||{}).value)||0;
+  var pa=(document.getElementById('ecg-pa-'+k)||{}).value||'';
+  var pas=parseInt((pa.split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;
+  var el=document.getElementById('ecg-dp-'+k); if(!el)return;
+  var dp = (fc&&pas)? fc*pas : 0;
+  el.value = dp? dp.toLocaleString('es-AR') : '';
+  ecgEvalDP();
+}
+function ecgEvalDP(){
+  var el=document.getElementById('ecg-dp-res'); if(!el)return;
+  var fcp=+((document.getElementById('ecg-fc-pic')||{}).value)||0;
+  var pap=(document.getElementById('ecg-pa-pic')||{}).value||'';
+  var pasp=parseInt((pap.split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;
+  var dpPic=fcp*pasp;
+  if(!dpPic){el.textContent='';return;}
+  if(dpPic>=25000){el.style.color='var(--green)';el.textContent='✅ Doble producto pico '+dpPic.toLocaleString('es-AR')+' — estrés miocárdico adecuado (≥25.000)';}
+  else if(dpPic>=20000){el.style.color='var(--amber)';el.textContent='⚠️ Doble producto pico '+dpPic.toLocaleString('es-AR')+' — estrés submáximo (20.000–25.000)';}
+  else{el.style.color='var(--red)';el.textContent='❌ Doble producto pico '+dpPic.toLocaleString('es-AR')+' — estudio submáximo (<20.000): verificar FC objetivo';}
 }
 
 function ebEvalAorta(){
@@ -2260,7 +2349,7 @@ function ebTextoInforme(){
   };
 
   /* Botones fijos */
-  window.eeGenerar=function(){ if(typeof generarInforme==='function'){ try{generarInforme();}catch(e){} } if(typeof goTo==='function') goTo('informe'); };
+  window.eeGenerar=function(){ if(typeof generarInforme==='function'){ try{generarInforme();}catch(e){} } if(typeof generarPDFCompleto==='function'){ generarPDFCompleto(); } else if(typeof goTo==='function'){ goTo('informe'); } };
   window.eeGuardados=function(){ eeToast('🗂 Guardados — módulo en preparación'); };
   window.eeLab=function(){ eeToast('🔬 Laboratorio — módulo en preparación'); };
 
@@ -2419,6 +2508,787 @@ function ebTextoInforme(){
   /* El botón Laboratorio (fijo, borde derecho, var(--accent2)) abre esta auditoría */
   window.eeLab=function(){ eeAuditOpen(); };
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-audit'); if(m&&m.classList.contains('open'))eeAuditClose(); } });
+})();
+</script>
+<script>
+/* ═══ Aceptar punto Y coma como separador decimal en todos los campos numéricos ═══ */
+(function(){
+  function normalizar(t){
+    if(t && t.classList && t.classList.contains('numdec') && typeof t.value==='string' && t.value.indexOf(',')!==-1){
+      var p=t.selectionStart;
+      t.value=t.value.replace(/,/g,'.');
+      try{ t.setSelectionRange(p,p); }catch(_){}
+    }
+  }
+  // Fase de captura: normaliza la coma ANTES de que corran los oninput/handlers de cada campo
+  document.addEventListener('input', function(e){ normalizar(e.target); }, true);
+  // Convertir los inputs numéricos a texto+decimal para poder tipear coma (type=number la rechaza)
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('input[type="number"]').forEach(function(el){
+      el.type='text';
+      el.setAttribute('inputmode','decimal');
+      el.classList.add('numdec');
+    });
+  });
+})();
+</script>
+<script>
+/* ═══ Protocolo y etapas de estrés — alimenta Bull's Eye y tabla ECG ═══ */
+/* Protocolos de esfuerzo con METs por etapa (base ErgoSmart) */
+var PE_PROTO={
+  bruce:{nombre:'Bruce',etapas:[
+    {n:'Basal',mets:null,tipo:'basal'},
+    {n:'Etapa 1',mets:4.6,tipo:'inter'},{n:'Etapa 2',mets:7.0,tipo:'inter'},{n:'Etapa 3',mets:10.1,tipo:'inter'},
+    {n:'Etapa 4',mets:12.9,tipo:'inter'},{n:'Etapa 5',mets:15.0,tipo:'inter'},{n:'Etapa 6',mets:16.9,tipo:'inter'},{n:'Etapa 7',mets:19.1,tipo:'inter'},
+    {n:'Recuperación',mets:null,tipo:'rec'}]},
+  bruce_mod:{nombre:'Bruce modificado',etapas:[
+    {n:'Basal',mets:null,tipo:'basal'},
+    {n:'Etapa 1',mets:1.7,tipo:'inter'},{n:'Etapa 2',mets:2.0,tipo:'inter'},{n:'Etapa 3',mets:4.6,tipo:'inter'},
+    {n:'Etapa 4',mets:7.0,tipo:'inter'},{n:'Etapa 5',mets:10.1,tipo:'inter'},{n:'Etapa 6',mets:12.9,tipo:'inter'},{n:'Etapa 7',mets:15.0,tipo:'inter'},
+    {n:'Recuperación',mets:null,tipo:'rec'}]},
+  naughton:{nombre:'Naughton',etapas:[
+    {n:'Basal',mets:null,tipo:'basal'},
+    {n:'Etapa 1',mets:1.7,tipo:'inter'},{n:'Etapa 2',mets:2.5,tipo:'inter'},{n:'Etapa 3',mets:3.5,tipo:'inter'},{n:'Etapa 4',mets:4.5,tipo:'inter'},
+    {n:'Etapa 5',mets:5.4,tipo:'inter'},{n:'Etapa 6',mets:6.4,tipo:'inter'},{n:'Etapa 7',mets:7.4,tipo:'inter'},
+    {n:'Recuperación',mets:null,tipo:'rec'}]},
+  astrand:{nombre:'Åstrand (bicicleta)',etapas:[
+    {n:'Basal',mets:null,tipo:'basal'},
+    {n:'25 W',mets:3.5,tipo:'inter'},{n:'50 W',mets:4.9,tipo:'inter'},{n:'75 W',mets:6.4,tipo:'inter'},
+    {n:'100 W',mets:7.8,tipo:'inter'},{n:'125 W',mets:9.2,tipo:'inter'},{n:'150 W',mets:10.7,tipo:'inter'},
+    {n:'Recuperación',mets:null,tipo:'rec'}]},
+  ramp:{nombre:'RAMP (bicicleta)',etapas:[
+    {n:'Basal',mets:null,tipo:'basal'},
+    {n:'RAMP inicio (20 W)',mets:3.2,tipo:'inter'},{n:'RAMP intermedio',mets:5.5,tipo:'inter'},{n:'RAMP alto',mets:7.8,tipo:'inter'},{n:'RAMP pico',mets:10.0,tipo:'inter'},
+    {n:'Recuperación',mets:null,tipo:'rec'}]}
+};
+var PE_DOBU=[
+  {n:'Basal',d:'—',tipo:'basal'},
+  {n:'Dosis bajas (5–10 mcg/kg/min)',d:'5–10 mcg/kg/min',tipo:'low'},
+  {n:'Dosis altas (20–40 mcg/kg/min)',d:'20–40 mcg/kg/min',tipo:'pico'},
+  {n:'Recuperación',d:'—',tipo:'rec'}
+];
+var PE_DIPI=[
+  {n:'Basal',d:'—',tipo:'basal'},
+  {n:'Dosis inicial (0.56 mg/kg en 4 min)',d:'0.56 mg/kg',tipo:'low'},
+  {n:'Dosis alta (0.84 mg/kg total)',d:'0.84 mg/kg',tipo:'pico'},
+  {n:'Recuperación',d:'—',tipo:'rec'}
+];
+var peState={tipo:'esfuerzo',proto:'bruce',stages:[]};
+
+function peDefaults(){
+  if(peState.tipo==='esfuerzo'){ var p=PE_PROTO[peState.proto]||PE_PROTO.bruce; peState.stages=p.etapas.map(function(s){return {n:s.n,mets:s.mets,tipo:s.tipo};}); }
+  else if(peState.tipo==='dobutamina'){ peState.stages=PE_DOBU.map(function(s){return {n:s.n,d:s.d,tipo:s.tipo};}); }
+  else { peState.stages=PE_DIPI.map(function(s){return {n:s.n,d:s.d,tipo:s.tipo};}); }
+}
+function peEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function peKeyNames(){
+  var st=peState.stages||[];
+  var byTipo=function(t){ for(var i=0;i<st.length;i++){ if(st[i].tipo===t)return st[i]; } return null; };
+  var inter=st.filter(function(s){return s.tipo==='inter';});
+  var recs=st.filter(function(s){return s.tipo==='rec'||s.tipo==='recup';});
+  var basal=(byTipo('basal')||st[0]||{}).n||'Basal';
+  var recup=(recs.length?recs[0]:{}).n||'Recuperación';
+  var pico=(byTipo('pico')||(inter.length?inter[inter.length-1]:{})||{}).n||'Pico';
+  var low=(byTipo('low')||(inter.length?inter[0]:{})||{}).n||'Estrés bajo';
+  return {basal:basal,low:low,pico:pico,recup:recup};
+}
+function peApplyLabels(){
+  var k=peKeyNames();
+  // Bull's Eye: tabs + WMSI
+  var bullBtn=function(phase){ var bs=document.querySelectorAll('#bull-tabs .tab-btn'); for(var i=0;i<bs.length;i++){ if((bs[i].getAttribute('onclick')||'').indexOf("'"+phase+"'")!==-1)return bs[i]; } return null; };
+  var setBtn=function(phase,t){ var b=bullBtn(phase); if(b)b.textContent=t; };
+  setBtn('basal',k.basal); setBtn('pico',k.pico); setBtn('recup',k.recup);
+  var setW=function(id,t){ var w=document.querySelector('#bull-tab-'+id+' .wmsi-lbl'); if(w)w.textContent='WMSI '+t; };
+  setW('basal',k.basal); setW('pico',k.pico); setW('recup',k.recup);
+  // Tabla ECG: primer td de cada fila (hallada por su input de FC)
+  var setEcg=function(fcId,t){ var i=document.getElementById(fcId); if(i){ var tr=i.closest('tr'); if(tr&&tr.cells[0])tr.cells[0].textContent=t; } };
+  setEcg('ecg-fc-bas',k.basal); setEcg('ecg-fc-low',k.low); setEcg('ecg-fc-pic',k.pico); setEcg('ecg-fc-rec',k.recup);
+}
+function peRender(){
+  var wrap=document.getElementById('pe-stages'); if(!wrap)return;
+  if(!peState.stages||!peState.stages.length)peDefaults();
+  var pr=document.getElementById('pe-proto-row'); if(pr)pr.style.display=peState.tipo==='esfuerzo'?'':'none';
+  var ps=document.getElementById('pe-proto'); if(ps&&peState.proto)ps.value=peState.proto;
+  var isEsf=peState.tipo==='esfuerzo';
+  var rows=peState.stages.map(function(s,i){
+    var v2=isEsf?(s.mets!=null?s.mets+' METs':'—'):(s.d||'—');
+    var del=(s.tipo==='extra')?'<button class="btn btn-ghost" style="padding:2px 9px;line-height:1" onclick="peDelStage('+i+')" title="Quitar etapa">✕</button>':'';
+    return '<tr><td style="width:22px;color:var(--text3);text-align:center">'+(i+1)+'</td>'
+      +'<td><input type="text" value="'+peEsc(s.n)+'" oninput="peEditName('+i+',this.value)" style="width:100%"></td>'
+      +'<td style="white-space:nowrap;color:var(--text2);font-size:12px">'+peEsc(v2)+'</td>'
+      +'<td style="width:34px">'+del+'</td></tr>';
+  }).join('');
+  var head='<tr><th></th><th>Etapa (editable)</th><th>'+(isEsf?'METs':'Dosis')+'</th><th></th></tr>';
+  var add=(!isEsf)?'<button class="btn btn-ghost" style="margin-top:8px" onclick="peAddStage()">+ Agregar etapa</button>':'';
+  wrap.innerHTML='<div style="overflow-x:auto"><table style="font-size:13px">'+head+rows+'</table></div>'+add;
+  peApplyLabels();
+}
+function peEditName(i,v){ if(peState.stages[i]){ peState.stages[i].n=v; peApplyLabels(); } }
+function peAddStage(){ peState.stages.push({n:'Etapa adicional',d:'—',mets:null,tipo:'extra'}); peRender(); }
+function peDelStage(i){ peState.stages.splice(i,1); peRender(); }
+function peSetProto(v){ peState.proto=v; peDefaults(); peRender(); }
+function peSyncFromEstres(){
+  var pe=document.getElementById('p-estres'); if(!pe)return;
+  var v=pe.value; peState.tipo=(v==='ejercicio')?'esfuerzo':v;
+  if(peState.tipo==='esfuerzo'&&!PE_PROTO[peState.proto])peState.proto='bruce';
+  peDefaults(); peRender();
+}
+function peInit(){
+  var pe=document.getElementById('p-estres');
+  if(!peState.stages||!peState.stages.length){
+    if(pe){ var v=pe.value; peState.tipo=(v==='ejercicio')?'esfuerzo':(v||'esfuerzo'); }
+    peDefaults();
+  } else if(pe){
+    // sincronizar el select con el tipo guardado
+    pe.value = peState.tipo==='esfuerzo'?'ejercicio':peState.tipo;
+  }
+  peRender();
+}
+function peReset(){
+  peState={tipo:'esfuerzo',proto:'bruce',stages:[]};
+  var pe=document.getElementById('p-estres'); if(pe)pe.value='ejercicio';
+  var ps=document.getElementById('pe-proto'); if(ps)ps.value='bruce';
+  peDefaults(); peRender();
+}
+document.addEventListener('DOMContentLoaded',function(){ peInit(); });
+</script>
+<style>
+#bv-print-area{display:none}
+.bv-diagram{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:6px 8px 8px}
+@media print{ #bv-print-area{display:block!important} #bv-print-area svg{max-width:200px} }
+</style>
+<script>
+/* ═══ Bull's Eye por etapa: vistas 4C/2C/3C + eje corto + bull, guardar a PDF, comparativo ═══ */
+(function(){
+  // Mapeo AHA 17-seg a vistas (índices 0-based = id-1)
+  var BV_VIEWS={
+    '4c':{t:'4 cámaras', ll:'Septal',   l:[2,8,13], ax:16, rl:'Lateral',        r:[5,11,15]},
+    '2c':{t:'2 cámaras', ll:'Anterior', l:[0,6,12], ax:16, rl:'Inferior',       r:[3,9,14]},
+    '3c':{t:'3 cámaras', ll:'Anteroseptal', l:[1,7,13], ax:16, rl:'Inferolateral', r:[4,10,15]}
+  };
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function col(st){ return SEG_COLORS[st||0]; }
+  function keyName(){ return (typeof peKeyNames==='function')?peKeyNames():{basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación'}; }
+  window.bvStageName=function(st){ if(st==='extra')return bullExtra.name||'Etapa opcional'; return keyName()[st]||st; };
+  window.bvActiveStages=function(){ var a=['basal','low','pico','recup']; if(bullExtra.active)a.push('extra'); return a; };
+
+  function cell(x,y,w,h,idx,stage){
+    var st=(bull[stage]||[])[idx]||0, seg=SEGS[idx];
+    return '<g onclick="cycleBull(\''+stage+'\','+idx+')" oncontextmenu="openPop(event,\''+stage+'\','+idx+');return false;" style="cursor:pointer">'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="5" fill="'+col(st)+'" fill-opacity="0.9" stroke="#0D1117" stroke-width="2"><title>'+esc(seg.name)+' ('+seg.ter+') — '+SEG_LABELS[st]+'</title></rect>'
+      +'<text x="'+(x+w/2)+'" y="'+(y+h/2)+'" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="800" fill="#fff" pointer-events="none">'+seg.id+'</text></g>';
+  }
+  function longAxis(vk,stage){
+    var v=BV_VIEWS[vk], W=174, cw=56, lx=14, rx=W-14-cw, y0=34, rowH=42, gap=5;
+    var h='<div class="bv-diagram"><svg viewBox="0 0 '+W+' 214" width="150">';
+    h+='<text x="'+(W/2)+'" y="14" text-anchor="middle" font-size="12" font-weight="800" fill="var(--text)">'+v.t+'</text>';
+    h+='<text x="'+(lx+cw/2)+'" y="28" text-anchor="middle" font-size="8" fill="var(--text2)">'+v.ll+'</text>';
+    h+='<text x="'+(rx+cw/2)+'" y="28" text-anchor="middle" font-size="8" fill="var(--text2)">'+v.rl+'</text>';
+    [0,1,2].forEach(function(i){ h+=cell(lx, y0+i*(rowH+gap), cw, rowH, v.l[i], stage); });
+    [0,1,2].forEach(function(i){ h+=cell(rx, y0+i*(rowH+gap), cw, rowH, v.r[i], stage); });
+    var ay=y0+3*(rowH+gap);
+    h+=cell(lx, ay, (rx+cw-lx), 30, v.ax, stage);
+    h+='</svg></div>';
+    return h;
+  }
+  function shortAxis(stage){
+    var cx=87,cy=98,r1=74,r2=34,segs=[6,7,8,9,10,11],OFF=-60;
+    var h='<div class="bv-diagram"><svg viewBox="0 0 174 200" width="150"><text x="87" y="14" text-anchor="middle" font-size="12" font-weight="800" fill="var(--text)">Eje corto (papilar)</text>';
+    segs.forEach(function(idx,s){
+      var st=(bull[stage]||[])[idx]||0, seg=SEGS[idx];
+      var sd=OFF-s*60, ed=sd-60, md=sd-30, mr=(r1+r2)/2;
+      var tx=cx+mr*Math.cos(md*Math.PI/180), ty=cy+mr*Math.sin(md*Math.PI/180);
+      h+='<path d="'+arcPath(cx,cy,r1,r2,sd,ed)+'" fill="'+col(st)+'" fill-opacity="0.9" stroke="#0D1117" stroke-width="2" onclick="cycleBull(\''+stage+'\','+idx+')" oncontextmenu="openPop(event,\''+stage+'\','+idx+');return false;" style="cursor:pointer"><title>'+esc(seg.name)+' ('+seg.ter+') — '+SEG_LABELS[st]+'</title></path>';
+      h+='<text x="'+tx+'" y="'+ty+'" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="800" fill="#fff" pointer-events="none">'+seg.id+'</text>';
+    });
+    h+='</svg></div>';
+    return h;
+  }
+  window.bvRenderDiagrams=function(stage){
+    var host=document.getElementById('bv-diagrams-'+stage); if(!host)return;
+    host.innerHTML=longAxis('4c',stage)+longAxis('2c',stage)+longAxis('3c',stage)+shortAxis(stage);
+  };
+  function legend(){
+    return SEG_LABELS.map(function(l,i){ return '<div class="bull-leg-item"><div class="bull-dot" style="background:'+SEG_COLORS[i]+'"></div>'+l+' ('+i+')</div>'; }).join('');
+  }
+  function paneHtml(stage){
+    var nm=esc(bvStageName(stage));
+    return '<div class="card"><div class="card-body">'
+      +'<div class="bull-legend" style="justify-content:center;flex-wrap:wrap">'+legend()+'</div>'
+      +'<div style="font-size:10px;color:var(--text3);text-align:center;margin:4px 0">Click = ciclar estado · Click derecho = selección directa · Segmentos por vista según AHA 17</div>'
+      +'<div id="bv-diagrams-'+stage+'" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:flex-start;margin-bottom:12px"></div>'
+      +'<div style="display:flex;flex-direction:column;align-items:center;gap:6px">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase">Bull\'s Eye 17 segmentos</div>'
+        +'<svg id="bull-svg-'+stage+'" viewBox="0 0 340 340" width="280" height="280" style="cursor:pointer;flex-shrink:0"></svg>'
+        +'<div class="wmsi-box"><div class="wmsi-lbl">WMSI '+nm+'</div><div class="wmsi-val" id="wmsi-val-'+stage+'">—</div><div class="wmsi-cat" id="wmsi-cat-'+stage+'"></div></div>'
+      +'</div>'
+      +'<div class="btn-row" style="justify-content:center;margin-top:10px">'
+        +'<button class="btn btn-ghost" onclick="resetBull(\''+stage+'\');bvRenderDiagrams(\''+stage+'\')">↺ Reiniciar</button>'
+        +'<button class="btn btn-ghost" onclick="setAllBull(\''+stage+'\',1);bvRenderDiagrams(\''+stage+'\')">Todo normal</button>'
+        +(stage!=='basal'?'<button class="btn btn-ghost" onclick="bvCopyPrev(\''+stage+'\')">Copiar etapa previa</button>':'')
+      +'</div>'
+      +'<div style="text-align:center;margin-top:12px">'
+        +'<button class="btn btn-primary" id="bv-savebtn-'+stage+'" onclick="bvToggleSave(\''+stage+'\')">💾 Guardar en informe / PDF</button>'
+        +(stage==='extra'?' <button class="btn btn-ghost" onclick="bvRemoveExtra()">✕ Quitar etapa</button>':'')
+        +'<div style="font-size:11px;color:var(--text2);margin-top:6px" id="bv-savemsg-'+stage+'"></div>'
+      +'</div>'
+      +'</div></div>';
+  }
+  window.bvBuild=function(){
+    var tabs=document.getElementById('bull-tabs'), panes=document.getElementById('bull-panes'); if(!tabs||!panes)return;
+    ['basal','low','pico','recup','extra'].forEach(function(k){ if(!Array.isArray(bull[k]))bull[k]=Array(17).fill(1); });
+    var stages=bvActiveStages();
+    tabs.innerHTML=stages.map(function(st,i){ return '<button class="tab-btn'+(i===0?' active':'')+'" data-bvstage="'+st+'" onclick="bvSwitch(\''+st+'\',this)">'+esc(bvStageName(st))+'</button>'; }).join('')
+      +(bullExtra.active?'':'<button class="tab-btn" onclick="bvAddExtra()" style="color:var(--accent2)">+ Etapa opcional</button>')
+      +'<button class="tab-btn" data-bvstage="comp" onclick="bvSwitch(\'comp\',this)">Comparativo</button>';
+    panes.innerHTML=stages.map(function(st,i){ return '<div class="tab-pane'+(i===0?' active':'')+'" id="bull-tab-'+st+'">'+paneHtml(st)+'</div>'; }).join('')
+      +'<div class="tab-pane" id="bull-tab-comp"><div class="card"><div class="card-body" id="bv-comp-body"></div></div></div>';
+    stages.forEach(function(st){ bvRenderDiagrams(st); renderBull(st); bvSaveBtn(st); });
+    if(bullInited)stages.forEach(function(st){bullInited[st]=true;});
+  };
+  window.bvSwitch=function(stage,el){
+    document.querySelectorAll('#bull-panes .tab-pane').forEach(function(p){p.classList.remove('active');});
+    var pane=document.getElementById('bull-tab-'+stage); if(pane)pane.classList.add('active');
+    document.querySelectorAll('#bull-tabs .tab-btn').forEach(function(b){b.classList.remove('active');});
+    if(el)el.classList.add('active');
+    if(stage==='comp')bvRenderComp();
+    else { bvRenderDiagrams(stage); renderBull(stage); bvSaveBtn(stage); }
+  };
+  window.bvRelabel=function(){
+    var k=keyName();
+    ['basal','low','pico','recup'].forEach(function(st){
+      var nm=k[st]||st;
+      var b=document.querySelector('#bull-tabs .tab-btn[data-bvstage="'+st+'"]'); if(b)b.textContent=nm;
+      var w=document.querySelector('#bull-tab-'+st+' .wmsi-lbl'); if(w)w.textContent='WMSI '+nm;
+    });
+    var setEcg=function(fc,t){ var i=document.getElementById(fc); if(i){var tr=i.closest('tr'); if(tr&&tr.cells[0])tr.cells[0].textContent=t;} };
+    setEcg('ecg-fc-bas',k.basal); setEcg('ecg-fc-low',k.low); setEcg('ecg-fc-pic',k.pico); setEcg('ecg-fc-rec',k.recup);
+  };
+  window.bvAddExtra=function(){ bullExtra.active=true; bvBuild(); var b=document.querySelector('#bull-tabs .tab-btn[data-bvstage="extra"]'); if(b)bvSwitch('extra',b); };
+  window.bvRemoveExtra=function(){ bullExtra.active=false; bull.extra=Array(17).fill(1); delete bvInclude.extra; bvBuild(); var b=document.querySelector('#bull-tabs .tab-btn'); if(b)bvSwitch('basal',b); };
+  window.bvCopyPrev=function(stage){ var a=bvActiveStages(); var i=a.indexOf(stage); if(i>0){ copyBull(a[i-1],stage); bvRenderDiagrams(stage); } };
+  window.bvToggleSave=function(stage){ bvInclude[stage]=!bvInclude[stage]; bvSaveBtn(stage); if(typeof guardar==='function')guardar(); };
+  window.bvSaveBtn=function(stage){
+    var b=document.getElementById('bv-savebtn-'+stage), m=document.getElementById('bv-savemsg-'+stage); if(!b)return;
+    if(bvInclude[stage]){ b.textContent='✓ Guardado en informe'; b.className='btn btn-success'; if(m)m.textContent='Esta etapa se incluirá en el PDF.'; }
+    else { b.textContent='💾 Guardar en informe / PDF'; b.className='btn btn-primary'; if(m)m.textContent='Guardá la etapa para incluirla en el PDF.'; }
+  };
+  window.bvRenderComp=function(){
+    var body=document.getElementById('bv-comp-body'); if(!body)return;
+    var stages=bvActiveStages();
+    var h='<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Bull\'s Eye de todas las etapas. Marcá cuáles incluir en el PDF.</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center">';
+    h+=stages.map(function(st){
+      var inc=!!bvInclude[st];
+      return '<div style="text-align:center">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">'+esc(bvStageName(st))+'</div>'
+        +'<svg id="bv-comp-'+st+'" viewBox="0 0 340 340" width="180" height="180" style="cursor:default"></svg>'
+        +'<div class="wmsi-box" style="margin-top:6px;padding:6px 10px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:18px" id="bv-compwmsi-'+st+'">—</div></div>'
+        +'<label style="display:flex;align-items:center;gap:6px;justify-content:center;margin-top:6px;font-size:12px;cursor:pointer"><input type="checkbox" '+(inc?'checked':'')+' onchange="bvInclude[\''+st+'\']=this.checked;bvSaveBtn(\''+st+'\')"> Incluir en PDF</label>'
+        +'</div>';
+    }).join('');
+    h+='</div>';
+    h+='<div style="text-align:center;margin-top:16px"><button class="btn btn-primary" onclick="generarPDFCompleto()">📄 Generar PDF (vista previa)</button></div>';
+    body.innerHTML=h;
+    stages.forEach(function(st){ renderBull(st,'bv-comp-'+st,false); var w=(typeof getWMSI==='function')?getWMSI(st):null; var el=document.getElementById('bv-compwmsi-'+st); if(el)el.textContent=(w!=null?w:'—'); });
+  };
+  window.bvBuildPrintArea=function(){
+    var page=document.getElementById('page-informe'); if(!page)return;
+    var area=document.getElementById('bv-print-area');
+    if(!area){ area=document.createElement('div'); area.id='bv-print-area'; page.appendChild(area); }
+    var stages=bvActiveStages().filter(function(st){return bvInclude[st];});
+    if(!stages.length){ area.innerHTML=''; return; }
+    area.innerHTML='<h3 style="font-size:14px;margin:16px 0 8px">Bull\'s Eye por etapa</h3><div style="display:flex;flex-wrap:wrap;gap:14px">'
+      +stages.map(function(st){ return '<div style="text-align:center"><div style="font-weight:700;font-size:12px;margin-bottom:4px">'+esc(bvStageName(st))+' — WMSI '+((typeof getWMSI==='function'&&getWMSI(st)!=null)?getWMSI(st):'—')+'</div><svg id="bv-print-svg-'+st+'" viewBox="0 0 340 340" width="190" height="190"></svg></div>'; }).join('')
+      +'</div>';
+    stages.forEach(function(st){ renderBull(st,'bv-print-svg-'+st,false); });
+  };
+  window.bvPrint=function(){ if(typeof goTo==='function')goTo('informe'); setTimeout(function(){ if(typeof imprimirInforme==='function')imprimirInforme(); },60); };
+
+  // Envolver funciones existentes para re-renderizar los diagramas y el área de impresión
+  document.addEventListener('DOMContentLoaded',function(){
+    if(typeof cycleBull==='function'){ var _c=cycleBull; window.cycleBull=function(p,i){ _c(p,i); bvRenderDiagrams(p); }; }
+    if(typeof setBullState==='function'){ var _s=setBullState; window.setBullState=function(p,i,st){ _s(p,i,st); bvRenderDiagrams(p); }; }
+    if(typeof imprimirInforme==='function'){ var _im=imprimirInforme; window.imprimirInforme=function(){ bvBuildPrintArea(); return _im(); }; }
+    if(typeof peApplyLabels==='function'){ var _pa=peApplyLabels; window.peApplyLabels=function(){ _pa(); bvRelabel(); }; }
+    window.initBulls=function(){ if(!document.querySelector('#bull-panes .tab-pane'))bvBuild(); };
+    bvBuild(); bvRelabel();
+  });
+})();
+</script>
+
+<!-- ═══════════ VISTA PREVIA PDF ═══════════ -->
+<div class="ee-modal" id="pdf-preview-modal" onclick="if(event.target===this)pdfPreviewClose()">
+  <div class="pdf-preview-box">
+    <div class="pdf-preview-head">
+      <span>📄 Vista previa del informe</span>
+      <div class="pdf-preview-actions">
+        <button class="btn btn-ghost" onclick="pdfPreviewClose()">✏️ Volver a editar</button>
+        <button class="btn btn-teal" id="pdf-download-btn">⬇️ Descargar PDF</button>
+      </div>
+    </div>
+    <iframe id="pdf-preview-frame" title="Vista previa del informe PDF"></iframe>
+  </div>
+</div>
+
+<style>
+.pdf-preview-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:100%;max-width:920px;height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.pdf-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:14px;flex-wrap:wrap;color:var(--text);}
+.pdf-preview-actions{display:flex;gap:8px;flex-wrap:wrap;}
+#pdf-preview-frame{flex:1;width:100%;border:none;background:#525659;}
+</style>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   GENERACIÓN DE PDF COMPLETO — EcoEstrés Smart
+   Estilo visual alineado a EcoSmart / ErgoSmart (jsPDF, A4, Helvetica,
+   márgenes 14mm, barra de encabezado con logo, barras de sección, tablas).
+   ════════════════════════════════════════════════════════════════════════ */
+(function(){
+  var _pdfDoc=null, _pdfName='EcoEstres';
+
+  function V(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';}
+  function T(id){var e=document.getElementById(id);return (e&&e.value)?e.options[e.selectedIndex].text:'';}
+  function CHK(id){var e=document.getElementById(id);return !!(e&&e.checked);}
+  function num(id){var v=parseFloat(V(id).replace(',','.'));return isNaN(v)?null:v;}
+  function fmtDate(iso){ if(!iso)return ''; var p=String(iso).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; }
+  function pas(k){ var v=V('ecg-pa-'+k); var m=v.split('/'); return (m[0]||'').replace(/[^0-9]/g,''); }
+  function pad(k){ var v=V('ecg-pa-'+k); var m=v.split('/'); return (m[1]||'').replace(/[^0-9]/g,''); }
+  function dpVal(k){ var fc=parseInt(V('ecg-fc-'+k),10)||0; var s=parseInt(pas(k),10)||0; return fc&&s?fc*s:0; }
+
+  // Nombre de etapa (protocolo) por clave ecg
+  function stageName(k){
+    var m={bas:'basal',low:'low',pic:'pico',rec:'recup'};
+    var kn=(typeof peKeyNames==='function')?peKeyNames():{basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación'};
+    return kn[m[k]]||k;
+  }
+  // METs/dosis por etapa según protocolo
+  function stageMetric(k){
+    if(k==='bas'||k==='rec')return '—';
+    var st=(typeof peState!=='undefined'&&peState.stages)?peState.stages:[];
+    var byTipo=function(t){for(var i=0;i<st.length;i++)if(st[i].tipo===t)return st[i];return null;};
+    var inter=st.filter(function(s){return s.tipo==='inter';});
+    var obj = k==='low' ? (byTipo('low')||inter[0]) : (byTipo('pico')||(inter.length?inter[inter.length-1]:null));
+    if(!obj)return '—';
+    if(peState.tipo==='esfuerzo')return obj.mets!=null?(obj.mets+' METs'):'—';
+    return obj.d||'—';
+  }
+
+  // ─── Rasterizado del Bull's Eye a PNG ───
+  function bullSvgString(stage){
+    var wrap=document.createElement('div'); wrap.style.cssText='position:absolute;left:-9999px;top:0';
+    wrap.innerHTML='<svg id="__pdfbull" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340" width="340" height="340"></svg>';
+    document.body.appendChild(wrap);
+    try{ if(typeof renderBull==='function')renderBull(stage,'__pdfbull',false); }catch(e){}
+    var svg=wrap.querySelector('svg');
+    // fondo blanco
+    var bg='<rect x="0" y="0" width="340" height="340" fill="#ffffff"/>';
+    var inner=svg?svg.innerHTML:'';
+    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340" width="340" height="340">'+bg+inner+'</svg>';
+    document.body.removeChild(wrap);
+    return s;
+  }
+  function bullToPng(stage){ return new Promise(function(res){
+    try{
+      var s=bullSvgString(stage);
+      var img=new Image();
+      img.onload=function(){ var cv=document.createElement('canvas'); cv.width=360; cv.height=360; var c=cv.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,360,360); c.drawImage(img,10,10,340,340); res(cv.toDataURL('image/png')); };
+      img.onerror=function(){ res(null); };
+      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+    }catch(e){ res(null); }
+  }); }
+  function loadDims(src){ return new Promise(function(res){ var im=new Image(); im.onload=function(){res({w:im.naturalWidth||im.width,h:im.naturalHeight||im.height});}; im.onerror=function(){res({w:4,h:3});}; im.src=src; }); }
+
+  // Bulls seleccionados (bvInclude)
+  function bullStagesSel(){
+    var order=['basal','low','pico','recup','extra'], out=[];
+    var inc=(typeof bvInclude!=='undefined')?bvInclude:{};
+    order.forEach(function(st){
+      if(st==='extra' && !(typeof bullExtra!=='undefined'&&bullExtra&&bullExtra.active))return;
+      if(inc[st]){ var lbl=(typeof bvStageName==='function')?bvStageName(st):st; out.push({stage:st,label:lbl}); }
+    });
+    return out;
+  }
+  // Imágenes seleccionadas {src,lbl}
+  function imgsSel(kind){
+    var arr=kind==='ecg'?ecgImg:estImg; var meta=(typeof imgMetaEnsure==='function')?imgMetaEnsure(kind):[];
+    var out=[]; arr.forEach(function(src,i){ if(!src)return; var m=meta[i]||{inc:true,lbl:''}; if(m.inc===false)return; out.push({src:src,lbl:m.lbl||''}); });
+    return out;
+  }
+
+  // ════════════ CONSTRUCCIÓN DEL DOCUMENTO ════════════
+  function buildDoc(assets){
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var mL=14,mR=196,pgW=182,y=0;
+    var _tema={'1':[26,58,92],'2':[26,92,58],'3':[74,26,122],'4':[123,45,66]};
+    var TEMA=_tema[String((function(){try{return localStorage.getItem('ecoestres_pdf_color');}catch(e){return null;}})()||'1')]||_tema['1'];
+
+    function fb(s){doc.setFont('helvetica','bold');doc.setFontSize(s||7.5);}
+    function fn(s){doc.setFont('helvetica','normal');doc.setFontSize(s||7.5);}
+    function fi(s){doc.setFont('helvetica','bolditalic');doc.setFontSize(s||8);}
+    function tc(r,g,b){doc.setTextColor(r,g,b);}
+    function fc(r,g,b){doc.setFillColor(r,g,b);}
+    function dc(r,g,b){doc.setDrawColor(r,g,b);}
+    function checkPage(n){ if(y+(n||10)>284){ doc.addPage(); y=16; } }
+
+    function drawBar(txt){
+      y+=1.5; checkPage(11);
+      fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F');
+      fb(8.5); tc(255,255,255); doc.text(String(txt),mL+5,y+4.9);
+      y+=9;
+    }
+    function drawText(txt,size){
+      fn(size||8); tc(20,20,20);
+      var lines=doc.splitTextToSize(String(txt),pgW-4);
+      lines.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5; });
+    }
+    function drawBullet(lines){
+      fn(8); tc(20,20,20);
+      lines.forEach(function(l){ var ls=doc.splitTextToSize(l,pgW-8); ls.forEach(function(t,i){ checkPage(5.6); doc.text((i===0?'•  ':'   ')+t,mL+3,y); y+=4.8; }); });
+    }
+
+    // Encabezado (barra de color con logo, título, médico)
+    function header(){
+      var hdrH=23;
+      fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(0,0,210,hdrH,'F');
+      var lite=TEMA.map(function(c){return Math.round(c+(255-c)*0.32);});
+      // línea ECG decorativa
+      dc(lite[0],lite[1],lite[2]); doc.setLineWidth(0.5);
+      var pts=[[0,13],[24,13],[30,7],[34,17],[38,13],[60,13],[66,7],[70,17],[74,13],[110,13],[116,7],[120,17],[124,13],[150,13],[156,7],[160,17],[164,13],[210,13]];
+      for(var i=1;i<pts.length;i++)doc.line(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1]);
+      fb(14); tc(255,255,255); doc.text('Informe de Ecocardiograma de Estrés',105,10,{align:'center'});
+      var med=[V('cfg-medico'),V('cfg-matricula')?('Mat. '+V('cfg-matricula')):'',V('cfg-inst'),V('cfg-ciudad')].filter(Boolean).join('  ·  ');
+      fn(8.5); tc(220,232,248); if(med)doc.text(med,105,17,{align:'center'});
+      // logo
+      if(assets.logo){ try{ var lh=17, lw=lh*(assets.logoDims.w/assets.logoDims.h); if(lw>44){lw=44;lh=lw*(assets.logoDims.h/assets.logoDims.w);} doc.addImage(assets.logo,undefined,210-lw-6,3,lw,lh); }catch(e){} }
+      dc(lite[0],lite[1],lite[2]); doc.setLineWidth(1.2); doc.line(0,hdrH,210,hdrH);
+      y=hdrH+4;
+      // línea meta (fechas / institución)
+      var meta=[]; if(V('cfg-inst'))meta.push(V('cfg-inst')+(V('cfg-ciudad')?(' — '+V('cfg-ciudad')):''));
+      if(V('p-fecha'))meta.push('Estudio: '+fmtDate(V('p-fecha')));
+      if(V('p-fecha-sol'))meta.push('Solicitud: '+fmtDate(V('p-fecha-sol')));
+      if(meta.length){ fn(7.5); tc(90,90,90); doc.text(meta.join('   ·   '),mL,y); y+=4; }
+    }
+
+    // Caja de datos (grid de pares label:value)
+    function infoBox(rows){
+      var cols=3, cw=pgW/cols, rh=6.4;
+      var filled=rows.filter(function(r){return r && r[1]!=null && r[1]!=='';});
+      if(!filled.length)return;
+      var nrows=Math.ceil(filled.length/cols);
+      checkPage(nrows*rh+2);
+      var x0=mL, y0=y;
+      fc(255,255,255); dc(170,185,210); doc.setLineWidth(0.4);
+      doc.rect(x0,y0,pgW,nrows*rh,'FD');
+      for(var i=0;i<filled.length;i++){
+        var r=Math.floor(i/cols), c=i%cols, cx=x0+c*cw+2.5, cy=y0+r*rh+4.2;
+        fb(7); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text(String(filled[i][0])+':',cx,cy);
+        var lw=doc.getTextWidth(String(filled[i][0])+': ');
+        fn(7.5); tc(20,20,20); doc.text(String(filled[i][1]),cx+lw+0.5,cy);
+      }
+      // separadores
+      dc(210,218,230); doc.setLineWidth(0.15);
+      for(var rr=1;rr<nrows;rr++)doc.line(x0,y0+rr*rh,x0+pgW,y0+rr*rh);
+      for(var cc=1;cc<cols;cc++)doc.line(x0+cc*cw,y0,x0+cc*cw,y0+nrows*rh);
+      y=y0+nrows*rh+1.5;
+    }
+
+    // Tabla multi-columna (secciones de valores)
+    function tablaCompacta(secciones){
+      var secs=secciones.filter(function(s){return s.items.some(function(it){return it && it.val!=null && it.val!=='';});});
+      if(!secs.length)return;
+      var n=secs.length, cW=pgW/n, hH=5.6, rH=5;
+      var maxRows=0; secs.forEach(function(s){ var c=s.items.filter(function(it){return it&&it.val!=null&&it.val!=='';}).length; if(c>maxRows)maxRows=c; });
+      checkPage(hH+maxRows*rH+2);
+      var x0=mL, y0=y;
+      // header row
+      fc(238,238,238); doc.rect(x0,y0,pgW,hH,'F');
+      fb(6.6); tc(85,85,85);
+      secs.forEach(function(s,ci){ doc.text(String(s.titulo),x0+ci*cW+2,y0+3.8); });
+      // data
+      secs.forEach(function(s,ci){
+        var items=s.items.filter(function(it){return it&&it.val!=null&&it.val!=='';});
+        items.forEach(function(it,ri){
+          var cx=x0+ci*cW+2, cy=y0+hH+ri*rH+3.4;
+          fb(7); tc(15,15,15); var lbl=String(it.lbl)+': ';
+          doc.text(lbl,cx,cy);
+          var lw=doc.getTextWidth(lbl);
+          fn(7); tc(35,35,35);
+          var vtxt=doc.splitTextToSize(String(it.val),cW-4-lw);
+          doc.text(vtxt[0]||'',cx+lw,cy);
+        });
+      });
+      var tot=hH+maxRows*rH;
+      dc(180,180,180); doc.setLineWidth(0.3); doc.rect(x0,y0,pgW,tot);
+      doc.setLineWidth(0.2); dc(210,210,210); doc.line(x0,y0+hH,x0+pgW,y0+hH);
+      dc(150,150,150); doc.setLineWidth(0.5);
+      for(var cc=1;cc<n;cc++)doc.line(x0+cc*cW,y0,x0+cc*cW,y0+tot);
+      y=y0+tot+2;
+    }
+
+    // Tabla de etapas
+    function stageTable(){
+      var keys=['bas','low','pic','rec'];
+      var heads=['Etapa','FC (lpm)','PAS/PAD','Doble prod.','METs / Dosis','Síntomas'];
+      var colW=[42,20,26,28,36,30];
+      var hH=7.5, rH=6, x0=mL, y0=y;
+      checkPage(hH+keys.length*rH+2);
+      // header
+      fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(x0,y0,pgW,hH,'F');
+      fb(6.6); tc(255,255,255);
+      var cx=x0;
+      heads.forEach(function(h,i){ doc.text(h,cx+colW[i]/2,y0+4.8,{align:'center'}); cx+=colW[i]; });
+      // rows
+      keys.forEach(function(k,ri){
+        var ry=y0+hH+ri*rH;
+        var isRec=(k==='rec');
+        fc(isRec?244:(ri%2?248:255),isRec?247:(ri%2?248:255),isRec?250:(ri%2?248:255));
+        doc.rect(x0,ry,pgW,rH,'F');
+        var vals=[ stageName(k), V('ecg-fc-'+k)||'—', (pas(k)||'—')+'/'+(pad(k)||'—'), (dpVal(k)?dpVal(k).toLocaleString('es-AR'):'—'), stageMetric(k), (T('ecg-sint-'+k)||'—') ];
+        fn(6.6); tc(25,25,25);
+        var xx=x0;
+        vals.forEach(function(v,i){ var t=doc.splitTextToSize(String(v),colW[i]-2); doc.text(t[0]||'',xx+colW[i]/2,ry+3.9,{align:'center'}); xx+=colW[i]; });
+      });
+      var tot=hH+keys.length*rH;
+      dc(180,180,180); doc.setLineWidth(0.3); doc.rect(x0,y0,pgW,tot);
+      var xx=x0; for(var i=0;i<colW.length-1;i++){ xx+=colW[i]; doc.setLineWidth(0.15); dc(215,215,215); doc.line(xx,y0,xx,y0+tot); }
+      dc(215,215,215); for(var r=1;r<=keys.length;r++)doc.line(x0,y0+hH+(r-1)*rH,x0+pgW,y0+hH+(r-1)*rH);
+      y=y0+tot+2;
+    }
+
+    // Bloque de imágenes (2 por fila)
+    function imgBlock(list){
+      if(!list.length)return;
+      var gap=6, cellW=(pgW-gap)/2, i=0;
+      while(i<list.length){
+        var row=list.slice(i,i+2);
+        // altura de fila = max alto escalado
+        var hs=row.map(function(o){ var d=o.dims||{w:4,h:3}; var w=cellW; var h=w*(d.h/d.w); if(h>70)h=70; return h; });
+        var rowH=Math.max.apply(null,hs)+ (row.some(function(o){return o.lbl;})?5:1);
+        checkPage(rowH+2);
+        row.forEach(function(o,c){
+          var d=o.dims||{w:4,h:3}; var w=cellW; var h=w*(d.h/d.w); if(h>70){h=70;w=h*(d.w/d.h);}
+          var x=mL+c*(cellW+gap)+(cellW-w)/2;
+          try{ doc.addImage(o.src,undefined,x,y,w,h); }catch(e){}
+          if(o.lbl){ fn(7); tc(70,70,70); doc.text(String(o.lbl),mL+c*(cellW+gap)+cellW/2,y+h+3.6,{align:'center'}); }
+        });
+        y+=rowH+2;
+        i+=2;
+      }
+    }
+
+    // Firma
+    function firma(){
+      checkPage(26); y+=6;
+      dc(180,180,180); doc.setLineWidth(0.4); doc.line(mL,y,mR,y); y+=5;
+      var nom=V('cfg-medico'); var mat=V('cfg-matricula'); var fir=V('cfg-firma');
+      if(assets.firmaImg){ try{ var fh=16, fw=fh*(assets.firmaImgDims.w/assets.firmaImgDims.h); doc.addImage(assets.firmaImg,undefined,mR-fw,y-2,fw,fh); y+=fh; }catch(e){} }
+      fb(9.5); tc(0,0,0); if(nom)doc.text(nom+'.',mR,y,{align:'right'}); y+=5;
+      if(mat){ fn(8); tc(0,0,0); doc.text('Matrícula '+mat,mR,y,{align:'right'}); y+=4.4; }
+      if(fir){ fn(7.5); tc(90,90,90); doc.text(fir,mR,y,{align:'right'}); y+=4; }
+      var inst=[V('cfg-inst'),V('cfg-ciudad')].filter(Boolean).join(' — ');
+      if(inst){ fn(7.5); tc(90,90,90); doc.text(inst,mR,y,{align:'right'}); y+=4; }
+    }
+
+    function footer(){
+      var tot=doc.internal.getNumberOfPages();
+      var inst=V('cfg-inst')||'CeiboMed';
+      for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
+        doc.text('EcoEstrés Smart · CeiboMed · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); }
+    }
+
+    // ─────── ENSAMBLADO ───────
+    header();
+
+    // 2 · Datos del paciente
+    drawBar('DATOS DEL PACIENTE');
+    var dob=[V('p-fnac-dia'),(function(){var m=document.getElementById('p-fnac-mes');return m&&m.value?m.options[m.selectedIndex].text:'';})(),V('p-fnac-anio')].filter(Boolean).join('/');
+    infoBox([
+      ['Nombre', V('p-nombre')],
+      ['Documento / HC', V('p-hc')],
+      ['Fecha nac.', dob],
+      ['Edad', V('p-edad')?(V('p-edad')+' años'):''],
+      ['Sexo', {M:'Masculino',F:'Femenino'}[V('p-sexo')]||''],
+      ['Peso', V('p-peso')?(V('p-peso')+' kg'):''],
+      ['Talla', V('p-talla')?(V('p-talla')+' cm'):''],
+      ['IMC', V('p-imc')?(V('p-imc')+' kg/m²'):''],
+      ['SC', V('eb-sc')?(V('eb-sc')+' m²'):'']
+    ]);
+
+    // 3 · Indicación y contexto
+    drawBar('INDICACIÓN Y CONTEXTO');
+    var ptp=(document.getElementById('ptp-result')?document.getElementById('ptp-result').textContent:'').trim();
+    var tipoEstres=T('p-estres')|| (typeof peState!=='undefined'?peState.tipo:'');
+    var proto=''; if(typeof peState!=='undefined'){ if(peState.tipo==='esfuerzo'){ proto=(typeof PE_PROTO!=='undefined'&&PE_PROTO[peState.proto])?PE_PROTO[peState.proto].nombre:peState.proto; } }
+    infoBox([
+      ['Indicación', T('p-ind')],
+      ['PTP (ESC 2019)', ptp.replace(/\s+/g,' ')],
+      ['Tipo de estrés', tipoEstres],
+      ['Protocolo', proto]
+    ]);
+    var frcv=[]; [['frcv-hta','HTA'],['frcv-dm','DM'],['frcv-dislip','Dislipemia'],['frcv-tab','Tabaquismo'],['frcv-obes','Obesidad'],['frcv-ahf','AHF EC']].forEach(function(f){ if(CHK(f[0]))frcv.push(f[1]); });
+    if(frcv.length){ fn(8); tc(20,20,20); doc.text('Factores de riesgo: '+frcv.join(', ')+'.',mL+2,y+1); y+=5; }
+    if(V('p-medicacion')){ fn(8); tc(20,20,20); drawText('Medicación relevante: '+V('p-medicacion')+'.'); }
+
+    // 4 · Tabla de etapas
+    drawBar('DESARROLLO POR ETAPAS');
+    stageTable();
+
+    // 5 · Narrativo del estrés
+    drawBar('DESARROLLO DE LA PRUEBA DE ESTRÉS');
+    var nb=[];
+    var fcmax=V('b-fc-max'),fcteo=V('b-fc-teo'),fcpct=(fcteo&&fcmax)?Math.round(+fcmax/+fcteo*100):null;
+    var adecTxt=(document.getElementById('b-adec')?T('b-adec'):'');
+    var hemo='Respuesta hemodinámica: PA basal '+(V('b-pa-bas')||'—')+' → PA pico '+(V('b-pa-pico')||'—')+' mmHg. FC máx '+(fcmax||'—')+' lpm'+(fcpct!=null?(' ('+fcpct+'% de la FC máx. teórica)'):'')+'.';
+    if(T('d-pa'))hemo+=' '+T('d-pa')+'.';
+    nb.push(hemo);
+    if(V('b-mets'))nb.push('METs alcanzados: '+V('b-mets')+'.');
+    var ecgL='ECG: basal '+(T('b-ecg-bas')||'—').toLowerCase()+'; durante estrés '+(T('b-ecg-estres')||'sin cambios').toLowerCase()+'.';
+    if(V('b-ecg-desc'))ecgL+=' '+V('b-ecg-desc');
+    nb.push(ecgL);
+    if(V('ecg-arritmias'))nb.push('Arritmias: '+V('ecg-arritmias')+'.');
+    if(T('b-sintomas'))nb.push('Síntomas durante el estrés: '+T('b-sintomas')+'.');
+    var sintEt=[]; ['bas','low','pic','rec'].forEach(function(k){ var s=T('ecg-sint-'+k); if(s&&s.toLowerCase()!=='ninguno')sintEt.push(stageName(k)+': '+s); });
+    if(sintEt.length)nb.push('Síntomas por etapa — '+sintEt.join('; ')+'.');
+    if(T('b-stop'))nb.push('Motivo de finalización: '+T('b-stop')+'.');
+    if(adecTxt)nb.push('Adecuación del estrés: '+adecTxt+'.');
+    drawBullet(nb);
+
+    // 6 · Imágenes ECG
+    if(assets.ecgImgs.length){ drawBar('REGISTRO ELECTROCARDIOGRÁFICO'); imgBlock(assets.ecgImgs); }
+
+    // 7 · Tabla eco basal
+    drawBar('ECOCARDIOGRAMA BASAL — MEDICIONES');
+    tablaCompacta([
+      {titulo:'Dimensiones VI',items:[
+        {lbl:'DIVI',val:V('eb-divi')?V('eb-divi')+' mm':''},
+        {lbl:'DSVI',val:V('eb-dsvi')?V('eb-dsvi')+' mm':''},
+        {lbl:'SIVd',val:V('eb-sivd')?V('eb-sivd')+' mm':''},
+        {lbl:'PPVId',val:V('eb-ppvid')?V('eb-ppvid')+' mm':''},
+        {lbl:'FA',val:V('eb-fac')?V('eb-fac')+' %':''},
+        {lbl:'Masa i',val:V('eb-masa-i')?V('eb-masa-i')+' g/m²':''},
+        {lbl:'RWT',val:V('eb-rwt')}
+      ]},
+      {titulo:'Función sistólica',items:[
+        {lbl:'FEVI',val:(V('eb-fevi')||V('eb-fevi-simpson'))?((V('eb-fevi')||V('eb-fevi-simpson'))+' %'):''},
+        {lbl:'Método',val:T('eb-fevi-metodo')},
+        {lbl:'GLS',val:V('eb-gls')?V('eb-gls')+' %':''},
+        {lbl:'VTD',val:V('eb-vtd')?V('eb-vtd')+' mL':''},
+        {lbl:'VTS',val:V('eb-vts')?V('eb-vts')+' mL':''}
+      ]},
+      {titulo:'Función diastólica',items:[
+        {lbl:'E',val:V('eb-e')?V('eb-e')+' cm/s':''},
+        {lbl:'A',val:V('eb-a')?V('eb-a')+' cm/s':''},
+        {lbl:'E/A',val:V('eb-ea')},
+        {lbl:'TD',val:V('eb-td')?V('eb-td')+' ms':''},
+        {lbl:"e' prom",val:V('eb-e-prom')?V('eb-e-prom')+' cm/s':''},
+        {lbl:"E/e'",val:V('eb-eeprom')},
+        {lbl:'TRIV',val:V('eb-triv')?V('eb-triv')+' ms':''}
+      ]}
+    ]);
+    tablaCompacta([
+      {titulo:'Ventrículo derecho',items:[
+        {lbl:'DTDVD',val:V('eb-vd-bas')?V('eb-vd-bas')+' mm':''},
+        {lbl:'TAPSE',val:V('eb-tapse')?V('eb-tapse')+' mm':''},
+        {lbl:"S'",val:V('eb-s-tric')?V('eb-s-tric')+' cm/s':''},
+        {lbl:'FAC VD',val:V('eb-fac-vd')?V('eb-fac-vd')+' %':''},
+        {lbl:'PSAP',val:V('eb-psap')?V('eb-psap')+' mmHg':''}
+      ]},
+      {titulo:'AI / Aorta',items:[
+        {lbl:'AI diám',val:V('eb-ai-diam')?V('eb-ai-diam')+' mm':''},
+        {lbl:'AI vol i',val:V('eb-ai-vol-i')?V('eb-ai-vol-i')+' mL/m²':''},
+        {lbl:'Ao senos',val:V('eb-ao-senos')?V('eb-ao-senos')+' mm':''},
+        {lbl:'Ao asc',val:V('eb-ao-asc')?V('eb-ao-asc')+' mm':''}
+      ]},
+      {titulo:'Doppler valvular',items:[
+        {lbl:'VM GM',val:V('eb-vm-gm')?V('eb-vm-gm')+' mmHg':''},
+        {lbl:'IM',val:T('eb-im-grado')},
+        {lbl:'VA Vmax',val:V('eb-va-vmax')?V('eb-va-vmax')+' m/s':''},
+        {lbl:'AVA',val:V('eb-va-ava')?V('eb-va-ava')+' cm²':''},
+        {lbl:'IAo',val:T('eb-iao-grado')},
+        {lbl:'IT Vmax',val:V('eb-it-vmax')?V('eb-it-vmax')+' m/s':''}
+      ]}
+    ]);
+
+    // 8 · Narrativo eco basal
+    var ebLines=(typeof ebTextoInforme==='function')?ebTextoInforme():[];
+    if(ebLines.length){ drawBar('ECOCARDIOGRAMA BASAL — DESCRIPCIÓN'); drawBullet(ebLines); }
+
+    // 9 · Resultado eco estrés (ABCD-FLPR)
+    drawBar('RESULTADO DEL ECO ESTRÉS (ABCD-FLPR)');
+    var wmsiB=(typeof getWMSI==='function')?getWMSI('basal'):null, wmsiP=(typeof getWMSI==='function')?getWMSI('pico'):null, wmsiR=(typeof getWMSI==='function')?getWMSI('recup'):null;
+    var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]};
+    var abcd=[];
+    abcd.push('A — Adecuación: '+(adecTxt||(fcpct!=null?(fcpct+'% FC máx. teórica'):'—'))+'.');
+    abcd.push('B — ECG: '+(T('b-ecg-estres')||'sin cambios significativos')+'.');
+    var cTxt='C — Contractilidad: WMSI basal '+(wmsiB!=null?wmsiB:'—')+', pico '+(wmsiP!=null?wmsiP:'—')+(wmsiR!=null?(', recuperación '+wmsiR):'')+'.';
+    if(an.segs&&an.segs.length){ var det=an.segs.map(function(s){return (SEG_LABELS[s.st]||'').toLowerCase()+' seg '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')'+(s.nuevo?' [nuevo]':'');}).join('; '); cTxt+=' Alteraciones en pico: '+det+'.'; }
+    else cTxt+=' Sin nuevas alteraciones segmentarias en el pico.';
+    if(V('c-fevi-bas')||V('c-fevi-pic'))cTxt+=' FEVI '+(V('c-fevi-bas')||'—')+'%→'+(V('c-fevi-pic')||'—')+'%.';
+    abcd.push(cTxt);
+    abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta PA: '+(T('d-pa')||'—')+'.');
+    var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
+    abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.');
+    abcd.push('L — Líneas B pulmonares post-estrés: '+(T('l-post')||'—')+'.');
+    abcd.push('P — Presiones: PSAP pico '+(V('p-psap-pic')||'—')+' mmHg; E/e\' pico '+(V('p-ee-pic')||'—')+'; patrón diastólico '+(T('p-diast')||'—')+'.');
+    abcd.push('R — Recuperación: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):''));
+    drawBullet(abcd);
+    var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
+    var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
+    if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); }
+    if(V('res-comment'))drawText(V('res-comment'));
+
+    // 10 · Imágenes Bull's Eye
+    if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA"); imgBlock(assets.bullImgs); }
+
+    // 11 · Imágenes eco estrés
+    if(assets.estImgs.length){ drawBar('IMÁGENES DEL ECO ESTRÉS'); imgBlock(assets.estImgs); }
+
+    // 12 · Conclusión resumida
+    drawBar('CONCLUSIÓN');
+    var ecgConc; var ee=T('b-ecg-estres');
+    if(!ee||/sin cambios/i.test(ee))ecgConc='ECG: sin cambios isquémicos significativos durante el estrés.';
+    else ecgConc='ECG: '+ee+'.';
+    var estConc='Eco estrés: '+(resMap[rg]||'resultado no especificado')+'.';
+    fb(8.2); tc(20,20,20); [ecgConc,estConc].forEach(function(l){ var ls=doc.splitTextToSize('▸ '+l,pgW-4); ls.forEach(function(t){ checkPage(6); doc.text(t,mL+2,y); y+=5.2; }); });
+
+    // 13 · Firma
+    firma();
+    footer();
+    return doc;
+  }
+
+  // ════════════ ORQUESTACIÓN + VISTA PREVIA ════════════
+  window.generarPDFCompleto=async function(){
+    if(!(window.jspdf&&window.jspdf.jsPDF)){ alert('No se pudo cargar la librería de PDF (jsPDF). Verificá la conexión a internet e intentá de nuevo.'); return; }
+    var btn=document.getElementById('pdf-download-btn');
+    try{
+      // Precarga de assets (async): bulls rasterizados, dimensiones de imágenes, logo, firma
+      var assets={logo:null,logoDims:{w:1,h:1},firmaImg:null,firmaImgDims:{w:1,h:1},bullImgs:[],ecgImgs:[],estImgs:[]};
+      try{ var lg=localStorage.getItem('ecoestres_logo'); if(lg){ assets.logo=lg; assets.logoDims=await loadDims(lg); } }catch(e){}
+      try{ var fm=localStorage.getItem('ecoestres_firma'); if(fm){ assets.firmaImg=fm; assets.firmaImgDims=await loadDims(fm); } }catch(e){}
+      // Bulls
+      var bs=bullStagesSel();
+      for(var i=0;i<bs.length;i++){ var png=await bullToPng(bs[i].stage); if(png){ var d=await loadDims(png); assets.bullImgs.push({src:png,lbl:bs[i].label+((typeof getWMSI==='function'&&getWMSI(bs[i].stage)!=null)?('  ·  WMSI '+getWMSI(bs[i].stage)):''),dims:d}); } }
+      // Imágenes ECG / estrés
+      var ei=imgsSel('ecg'); for(var a=0;a<ei.length;a++){ var de=await loadDims(ei[a].src); assets.ecgImgs.push({src:ei[a].src,lbl:ei[a].lbl,dims:de}); }
+      var si=imgsSel('est'); for(var b=0;b<si.length;b++){ var ds=await loadDims(si[b].src); assets.estImgs.push({src:si[b].src,lbl:si[b].lbl,dims:ds}); }
+
+      var doc=buildDoc(assets);
+      _pdfDoc=doc;
+      // nombre de archivo
+      var nom=V('p-nombre')||'EcoEstres'; var fch=V('p-fecha')||'';
+      _pdfName=[nom,fch].filter(Boolean).join(' - ').replace(/[\\/:*?"<>|]/g,'_')||'EcoEstres';
+      // Vista previa
+      var url=doc.output('bloburl');
+      var frame=document.getElementById('pdf-preview-frame'); if(frame)frame.src=url;
+      var modal=document.getElementById('pdf-preview-modal'); if(modal)modal.classList.add('open');
+      if(btn)btn.onclick=function(){ try{_pdfDoc.save(_pdfName+'.pdf');}catch(e){alert('Error al descargar: '+e.message);} };
+    }catch(err){ alert('No se pudo generar el PDF: '+err.message); }
+  };
+  window.pdfPreviewClose=function(){ var m=document.getElementById('pdf-preview-modal'); if(m)m.classList.remove('open'); var f=document.getElementById('pdf-preview-frame'); if(f)f.src='about:blank'; };
 })();
 </script>
 </body>
