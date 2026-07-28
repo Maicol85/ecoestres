@@ -2606,6 +2606,18 @@ function ebTextoInforme(){
 .eeg-cmp-bull{text-align:center;margin-bottom:8px;}
 .eeg-cmp-lbl{font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:3px;}
 .eeg-cmp-bull svg{width:100%;max-width:230px;}
+.eeg-cmp-hdcol{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:14px;font-weight:700;color:var(--text);display:flex;flex-direction:column;gap:2px;}
+.eeg-cmp-hdcol span{font-weight:500;color:var(--text2);font-size:11px;}
+.eeg-cmp-sec{font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;border-bottom:1px solid var(--border);padding-bottom:4px;}
+.eeg-htab{width:100%;border-collapse:collapse;font-size:12px;}
+.eeg-htab th,.eeg-htab td{border:1px solid var(--border);padding:6px 10px;text-align:left;}
+.eeg-htab th{background:var(--bg3);color:var(--text2);font-weight:700;}
+.eeg-htab td:first-child{color:var(--text2);font-weight:600;}
+.eeg-cmp-stage{margin-bottom:12px;}
+.eeg-cmp-stagelbl{font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;text-align:center;}
+.eeg-pdfopts{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--text2);}
+.eeg-pdfopts label{display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;}
+.eeg-pdfopts input[type=checkbox]{flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2);}
 </style>
 <div class="ee-modal" id="ee-guardados" onclick="if(event.target===this)eeGuardadosClose()">
   <div class="ee-modal-box">
@@ -2617,7 +2629,7 @@ function ebTextoInforme(){
 /* ═══ Módulo Guardados: guardar / listar / editar / filtrar / comparar ═══ */
 (function(){
   var LSKEY='ecoestres_informes';
-  var _editId=null, _sel=[];
+  var _editId=null, _sel=[], _cmpDoc=null;
   function recs(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function save(a){ try{ localStorage.setItem(LSKEY, JSON.stringify(a)); }catch(e){ alert('No se pudo guardar (¿espacio de almacenamiento lleno?): '+e.message); } }
   function F(r,id){ return (r&&r.vals&&r.vals[id]!=null)?r.vals[id]:''; }
@@ -2696,20 +2708,156 @@ function ebTextoInforme(){
     eeGuardadosList();
   };
 
+  // ── Helpers del comparativo ──
+  var RESMAP={neg:'NEGATIVO para isquemia',pos:'POSITIVO para isquemia',inc:'Indeterminado',via:'Viabilidad presente',novia:'Sin viabilidad'};
+  function resLabelOf(r){ return RESMAP[F(r,'res-global')]||'—'; }
+  function dpOf(r){ var fc=parseInt(F(r,'ecg-fc-pic'),10)||0; var pa=String(F(r,'ecg-pa-pic')||''); var pas=parseInt((pa.split('/')[0]||'').replace(/[^0-9]/g,''),10)||0; return (fc&&pas)?(fc*pas):null; }
+  function dpTxt(r){ var d=dpOf(r); return d?d.toLocaleString('es-AR'):'—'; }
+  function stageLabelsOf(r){
+    var def={basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación',extra:(r.bullExtra&&r.bullExtra.name)||'Etapa opcional'};
+    var st=(r.peState&&r.peState.stages)||[]; if(!st.length)return def;
+    var byTipo=function(t){for(var i=0;i<st.length;i++)if(st[i].tipo===t)return st[i];return null;};
+    var inter=st.filter(function(s){return s.tipo==='inter';});
+    var rc=st.filter(function(s){return s.tipo==='rec'||s.tipo==='recup';});
+    return { basal:((byTipo('basal')||st[0]||{}).n)||'Basal',
+      low:((byTipo('low')||inter[0]||{}).n)||'Estrés bajo',
+      pico:((byTipo('pico')||(inter.length?inter[inter.length-1]:{})||{}).n)||'Pico',
+      recup:((rc[0]||{}).n)||'Recuperación', extra:def.extra };
+  }
+  function cmpStages(a,b){ var s=['basal','low','pico','recup']; if((a.bullExtra&&a.bullExtra.active)||(b.bullExtra&&b.bullExtra.active))s.push('extra'); return s; }
+
   window.eeComparar=function(){
     if(_sel.length!==2){ toast('Seleccioná 2 estudios'); return; }
     var arr=recs(); var a=arr.find(function(x){return x.id===_sel[0];}), b=arr.find(function(x){return x.id===_sel[1];});
     if(!a||!b){ eeGuardadosList(); return; }
     var body=document.getElementById('ee-guardados-body');
-    function col(r,tag){
-      return '<div class="eeg-cmp-col"><div class="eeg-cmp-hd">'+esc(F(r,'p-nombre')||'(sin nombre)')+'<span>'+esc(fmtFecha(F(r,'p-fecha')))+'</span></div>'
-        +'<div class="eeg-cmp-bull"><div class="eeg-cmp-lbl">Basal · WMSI '+wmsiOf((r.bull||{}).basal)+'</div><svg id="eeg-cmp-'+tag+'-basal" viewBox="0 0 340 340"></svg></div>'
-        +'<div class="eeg-cmp-bull"><div class="eeg-cmp-lbl">Pico · WMSI '+wmsiOf((r.bull||{}).pico)+'</div><svg id="eeg-cmp-'+tag+'-pico" viewBox="0 0 340 340"></svg></div>'
-        +'</div>';
+    var la=stageLabelsOf(a), lb=stageLabelsOf(b), stages=cmpStages(a,b);
+    var nA=esc(F(a,'p-nombre')||'Estudio A'), nB=esc(F(b,'p-nombre')||'Estudio B');
+    function hrow(lbl,va,vb){ return '<tr><td>'+lbl+'</td><td>'+esc(va||'—')+'</td><td>'+esc(vb||'—')+'</td></tr>'; }
+    var h='<div class="eeg-top" style="justify-content:space-between;gap:12px">'
+      +'<button class="btn btn-ghost" onclick="eeGuardadosOpen()">← Volver a la lista</button>'
+      +'<div class="eeg-pdfopts"><span>Incluir en PDF:</span>'
+        +'<label><input type="checkbox" id="cmp-inc-hemo" checked> Hemodinámica</label>'
+        +'<label><input type="checkbox" id="cmp-inc-res" checked> Resultado</label>'
+        +'<label><input type="checkbox" id="cmp-inc-bulls" checked> Bull\'s Eye</label>'
+        +'<button class="btn btn-primary" style="padding:6px 12px" onclick="eeCompararPDF()">📄 Descargar PDF</button>'
+      +'</div></div>';
+    h+='<div class="eeg-cmp"><div class="eeg-cmp-hdcol">'+nA+'<span>'+esc(fmtFecha(F(a,'p-fecha')))+'</span></div>'
+      +'<div class="eeg-cmp-hdcol">'+nB+'<span>'+esc(fmtFecha(F(b,'p-fecha')))+'</span></div></div>';
+    h+='<div class="eeg-cmp-sec">Valores hemodinámicos y resultado</div>';
+    h+='<table class="eeg-htab"><tr><th>Parámetro</th><th>'+nA+'</th><th>'+nB+'</th></tr>'
+      +hrow('FC máx (lpm)',F(a,'b-fc-max'),F(b,'b-fc-max'))
+      +hrow('PA pico (mmHg)',F(a,'b-pa-pico'),F(b,'b-pa-pico'))
+      +hrow('METs',F(a,'b-mets'),F(b,'b-mets'))
+      +hrow('Doble producto',dpTxt(a),dpTxt(b))
+      +hrow('Resultado',resLabelOf(a),resLabelOf(b))
+      +'</table>';
+    h+='<div class="eeg-cmp-sec">Bull\'s Eye por etapa</div>';
+    stages.forEach(function(ph){
+      h+='<div class="eeg-cmp-stage"><div class="eeg-cmp-stagelbl">'+esc(la[ph]||ph)+'  ·  '+esc(lb[ph]||ph)+'</div>'
+        +'<div class="eeg-cmp"><div class="eeg-cmp-bull"><div class="eeg-cmp-lbl">'+nA+' · WMSI '+wmsiOf(a.bull&&a.bull[ph])+'</div><svg id="eeg-cmp-A-'+ph+'" viewBox="0 0 340 340"></svg></div>'
+        +'<div class="eeg-cmp-bull"><div class="eeg-cmp-lbl">'+nB+' · WMSI '+wmsiOf(b.bull&&b.bull[ph])+'</div><svg id="eeg-cmp-B-'+ph+'" viewBox="0 0 340 340"></svg></div></div></div>';
+    });
+    body.innerHTML=h;
+    stages.forEach(function(ph){ bullSvgFor(a.bull, ph, 'eeg-cmp-A-'+ph); bullSvgFor(b.bull, ph, 'eeg-cmp-B-'+ph); });
+  };
+
+  // Rasteriza el bull's eye de un registro a PNG (para el PDF del comparativo)
+  function bullToPngFor(recBull, phase){ return new Promise(function(res){
+    try{
+      var wrap=document.createElement('div'); wrap.style.cssText='position:absolute;left:-9999px;top:0';
+      wrap.innerHTML='<svg id="__cmpbull" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340" width="340" height="340"></svg>';
+      document.body.appendChild(wrap);
+      var saved=bull[phase];
+      bull[phase]=(recBull&&Array.isArray(recBull[phase]))?recBull[phase]:Array(17).fill(1);
+      try{ renderBull(phase,'__cmpbull',false); }catch(e){}
+      bull[phase]=saved;
+      var svg=wrap.querySelector('svg');
+      var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340" width="340" height="340"><rect width="340" height="340" fill="#ffffff"/>'+(svg?svg.innerHTML:'')+'</svg>';
+      document.body.removeChild(wrap);
+      var img=new Image();
+      img.onload=function(){ var cv=document.createElement('canvas'); cv.width=360;cv.height=360; var c=cv.getContext('2d'); c.fillStyle='#fff';c.fillRect(0,0,360,360); c.drawImage(img,10,10,340,340); res(cv.toDataURL('image/png')); };
+      img.onerror=function(){res(null);};
+      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+    }catch(e){res(null);}
+  }); }
+
+  function buildCmpDoc(a,b,o){
+    var jsPDF=window.jspdf.jsPDF, doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var mL=14,pgW=182,y=0, TEMA=[26,58,92];
+    function San(s){ return String(s==null?'':s).replace(/[–—]/g,'-').replace(/[·•]/g,'-').replace(/→/g,' a ').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/…/g,'...').replace(/[^\x20-\xFF\t\n\r]/g,''); }
+    var _t=doc.text.bind(doc); doc.text=function(t,x,yy,op){ if(typeof t==='string')t=San(t); else if(Array.isArray(t))t=t.map(function(z){return typeof z==='string'?San(z):z;}); return _t(t,x,yy,op); };
+    var _sp=doc.splitTextToSize.bind(doc); doc.splitTextToSize=function(t,w,op){return _sp(San(t),w,op);};
+    function fb(s){doc.setFont('helvetica','bold');doc.setFontSize(s||8);}
+    function fn(s){doc.setFont('helvetica','normal');doc.setFontSize(s||8);}
+    function checkPage(n){ if(y+(n||10)>284){doc.addPage();y=16;} }
+    function drawBar(txt){ y+=3; checkPage(14); doc.setFillColor(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F'); fb(8.5); doc.setTextColor(255,255,255); doc.text(txt,mL+5,y+4.9); y+=10; }
+    var gv=function(id){var e=document.getElementById(id);return e?String(e.value||''):'';};
+    var nA=F(a,'p-nombre')||'Estudio A', nB=F(b,'p-nombre')||'Estudio B';
+    // encabezado
+    doc.setFillColor(TEMA[0],TEMA[1],TEMA[2]); doc.rect(0,0,210,20,'F');
+    fb(14); doc.setTextColor(255,255,255); doc.text('Comparativo de estudios',105,9.5,{align:'center'});
+    var med=[gv('cfg-medico'),gv('cfg-inst'),gv('cfg-ciudad')].filter(Boolean).join('  ·  ');
+    fn(8); doc.setTextColor(220,232,248); if(med)doc.text(med,105,16,{align:'center'});
+    y=25;
+    fb(10); doc.setTextColor(20,20,20);
+    doc.text('A: '+nA+' ('+fmtFecha(F(a,'p-fecha'))+')',mL,y); y+=5.5;
+    doc.text('B: '+nB+' ('+fmtFecha(F(b,'p-fecha'))+')',mL,y); y+=4;
+    // hemodinámica / resultado
+    if(o.incHemo||o.incRes){
+      drawBar('VALORES HEMODINAMICOS Y RESULTADO');
+      var rows=[];
+      if(o.incHemo){ rows.push(['FC max (lpm)',F(a,'b-fc-max'),F(b,'b-fc-max')]); rows.push(['PA pico (mmHg)',F(a,'b-pa-pico'),F(b,'b-pa-pico')]); rows.push(['METs',F(a,'b-mets'),F(b,'b-mets')]); rows.push(['Doble producto',dpTxt(a),dpTxt(b)]); }
+      if(o.incRes){ rows.push(['Resultado',resLabelOf(a),resLabelOf(b)]); }
+      var x=mL, cP=pgW*0.34, cV=(pgW-cP)/2, rh=6.6;
+      checkPage(rh*(rows.length+1)+2); var y0=y;
+      doc.setFillColor(235,235,235); doc.rect(x,y,pgW,rh,'F'); fb(7.6); doc.setTextColor(60,60,60);
+      doc.text('Parametro',x+2,y+4.4); doc.text(doc.splitTextToSize(nA,cV-3)[0],x+cP+2,y+4.4); doc.text(doc.splitTextToSize(nB,cV-3)[0],x+cP+cV+2,y+4.4); y+=rh;
+      rows.forEach(function(rw,i){ if(i%2){doc.setFillColor(248,248,248);doc.rect(x,y,pgW,rh,'F');}
+        fb(7.6); doc.setTextColor(20,20,20); doc.text(String(rw[0]),x+2,y+4.4);
+        fn(7.6); doc.setTextColor(30,30,30); doc.text(doc.splitTextToSize(String(rw[1]||'-'),cV-3)[0],x+cP+2,y+4.4); doc.text(doc.splitTextToSize(String(rw[2]||'-'),cV-3)[0],x+cP+cV+2,y+4.4); y+=rh; });
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.2); doc.rect(x,y0,pgW,rh*(rows.length+1));
+      doc.line(x+cP,y0,x+cP,y0+rh*(rows.length+1)); doc.line(x+cP+cV,y0,x+cP+cV,y0+rh*(rows.length+1));
+      y+=3;
     }
-    body.innerHTML='<div class="eeg-top"><button class="btn btn-ghost" onclick="eeGuardadosOpen()">← Volver a la lista</button></div>'
-      +'<div class="eeg-cmp">'+col(a,'A')+col(b,'B')+'</div>';
-    [['A',a],['B',b]].forEach(function(p){ ['basal','pico'].forEach(function(ph){ bullSvgFor(p[1].bull, ph, 'eeg-cmp-'+p[0]+'-'+ph); }); });
+    // bulls por etapa
+    if(o.incBulls){
+      drawBar("BULL'S EYE POR ETAPA");
+      o.stages.forEach(function(ph){
+        checkPage(85);
+        fb(9); doc.setTextColor(TEMA[0],TEMA[1],TEMA[2]); doc.text((o.la[ph]||ph)+'   /   '+(o.lb[ph]||ph),105,y+3,{align:'center'}); y+=6;
+        var imgW=68, x1=mL+(pgW/2-imgW)/2, x2=mL+pgW/2+(pgW/2-imgW)/2;
+        if(o.pngs['A_'+ph]){try{doc.addImage(o.pngs['A_'+ph],undefined,x1,y,imgW,imgW);}catch(e){}}
+        if(o.pngs['B_'+ph]){try{doc.addImage(o.pngs['B_'+ph],undefined,x2,y,imgW,imgW);}catch(e){}}
+        fn(7.5); doc.setTextColor(70,70,70);
+        doc.text(nA+' · WMSI '+wmsiOf(a.bull&&a.bull[ph]),x1+imgW/2,y+imgW+4,{align:'center'});
+        doc.text(nB+' · WMSI '+wmsiOf(b.bull&&b.bull[ph]),x2+imgW/2,y+imgW+4,{align:'center'});
+        y+=imgW+9;
+      });
+    }
+    // pie
+    var tot=doc.internal.getNumberOfPages();
+    for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); doc.setTextColor(150,150,150); doc.text('EcoEstrés Smart · CeiboMed · Comparativo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); }
+    return doc;
+  }
+
+  window.eeCompararPDF=async function(){
+    if(!(window.jspdf&&window.jspdf.jsPDF)){ alert('No se pudo cargar la librería de PDF (jsPDF).'); return; }
+    if(_sel.length!==2){ toast('Seleccioná 2 estudios'); return; }
+    var arr=recs(); var a=arr.find(function(x){return x.id===_sel[0];}), b=arr.find(function(x){return x.id===_sel[1];});
+    if(!a||!b)return;
+    var chk=function(id){var e=document.getElementById(id);return e?e.checked:true;};
+    var o={ incHemo:chk('cmp-inc-hemo'), incRes:chk('cmp-inc-res'), incBulls:chk('cmp-inc-bulls'),
+      stages:cmpStages(a,b), la:stageLabelsOf(a), lb:stageLabelsOf(b), pngs:{} };
+    if(o.incBulls){ for(var i=0;i<o.stages.length;i++){ var ph=o.stages[i]; o.pngs['A_'+ph]=await bullToPngFor(a.bull,ph); o.pngs['B_'+ph]=await bullToPngFor(b.bull,ph); } }
+    try{
+      var doc=buildCmpDoc(a,b,o); _cmpDoc=doc;
+      var fname=('Comparativo '+(F(a,'p-nombre')||'A')+' vs '+(F(b,'p-nombre')||'B')).replace(/[\\/:*?"<>|]/g,'_');
+      var url=doc.output('bloburl');
+      var frame=document.getElementById('pdf-preview-frame'); if(frame)frame.src=url;
+      var modal=document.getElementById('pdf-preview-modal'); if(modal)modal.classList.add('open');
+      var btn=document.getElementById('pdf-download-btn'); if(btn)btn.onclick=function(){ try{_cmpDoc.save(fname+'.pdf');}catch(e){alert('Error: '+e.message);} };
+    }catch(err){ alert('No se pudo generar el PDF del comparativo: '+err.message); }
   };
 
   window.eeGuardadosClearFilter=function(){ var a=document.getElementById('eeg-fnom'),b=document.getElementById('eeg-ffecha'); if(a)a.value=''; if(b)b.value=''; eeGuardadosList(); };
@@ -2737,7 +2885,7 @@ function ebTextoInforme(){
       }).join('');
     }
     var bar=document.getElementById('eeg-comparebar');
-    if(bar){ bar.innerHTML = (_sel.length? '<div class="eea-note" style="margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>'+_sel.length+'/2 seleccionados para comparar.</span>'+(_sel.length===2?'<button class="btn btn-primary" style="padding:5px 12px" onclick="eeComparar()">🔬 Comparar Bull\'s Eye</button>':'')+'</div>' : ''); }
+    if(bar){ bar.innerHTML = (_sel.length? '<div class="eea-note" style="margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>'+_sel.length+'/2 seleccionados para comparar.</span>'+(_sel.length===2?'<button class="btn btn-primary" style="padding:5px 12px" onclick="eeComparar()">🔬 Comparar estudios</button>':'')+'</div>' : ''); }
   };
 
   window.eeGuardadosOpen=function(){
