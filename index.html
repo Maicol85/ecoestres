@@ -2447,7 +2447,7 @@ function ebTextoInforme(){
 </style>
 <div class="ee-modal" id="ee-audit" onclick="if(event.target===this)eeAuditClose()">
   <div class="ee-modal-box">
-    <h3>🔬 Auditoría individual <button class="x" onclick="eeAuditClose()">✕</button></h3>
+    <h3>🔬 Auditoría individual <span style="display:flex;gap:8px;align-items:center"><button class="btn btn-teal" onclick="eeAuditExport()" title="Exportar auditoría a PDF">⬇ Exportar</button><button class="x" onclick="eeAuditClose()">✕</button></span></h3>
     <div id="ee-audit-body"></div>
   </div>
 </div>
@@ -2575,6 +2575,117 @@ function ebTextoInforme(){
       body.innerHTML=h;
     }
     var m=document.getElementById('ee-audit'); if(m)m.classList.add('open');
+  };
+  /* ═══ Exportar auditoría a PDF (mismo estilo visual que el resto de la app) ═══ */
+  window.eeAuditExport=function(){
+    if(!(window.jspdf&&window.jspdf.jsPDF)){ alert('No se pudo cargar la librería de PDF (jsPDF). Verificá la conexión a internet e intentá de nuevo.'); return; }
+    var A; try{ A=compute(); }catch(e){ A=null; }
+    if(!A){ alert('No se pudo calcular la auditoría para exportar.'); return; }
+    var T=A.T;
+    var jsPDF=window.jspdf.jsPDF, doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var mL=14, pgW=182, y=0;
+    // Saneado de texto (Helvetica WinAnsi sólo cubre U+0000–U+00FF)
+    function san(s){ return String(s==null?'':s).replace(/[–—]/g,'-').replace(/≥/g,'>=').replace(/≤/g,'<=').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/…/g,'...').replace(/ /g,' ').replace(/[^\x20-\xFF\t\n\r]/g,''); }
+    var _t=doc.text.bind(doc);
+    doc.text=function(txt,x,yy,o){ if(Array.isArray(txt))txt=txt.map(function(t){return typeof t==='string'?san(t):t;}); else if(typeof txt==='string')txt=san(txt); return _t(txt,x,yy,o); };
+    var _tema={'1':[26,58,92],'2':[26,92,58],'3':[74,26,122],'4':[123,45,66]};
+    var TEMA=_tema[String((function(){try{return localStorage.getItem('ecoestres_pdf_color');}catch(e){return null;}})()||'1')]||_tema['1'];
+    function gv(id){ var e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+    var inst=gv('cfg-inst')||'GREMEDA', ciudad=gv('cfg-ciudad');
+    function fb(s){doc.setFont('helvetica','bold');doc.setFontSize(s||8);}
+    function fn(s){doc.setFont('helvetica','normal');doc.setFontSize(s||8);}
+    function tc(r,g,b){doc.setTextColor(r,g,b);}
+    function fc(r,g,b){doc.setFillColor(r,g,b);}
+    function dc(r,g,b){doc.setDrawColor(r,g,b);}
+    function ensure(h){ if(y+(h||10)>284){ doc.addPage(); y=16; return true; } return false; }
+    function fmtToday(){ var d=new Date(), z=function(n){return(n<10?'0':'')+n;}; return z(d.getDate())+'/'+z(d.getMonth()+1)+'/'+d.getFullYear(); }
+    // Semáforo de color -> texto (Verde / Amarillo / Rojo)
+    function semTxt(c){ if(c==='var(--green)')return 'Verde'; if(c==='var(--yellow)'||c==='var(--amber)')return 'Amarillo'; if(c==='var(--red)')return 'Rojo'; return ''; }
+
+    // ── Encabezado (barra de color con línea ECG, institución y fecha) ──
+    var hdrH=23;
+    fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(0,0,210,hdrH,'F');
+    var lite=TEMA.map(function(c){return Math.round(c+(255-c)*0.32);});
+    dc(lite[0],lite[1],lite[2]); doc.setLineWidth(0.5);
+    var pts=[[0,13],[24,13],[30,7],[34,17],[38,13],[60,13],[66,7],[70,17],[74,13],[110,13],[116,7],[120,17],[124,13],[150,13],[156,7],[160,17],[164,13],[210,13]];
+    for(var i=1;i<pts.length;i++)doc.line(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1]);
+    fb(14); tc(255,255,255); doc.text('Auditoría — Laboratorio de Ecoestrés',105,10,{align:'center'});
+    fn(8.5); tc(220,232,248); doc.text(inst+(ciudad?('  ·  '+ciudad):''),105,17,{align:'center'});
+    try{ var lg=localStorage.getItem('ecoestres_logo'); if(lg){ doc.addImage(lg,undefined,210-46,3,40,17); } }catch(e){}
+    dc(lite[0],lite[1],lite[2]); doc.setLineWidth(1.2); doc.line(0,hdrH,210,hdrH);
+    y=hdrH+5;
+    fn(8); tc(90,90,90); doc.text('Fecha de exportación: '+fmtToday()+'   ·   Estudios auditados: '+T,mL,y); y+=4.5;
+    fn(7.2); tc(120,120,120); doc.text('Indicadores calculados en este equipo desde los estudios guardados. Semáforos según umbrales de calidad razonables.',mL,y); y+=4;
+
+    // ── Utilidades de dibujo ──
+    function bar(t){ y+=2.5; ensure(12); fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F'); fb(9); tc(255,255,255); doc.text(String(t),mL+4,y+4.9); y+=11; }
+    function row(label,val,sub,color){
+      ensure(6.2);
+      fn(8.5); tc(30,30,30); doc.text(String(label),mL+2,y);
+      fb(9); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text(String(val==null||val===''?'—':val),mL+92,y);
+      if(sub){ fn(7.5); tc(110,110,110); doc.text(String(sub),mL+118,y); }
+      var st=semTxt(color);
+      if(st){ var col=st==='Verde'?[22,140,70]:st==='Amarillo'?[184,134,11]:[190,40,40]; fb(8); tc(col[0],col[1],col[2]); doc.text('('+st+')',mL+150,y); }
+      y+=6;
+    }
+    function dist(title,entries){
+      var tot=entries.reduce(function(a,b){return a+(b.n||0);},0)||1;
+      ensure(6); fb(7.6); tc(90,90,90); doc.text(String(title),mL+2,y); y+=5;
+      entries.forEach(function(e){ var p=Math.round((e.n||0)/tot*100); ensure(5); fn(8); tc(40,40,40); doc.text('- '+e.label,mL+4,y); fb(8); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text((e.n||0)+' · '+p+'%',mL+92,y); y+=4.8; });
+      y+=1.5;
+    }
+
+    // ── VOLUMEN ──
+    bar('Volumen');
+    row('Estudios totales', T);
+    var u6=0; A.months.forEach(function(m){u6+=m.n;});
+    row('Últimos 6 meses', u6);
+    dist('Estudios por mes', A.months.map(function(m){return {label:m.label,n:m.n};}));
+    dist('Tipo de estrés', ['Esfuerzo','Dobutamina','Dipiridamol','Adenosina','Sin dato'].map(function(k){return {label:k,n:A.est[k]};}));
+
+    // ── RESULTADOS ──
+    bar('Resultados');
+    row('Positivos isquemia', pct(A.res.pos,T)+'%', A.res.pos+'/'+T, 'var(--red)');
+    row('Negativos', pct(A.res.neg,T)+'%', A.res.neg+'/'+T, 'var(--green)');
+    row('Indeterminados', pct(A.res.inc,T)+'%', A.res.inc+'/'+T, 'var(--yellow)');
+    row('Viabilidad presente', pct(A.res.via,T)+'%', A.res.via+'/'+T);
+    row('Con síntomas', pct(A.sint,T)+'%', A.sint+'/'+T, 'var(--amber)');
+    dist('Protocolo', [{label:'Completado',n:A.completado},{label:'Interrumpido',n:A.interrump}]);
+    row('Motivo finalización más frecuente', A.motivoTop);
+
+    // ── CALIDAD ──
+    bar('Calidad');
+    var pMax=pct(A.maxTest,T), pImg=pct(A.imgs,T), pBull=pct(A.bulls,T), pInf=pct(A.infs,T), pDp=pct(A.dp,T);
+    row('FC objetivo (máxima)', pMax+'%', A.maxTest+'/'+T, semHigh(pMax,85,70));
+    row('METs promedio', A.mets!=null?A.mets.toFixed(1):'—');
+    row('Doble producto reg.', pDp+'%', A.dp+'/'+T, semHigh(pDp,85,60));
+    row('Con imágenes', pImg+'%', A.imgs+'/'+T, semHigh(pImg,85,60));
+    row('Con Bull’s Eye', pBull+'%', A.bulls+'/'+T, semHigh(pBull,85,60));
+    row('Con informe narrativo', pInf+'%', A.infs+'/'+T, semHigh(pInf,85,60));
+    var wm=A.wmsi, wmColor=wm==null?'':(wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)');
+    row('WMSI prom. pico', wm!=null?wm.toFixed(2):'—', '', wmColor);
+
+    // ── HALLAZGOS ──
+    bar('Hallazgos');
+    dist('FEVI basal', ['Normal ≥55','Leve 45-54','Reducida 35-44','Severa <35','Sin dato'].map(function(k){return {label:k,n:A.fevi[k]};}));
+    row('Alt. motilidad pico', pct(A.altPico,T)+'%', A.altPico+'/'+T, 'var(--amber)');
+    row('Territorio más frecuente', A.terrTop);
+    row('PSAP basal >40', pct(A.psapHi,T)+'%', A.psapHi+'/'+T, A.psapHi>0?'var(--amber)':'var(--green)');
+
+    // ── BRECHAS ──
+    bar('Brechas');
+    var pSinInf=pct(A.sinInf,T), pSinBull=pct(A.sinBull,T), pSinSeg=pct(A.sinSeg,A.pacTotal);
+    row('Sin informe narrativo', A.sinInf, pSinInf+'%', semLow(pSinInf,10,30));
+    row('Sin Bull’s Eye', A.sinBull, pSinBull+'%', semLow(pSinBull,10,30));
+    row('Pacientes sin seguim. 6m', A.sinSeg, (A.pacTotal?pSinSeg+'% de '+A.pacTotal:'—'), semLow(pSinSeg,10,30));
+
+    // ── Pie de página ──
+    var np=doc.internal.getNumberOfPages();
+    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); }
+
+    var fname='Auditoria_Laboratorio_'+(inst.replace(/[^a-zA-Z0-9]+/g,'_'))+'_'+fmtToday().replace(/\//g,'-')+'.pdf';
+    doc.save(fname);
+    if(typeof eeToast==='function') eeToast('📄 PDF de auditoría generado');
   };
   /* El botón Laboratorio (fijo, borde derecho, var(--accent2)) abre esta auditoría */
   window.eeLab=function(){ eeAuditOpen(); };
