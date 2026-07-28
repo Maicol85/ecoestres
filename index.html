@@ -163,6 +163,28 @@ tr:last-child td{border-bottom:none;} tr:hover td{background:rgba(255,255,255,.0
 .img-pdf-ctrls .img-inc{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent2);cursor:pointer;white-space:nowrap;}
 .img-pdf-ctrls .img-lbl{flex:1;min-width:0;padding:4px 7px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:11px;font-family:inherit;outline:none;}
 .img-pdf-ctrls .img-lbl:focus{border-color:var(--accent2);}
+/* ── Slots de imágenes por fase (estilo ErgoSmart) ── */
+.ecg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ecg-slot{background:var(--bg3);border:2px dashed var(--border2);border-radius:9px;cursor:pointer;transition:border-color .15s,background .15s;position:relative;aspect-ratio:3/2;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.ecg-slot:hover{border-color:var(--accent2);}
+.ecg-slot.has-img{border-style:solid;border-color:var(--accent2);}
+.ecg-slot.drag-over{border-color:var(--accent);background:rgba(13,148,136,.10);}
+.ecg-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:7px;}
+.ecg-slot .slbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.58);font-size:10px;color:#fff;font-weight:600;padding:3px 6px;backdrop-filter:blur(4px);z-index:3;}
+.ecg-slot .slbl input{background:transparent;border:none;color:#fff;font-size:10px;font-weight:600;width:100%;text-align:center;outline:none;font-family:inherit;}
+.ecg-slot .rx{position:absolute;top:4px;right:4px;background:rgba(225,29,72,.9);color:#fff;border:none;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;display:none;z-index:5;font-weight:700;}
+.ecg-slot:hover .rx{display:block;}
+.ecg-slot .eico{font-size:24px;color:var(--text3);pointer-events:none;}
+.ecg-slot .etxt{font-size:10px;color:var(--text3);pointer-events:none;text-align:center;padding:0 6px;}
+.ecg-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;}
+/* ── Celdas ETT: imagen + texto de mediciones ── */
+.ett-grid{display:flex;flex-direction:column;gap:12px;}
+.ett-cell{display:flex;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;align-items:stretch;}
+.ett-cell .ecg-slot{flex:0 0 46%;aspect-ratio:auto;min-height:130px;margin:0;}
+.ett-cell .ett-txt{flex:1;min-width:0;padding:8px 9px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:12px;font-family:inherit;outline:none;resize:vertical;min-height:130px;line-height:1.5;}
+.ett-cell .ett-txt:focus{border-color:var(--accent2);}
+.ett-cell .ett-del{align-self:flex-start;}
+@media(max-width:560px){.ett-cell{flex-direction:column;}.ett-cell .ecg-slot{flex:none;aspect-ratio:3/2;}}
 .pop{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
   padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:500;min-width:200px;display:none;}
 .pop.open{display:block;}
@@ -782,13 +804,13 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           <select id="p-ind"><option value="">Seleccionar…</option><option>Diagnóstico de enfermedad coronaria</option><option>Evaluación pronóstica de EC conocida</option><option>Viabilidad miocárdica</option><option>Evaluación preoperatoria</option><option>Evaluación de valvulopatía dinámica</option><option>Eco estrés diastólico</option><option>Seguimiento post-revascularización</option><option>Otro</option></select>
         </div>
         <div class="fg"><label>Factores de riesgo</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
-            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-hta"> HTA</label>
-            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-dm"> DM</label>
-            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-dislip"> Dislipemia</label>
-            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-tab"> Tabaquismo</label>
-            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-obes"> Obesidad</label>
-            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-ahf"> AHF EC</label>
+          <div style="display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px;align-items:center">
+            <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-hta" style="flex-shrink:0;margin:0"> HTA</label>
+            <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-dm" style="flex-shrink:0;margin:0"> DM</label>
+            <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-dislip" style="flex-shrink:0;margin:0"> Dislipemia</label>
+            <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-tab" style="flex-shrink:0;margin:0"> Tabaquismo</label>
+            <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-obes" style="flex-shrink:0;margin:0"> Obesidad</label>
+            <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-ahf" style="flex-shrink:0;margin:0"> AHF EC</label>
           </div>
         </div>
         <div class="fg"><label>Medicación relevante</label><input id="p-medicacion" placeholder="Atenolol 50mg, AAS 100mg…"></div>
@@ -1190,27 +1212,29 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <textarea id="ecg-arritmias" placeholder="Extrasistolia ventricular aislada. TVNS en pico (3 latidos, 170 lpm)…" rows="2"></textarea>
     </div>
   </div></div>
-  <div class="card"><div class="card-head">🖼️ Imágenes ECG (Ctrl+V para pegar)</div><div class="card-body">
+  <div class="card"><div class="card-head">🖼️ Imágenes ECG por fase (Ctrl+V para pegar)</div><div class="card-body">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <span style="font-size:11px;color:var(--text2);font-weight:600">Slots:</span>
-      <div id="ecg-img-count-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <button class="btn btn-ghost" style="padding:6px 12px" onclick="ecgSlotsRegen()">🔄 Regenerar desde protocolo</button>
+      <button class="btn btn-ghost" style="padding:6px 12px" onclick="ecgSlotAdd()">＋ Agregar slot</button>
+      <span style="font-size:10px;color:var(--text3)">Slots automáticos por fase · Clic · Ctrl+V · Cada slot es opcional (solo los que tengan imagen se incluyen en el PDF)</span>
     </div>
-    <div class="img-grid" id="ecg-img-grid"></div>
-    <input type="file" id="ecg-img-file" accept="image/*" style="display:none" onchange="ecgImgChosen(event)">
+    <div class="ecg-grid" id="ecg-img-grid"></div>
   </div></div>
 </div>
 
-<!-- ═══ IMÁGENES ═══ -->
+<!-- ═══ IMÁGENES ETT ═══ -->
 <div class="page" id="page-imagenes">
-  <div class="page-title">🖼️ Imágenes del estudio</div>
-  <div class="page-sub">Clips y capturas del eco estrés. Drag &amp; drop para reordenar. Ctrl+V para pegar.</div>
+  <div class="page-title">🖼️ Imágenes ETT</div>
+  <div class="page-sub">Imágenes ecocardiográficas con cálculos, mediciones u observaciones al lado. En el PDF: imagen a la izquierda, texto a la derecha.</div>
   <div class="card"><div class="card-body">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <span style="font-size:11px;color:var(--text2);font-weight:600">Cantidad de slots:</span>
-      <div id="est-img-count-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <button class="btn btn-ghost" style="padding:6px 12px" onclick="ettSlotAdd()">＋ Agregar imagen</button>
+      <span style="font-size:11px;color:var(--text2);font-weight:600;margin-left:6px">PDF:</span>
+      <button class="btn btn-ghost" id="ett-pp-4" style="padding:6px 12px" onclick="ettSetPerPage(4)">4 por página (2×2)</button>
+      <button class="btn btn-ghost" id="ett-pp-6" style="padding:6px 12px" onclick="ettSetPerPage(6)">6 por página (3×2)</button>
+      <span style="font-size:10px;color:var(--text3)">Clic · Ctrl+V · Solo los slots con imagen se incluyen en el PDF</span>
     </div>
-    <div class="img-grid" id="est-img-grid"></div>
-    <input type="file" id="est-img-file" accept="image/*" style="display:none" onchange="estImgChosen(event)">
+    <div class="ett-grid" id="est-img-grid"></div>
   </div></div>
 </div>
 
@@ -1279,11 +1303,11 @@ let bullInited={basal:false,low:false,pico:false,recup:false,extra:false};
 let bvInclude={};                 // etapa -> incluir en PDF/informe
 let bullExtra={active:false,name:'Etapa opcional'};
 let popPhase=null,popIdx=-1;
-let ecgImg=[null,null],ecgImgCount=2,ecgImgActive=0;
-let estImg=[null,null],estImgCount=2,estImgActive=0;
-let ecgImgMeta=[],estImgMeta=[];
-function imgMetaEnsure(kind){const arr=kind==='ecg'?ecgImg:estImg;const meta=kind==='ecg'?ecgImgMeta:estImgMeta;while(meta.length<arr.length)meta.push({inc:true,lbl:''});return meta;}
-function imgMetaSet(kind,idx,field,val){const meta=imgMetaEnsure(kind);if(!meta[idx])meta[idx]={inc:true,lbl:''};meta[idx][field]=val;}
+let ecgSlots=[];          // [{name, img}] — imágenes ECG por fase
+let ecgSlotsAuto=true;    // nombres auto-sincronizados con el protocolo hasta que el médico edite/cargue
+let ettSlots=[];          // [{img, txt}] — imágenes ETT con mediciones
+let ettPerPage=4;         // 4 (2×2) o 6 (3×2) en el PDF
+let ecgPasteTarget=-1, ettPasteTarget=-1;
 let dobuData={};
 const KEY='ecoestres_smart_v1';
 
@@ -1297,7 +1321,7 @@ function recolectarEstado(){
   const vals={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
-  return{vals,bull,ecgImg,ecgImgCount,estImg,estImgCount,ecgImgMeta,estImgMeta,dobuData,peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
+  return{vals,bull,ecgSlots,ecgSlotsAuto,ettSlots,ettPerPage,dobuData,peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
 }
 function cargarEstado(){
   let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
@@ -1307,10 +1331,9 @@ function cargarEstado(){
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
     if(s.bull)bull=s.bull;
     ['basal','low','pico','recup','extra'].forEach(function(k){ if(!Array.isArray(bull[k]))bull[k]=Array(17).fill(1); });
-    if(s.ecgImg){ecgImg=s.ecgImg;ecgImgCount=s.ecgImgCount||2;}
-    if(s.estImg){estImg=s.estImg;estImgCount=s.estImgCount||2;}
-    if(Array.isArray(s.ecgImgMeta))ecgImgMeta=s.ecgImgMeta;
-    if(Array.isArray(s.estImgMeta))estImgMeta=s.estImgMeta;
+    if(Array.isArray(s.ecgSlots)){ecgSlots=s.ecgSlots;ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!s.ecgSlots.some(function(x){return x&&x.img;});}
+    if(Array.isArray(s.ettSlots))ettSlots=s.ettSlots;
+    if(s.ettPerPage)ettPerPage=s.ettPerPage;
     if(s.dobuData)dobuData=s.dobuData;
     if(s.peState&&typeof peState!=='undefined')peState=s.peState;
     if(s.bvInclude)bvInclude=s.bvInclude;
@@ -1332,7 +1355,7 @@ function nuevoEstudio(){
   bullInited={basal:false,low:false,pico:false,recup:false,extra:false};
   bvInclude={}; bullExtra={active:false,name:'Etapa opcional'};
   if(typeof bvBuild==='function')bvBuild();
-  ecgImg=[null,null];ecgImgCount=2;estImg=[null,null];estImgCount=2;ecgImgMeta=[];estImgMeta=[];dobuData={};
+  ecgSlots=[];ecgSlotsAuto=true;ettSlots=[];ettPerPage=4;dobuData={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.readOnly)return;if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>el.checked=false);
   const fd=document.getElementById('p-fecha');if(fd)fd.value=new Date().toISOString().slice(0,10);
@@ -1348,8 +1371,11 @@ function importarDatos(e){
   const r=new FileReader();
   r.onload=ev=>{try{const s=JSON.parse(ev.target.result);
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
-    if(s.bull)bull=s.bull;if(s.ecgImg){ecgImg=s.ecgImg;ecgImgCount=s.ecgImgCount||2;}
-    if(s.estImg){estImg=s.estImg;estImgCount=s.estImgCount||2;}if(s.dobuData)dobuData=s.dobuData;
+    if(s.bull)bull=s.bull;
+    if(Array.isArray(s.ecgSlots)){ecgSlots=s.ecgSlots;ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!s.ecgSlots.some(function(x){return x&&x.img;});}
+    if(Array.isArray(s.ettSlots))ettSlots=s.ettSlots;
+    if(s.ettPerPage)ettPerPage=s.ettPerPage;
+    if(s.dobuData)dobuData=s.dobuData;
     actualizarUI();alert('✅ Datos importados');
   }catch(err){alert('Error: '+err.message);}};
   r.readAsText(f);
@@ -1695,46 +1721,87 @@ function updateViabConclusion(sv){
 
 // IMÁGENES
 function compress(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{let w=im.width,h=im.height,ratio=Math.min(900/w,700/h,1);w=Math.round(w*ratio);h=Math.round(h*ratio);const cv=document.createElement('canvas');cv.width=w;cv.height=h;const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,w,h);c.drawImage(im,0,0,w,h);cb(cv.toDataURL('image/jpeg',.7));};im.src=r.result;};r.readAsDataURL(file);}
-function renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVal,counts,kind){
-  const cb=document.getElementById(countId);
-  if(cb)cb.innerHTML=(counts||[2,4,6,8]).map(n=>`<button class="btn btn-ghost" style="padding:5px 12px;${countVal===n?'background:var(--accent2);color:#fff;border-color:var(--accent2);':''}" onclick="${countSetter}(${n})">${n}</button>`).join('')+`<button class="btn btn-ghost" style="padding:5px 12px" onclick="${countSetter}(null)">＋</button>`;
-  const grid=document.getElementById(gridId);if(!grid)return;grid.innerHTML='';
-  const meta=kind?imgMetaEnsure(kind):null;
-  imgArr.forEach((slot,idx)=>{
-    const cell=document.createElement('div');cell.className='img-slot'+(slot?' has-img':'');cell.dataset.idx=idx;
-    if(slot){
-      const m=meta&&meta[idx]?meta[idx]:{inc:true,lbl:''};
-      let ctrls='';
-      if(kind){ ctrls=`<div class="img-pdf-ctrls" onclick="event.stopPropagation()">`
-        +`<label class="img-inc"><input type="checkbox" ${m.inc!==false?'checked':''} onchange="imgMetaSet('${kind}',${idx},'inc',this.checked)"> PDF</label>`
-        +`<input class="img-lbl" value="${(m.lbl||'').replace(/"/g,'&quot;')}" placeholder="Etapa/etiqueta" oninput="imgMetaSet('${kind}',${idx},'lbl',this.value)">`
-        +`</div>`; }
-      cell.setAttribute('draggable','true');cell.innerHTML=`<img src="${slot}"><button class="img-remove" onclick="${removeFn}(${idx})">✕</button>`+ctrls;
-    }
-    else{cell.innerHTML=`<div class="img-add-lbl"><span>➕</span>Agregar</div>`;cell.onclick=()=>pickFn(idx);}
-    cell.addEventListener('dragstart',e=>{if(slot)e.dataTransfer.setData('text/plain',String(idx));});
-    cell.addEventListener('dragover',e=>e.preventDefault());
-    cell.addEventListener('drop',e=>{e.preventDefault();const f=parseInt(e.dataTransfer.getData('text/plain'));if(!isNaN(f)){const t=imgArr[f];imgArr[f]=imgArr[idx];imgArr[idx]=t;renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVal,counts);}});
-    grid.appendChild(cell);
+/* ═══ Imágenes ECG por fase (slots automáticos desde el protocolo, estilo ErgoSmart) ═══ */
+function ecgPhaseNames(){
+  var out=[];
+  if(typeof peState!=='undefined'&&peState.stages&&peState.stages.length){ peState.stages.forEach(function(s){ out.push(s.n||'Fase'); }); }
+  else out=['Basal','Estrés bajo','Pico','Recuperación'];
+  out.push('Peor caso');
+  return out;
+}
+function ecgSlotsEnsure(){ if(!ecgSlots.length){ ecgSlots=ecgPhaseNames().map(function(n){return {name:n,img:null};}); ecgSlotsAuto=true; } }
+function ecgSlotsRegen(){
+  var names=ecgPhaseNames();
+  var next=names.map(function(n,i){ return {name:n, img:(ecgSlots[i]&&ecgSlots[i].img)||null}; });
+  for(var i=names.length;i<ecgSlots.length;i++){ next.push({name:ecgSlots[i].name, img:ecgSlots[i].img}); }
+  ecgSlots=next; ecgSlotsAuto=false; ecgImgRender();
+}
+function ecgSlotAdd(){ ecgSlots.push({name:'Imagen '+(ecgSlots.length+1), img:null}); ecgSlotsAuto=false; ecgImgRender(); }
+function ecgSlotRemove(e,i){ if(e)e.stopPropagation(); ecgSlots.splice(i,1); ecgSlotsAuto=false; ecgImgRender(); }
+function ecgSlotName(i,v){ if(ecgSlots[i])ecgSlots[i].name=v; ecgSlotsAuto=false; }
+function ecgSlotFile(i,input){ var f=input.files[0]; if(f)compress(f,function(d){ if(ecgSlots[i])ecgSlots[i].img=d; ecgSlotsAuto=false; ecgImgRender(); }); input.value=''; }
+function ecgImgRender(){
+  ecgSlotsEnsure();
+  // Mientras no se hayan subido imágenes ni editado nombres, seguir los nombres del protocolo
+  if(ecgSlotsAuto && ecgSlots.every(function(s){return !s.img;})){
+    var want=ecgPhaseNames();
+    if(want.join('|')!==ecgSlots.map(function(s){return s.name;}).join('|')){ ecgSlots=want.map(function(n){return {name:n,img:null};}); }
+  }
+  var grid=document.getElementById('ecg-img-grid'); if(!grid)return;
+  grid.innerHTML=ecgSlots.map(function(s,i){
+    var has=!!s.img;
+    return '<div class="ecg-slot'+(has?' has-img':'')+'" data-ecgidx="'+i+'" onclick="ecgPasteTarget='+i+'">'
+      +(has?'<img src="'+s.img+'">':'<div class="eico">🖼️</div><div class="etxt">Clic · Ctrl+V</div>')
+      +'<button class="rx" onclick="ecgSlotRemove(event,'+i+')">✕</button>'
+      +'<div class="slbl"><input type="text" value="'+String(s.name||'').replace(/"/g,'&quot;')+'" onclick="event.stopPropagation()" onchange="ecgSlotName('+i+',this.value)"></div>'
+      +'<input type="file" accept="image/*" onclick="event.stopPropagation()" onchange="ecgSlotFile('+i+',this)">'
+      +'</div>';
+  }).join('');
+  grid.querySelectorAll('.ecg-slot').forEach(function(d){
+    d.addEventListener('dragover',function(e){e.preventDefault();d.classList.add('drag-over');});
+    d.addEventListener('dragleave',function(){d.classList.remove('drag-over');});
+    d.addEventListener('drop',function(e){e.preventDefault();d.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f&&f.type.indexOf('image')===0){var i=+d.getAttribute('data-ecgidx');compress(f,function(dt){if(ecgSlots[i])ecgSlots[i].img=dt;ecgImgRender();});}});
   });
 }
-function ecgImgRender(){while(ecgImg.length<ecgImgCount)ecgImg.push(null);renderImgGrid('ecg-img-grid',ecgImg,'ecg-img-count-btns',ecgImgPick,ecgImgRemove,'setEcgImgCount',ecgImgCount,[2,4,6,8],'ecg');}
-function setEcgImgCount(n){ecgImgCount=n||ecgImg.length+1;while(ecgImg.length<ecgImgCount)ecgImg.push(null);ecgImgRender();}
-function ecgImgPick(idx){ecgImgActive=idx;document.getElementById('ecg-img-file').click();}
-function ecgImgChosen(e){const f=e.target.files[0];if(f)compress(f,d=>{ecgImg[ecgImgActive]=d;ecgImgRender();});e.target.value='';}
-function ecgImgRemove(idx){ecgImg[idx]=null;ecgImgRender();}
-function estImgRender(){while(estImg.length<estImgCount)estImg.push(null);renderImgGrid('est-img-grid',estImg,'est-img-count-btns',estImgPick,estImgRemove,'setEstImgCount',estImgCount,[2,4,6,8,10],'est');}
-function setEstImgCount(n){estImgCount=n||estImg.length+1;while(estImg.length<estImgCount)estImg.push(null);estImgRender();}
-function estImgPick(idx){estImgActive=idx;document.getElementById('est-img-file').click();}
-function estImgChosen(e){const f=e.target.files[0];if(f)compress(f,d=>{estImg[estImgActive]=d;estImgRender();});e.target.value='';}
-function estImgRemove(idx){estImg[idx]=null;estImgRender();}
-document.addEventListener('paste',e=>{
-  const page=document.querySelector('.page.active');if(!page)return;
-  const items=e.clipboardData?.items||[];
-  for(const item of items){if(item.type?.startsWith('image')){e.preventDefault();const f=item.getAsFile();if(!f)break;
-    if(page.id==='page-imagenes')compress(f,d=>{const i=estImg.findIndex(s=>!s);if(i>=0){estImg[i]=d;}else{estImg.push(d);estImgCount=estImg.length;}estImgRender();});
-    if(page.id==='page-ecg')compress(f,d=>{const i=ecgImg.findIndex(s=>!s);if(i>=0){ecgImg[i]=d;}else{ecgImg.push(d);ecgImgCount=ecgImg.length;}ecgImgRender();});
-    break;}}
+/* ═══ Imágenes ETT (imagen + texto de mediciones) ═══ */
+function ettSlotsEnsure(){ if(!ettSlots.length){ ettSlots=[{img:null,txt:''},{img:null,txt:''}]; } }
+function ettSlotAdd(){ ettSlots.push({img:null,txt:''}); estImgRender(); }
+function ettSlotRemove(e,i){ if(e)e.stopPropagation(); ettSlots.splice(i,1); estImgRender(); }
+function ettSlotFile(i,input){ var f=input.files[0]; if(f)compress(f,function(d){ if(ettSlots[i])ettSlots[i].img=d; estImgRender(); }); input.value=''; }
+function ettSlotTxt(i,v){ if(ettSlots[i])ettSlots[i].txt=v; }
+function ettSetPerPage(n){ ettPerPage=n; estImgRender(); }
+function estImgRender(){
+  ettSlotsEnsure();
+  var grid=document.getElementById('est-img-grid'); if(!grid)return;
+  grid.innerHTML=ettSlots.map(function(s,i){
+    var has=!!s.img;
+    return '<div class="ett-cell">'
+      +'<div class="ecg-slot'+(has?' has-img':'')+'" data-ettidx="'+i+'" onclick="ettPasteTarget='+i+'">'
+        +(has?'<img src="'+s.img+'">':'<div class="eico">🖼️</div><div class="etxt">Clic · Ctrl+V</div>')
+        +'<button class="rx" onclick="ettSlotRemove(event,'+i+')">✕</button>'
+        +'<input type="file" accept="image/*" onclick="event.stopPropagation()" onchange="ettSlotFile('+i+',this)">'
+      +'</div>'
+      +'<textarea class="ett-txt" placeholder="Cálculos, mediciones u observaciones…" oninput="ettSlotTxt('+i+',this.value)">'+String(s.txt||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</textarea>'
+      +'</div>';
+  }).join('');
+  grid.querySelectorAll('.ecg-slot').forEach(function(d){
+    d.addEventListener('dragover',function(e){e.preventDefault();d.classList.add('drag-over');});
+    d.addEventListener('dragleave',function(){d.classList.remove('drag-over');});
+    d.addEventListener('drop',function(e){e.preventDefault();d.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f&&f.type.indexOf('image')===0){var i=+d.getAttribute('data-ettidx');compress(f,function(dt){if(ettSlots[i])ettSlots[i].img=dt;estImgRender();});}});
+  });
+  var b4=document.getElementById('ett-pp-4'), b6=document.getElementById('ett-pp-6');
+  if(b4){b4.classList.toggle('btn-teal',ettPerPage===4);b4.classList.toggle('btn-ghost',ettPerPage!==4);}
+  if(b6){b6.classList.toggle('btn-teal',ettPerPage===6);b6.classList.toggle('btn-ghost',ettPerPage!==6);}
+}
+document.addEventListener('paste',function(e){
+  var page=document.querySelector('.page.active'); if(!page)return;
+  var items=(e.clipboardData&&e.clipboardData.items)||[];
+  for(var k=0;k<items.length;k++){ var item=items[k];
+    if(item.type&&item.type.indexOf('image')===0){ e.preventDefault(); var f=item.getAsFile(); if(!f)break;
+      if(page.id==='page-ecg'){ ecgSlotsEnsure(); var t=ecgPasteTarget; if(t<0||t>=ecgSlots.length||ecgSlots[t].img){ t=ecgSlots.findIndex(function(s){return !s.img;}); } if(t<0){ ecgSlots.push({name:'Imagen '+(ecgSlots.length+1),img:null}); t=ecgSlots.length-1; } ecgSlotsAuto=false; (function(idx){ compress(f,function(d){ if(ecgSlots[idx])ecgSlots[idx].img=d; ecgImgRender(); }); })(t); }
+      else if(page.id==='page-imagenes'){ ettSlotsEnsure(); var t2=ettPasteTarget; if(t2<0||t2>=ettSlots.length||ettSlots[t2].img){ t2=ettSlots.findIndex(function(s){return !s.img;}); } if(t2<0){ ettSlots.push({img:null,txt:''}); t2=ettSlots.length-1; } (function(idx){ compress(f,function(d){ if(ettSlots[idx])ettSlots[idx].img=d; estImgRender(); }); })(t2); }
+      break; }
+  }
 });
 
 // INFORME
@@ -2425,7 +2492,8 @@ function ebTextoInforme(){
     A.maxTest=maxTest;
     var metsArr=[]; R.forEach(function(r){ var m=num(F(r,'b-mets')); if(m!=null)metsArr.push(m); }); A.mets=metsArr.length?(metsArr.reduce(function(a,b){return a+b;},0)/metsArr.length):null;
     var dp=0; R.forEach(function(r){ if(num(F(r,'b-fc-max'))!=null&&pasPico(r)!=null)dp++; }); A.dp=dp;
-    var imgs=0; R.forEach(function(r){ if(arr(r,'estImg').some(Boolean)||arr(r,'ecgImg').some(Boolean))imgs++; }); A.imgs=imgs;
+    var hasImg=function(r){ if(arr(r,'estImg').some(Boolean)||arr(r,'ecgImg').some(Boolean))return true; if(arr(r,'ecgSlots').some(function(s){return s&&s.img;}))return true; if(arr(r,'ettSlots').some(function(s){return s&&s.img;}))return true; return false; };
+    var imgs=0; R.forEach(function(r){ if(hasImg(r))imgs++; }); A.imgs=imgs;
     var bulls=0; R.forEach(function(r){ if(bullEdited(r))bulls++; }); A.bulls=bulls;
     var infs=0; R.forEach(function(r){ if(String(F(r,'informe-txt')||'').trim().length>10)infs++; }); A.infs=infs;
     var wmArr=[]; R.forEach(function(r){ var w=wmsiPico(r); if(w!=null)wmArr.push(w); }); A.wmsi=wmArr.length?(wmArr.reduce(function(a,b){return a+b;},0)/wmArr.length):null;
@@ -2570,10 +2638,9 @@ function ebTextoInforme(){
     if(!s)return;
     if(s.vals)Object.keys(s.vals).forEach(function(id){ var el=document.getElementById(id); if(!el)return; var v=s.vals[id]; if(el.type==='checkbox')el.checked=!!v; else el.value=v; });
     if(s.bull){ ['basal','low','pico','recup','extra'].forEach(function(k){ bull[k]=Array.isArray(s.bull[k])?s.bull[k].slice():Array(17).fill(1); }); }
-    if(Array.isArray(s.ecgImg)){ ecgImg.length=0; s.ecgImg.forEach(function(x){ecgImg.push(x);}); ecgImgCount=s.ecgImgCount||ecgImg.length||2; }
-    if(Array.isArray(s.estImg)){ estImg.length=0; s.estImg.forEach(function(x){estImg.push(x);}); estImgCount=s.estImgCount||estImg.length||2; }
-    if(Array.isArray(s.ecgImgMeta)){ ecgImgMeta.length=0; s.ecgImgMeta.forEach(function(x){ecgImgMeta.push(x);}); }
-    if(Array.isArray(s.estImgMeta)){ estImgMeta.length=0; s.estImgMeta.forEach(function(x){estImgMeta.push(x);}); }
+    if(Array.isArray(s.ecgSlots)){ ecgSlots=s.ecgSlots.map(function(x){return {name:x.name,img:x.img};}); ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!ecgSlots.some(function(x){return x&&x.img;}); }
+    if(Array.isArray(s.ettSlots)){ ettSlots=s.ettSlots.map(function(x){return {img:x.img,txt:x.txt};}); }
+    if(s.ettPerPage)ettPerPage=s.ettPerPage;
     if(s.dobuData&&typeof dobuData!=='undefined'){ Object.keys(dobuData).forEach(function(k){delete dobuData[k];}); Object.assign(dobuData,s.dobuData); }
     if(s.peState&&typeof peState!=='undefined'){ Object.keys(peState).forEach(function(k){delete peState[k];}); Object.assign(peState,s.peState); }
     if(s.bvInclude&&typeof bvInclude!=='undefined'){ Object.keys(bvInclude).forEach(function(k){delete bvInclude[k];}); Object.assign(bvInclude,s.bvInclude); }
@@ -3314,12 +3381,6 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     });
     return out;
   }
-  // Imágenes seleccionadas {src,lbl}
-  function imgsSel(kind){
-    var arr=kind==='ecg'?ecgImg:estImg; var meta=(typeof imgMetaEnsure==='function')?imgMetaEnsure(kind):[];
-    var out=[]; arr.forEach(function(src,i){ if(!src)return; var m=meta[i]||{inc:true,lbl:''}; if(m.inc===false)return; out.push({src:src,lbl:m.lbl||''}); });
-    return out;
-  }
 
   // ════════════ CONSTRUCCIÓN DEL DOCUMENTO ════════════
   function buildDoc(assets){
@@ -3366,9 +3427,13 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     function fc(r,g,b){doc.setFillColor(r,g,b);}
     function dc(r,g,b){doc.setDrawColor(r,g,b);}
     function checkPage(n){ if(y+(n||10)>284){ doc.addPage(); y=16; } }
+    // Salto de página inteligente: asegura `h` mm disponibles; si no, nueva página
+    function ensure(h){ if(y+(h||10)>284){ doc.addPage(); y=16; return true; } return false; }
 
-    function drawBar(txt){
-      y+=3.5; checkPage(15);
+    // drawBar(txt, keepWith): keepWith = mm del contenido que sigue, para no dejar
+    // el encabezado azul huérfano al pie de página (salto inteligente antes del bloque).
+    function drawBar(txt, keepWith){
+      y+=3.5; ensure(9+(keepWith||6));
       fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F');
       fb(8.5); tc(255,255,255); doc.text(String(txt),mL+5,y+4.9);
       y+=10;
@@ -3515,6 +3580,29 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       }
     }
 
+    // Bloque ETT: imagen a la izquierda, texto (mediciones) a la derecha.
+    // 2 columnas; 2 filas/página (2×2=4) o 3 filas/página (3×2=6). Salto automático.
+    function imgBlockETT(list, perPage){
+      if(!list.length)return;
+      var cols=2, rowsPerPage=(perPage===6?3:2), gap=6;
+      var cellW=(pgW-gap)/2, cellH=(perPage===6?42:62);
+      var i=0, rc=0;
+      while(i<list.length){
+        if(rc>=rowsPerPage){ doc.addPage(); y=16; rc=0; }
+        else ensure(cellH+3);
+        for(var c=0;c<cols && i<list.length;c++,i++){
+          var o=list[i], x=mL+c*(cellW+gap), y0=y;
+          dc(205,205,205); doc.setLineWidth(0.3); doc.rect(x,y0,cellW,cellH);
+          var imgW=cellW*0.5, txtX=x+imgW+2.5, txtW=cellW-imgW-4.5;
+          var d=o.dims||{w:4,h:3}, iw=imgW-3, ih=iw*(d.h/d.w); if(ih>cellH-4){ ih=cellH-4; iw=ih*(d.w/d.h); }
+          try{ doc.addImage(o.src,undefined,x+1.5+((imgW-3-iw)/2),y0+2+((cellH-4-ih)/2),iw,ih); }catch(e){}
+          dc(220,220,220); doc.setLineWidth(0.2); doc.line(x+imgW,y0+1.5,x+imgW,y0+cellH-1.5);
+          if(o.txt){ fn(7.3); tc(30,30,30); var tl=doc.splitTextToSize(String(o.txt),txtW); var ty=y0+4.5; for(var t=0;t<tl.length;t++){ if(ty>y0+cellH-1.5)break; doc.text(tl[t],txtX,ty); ty+=4; } }
+        }
+        y+=cellH+3; rc++;
+      }
+    }
+
     // Firma
     function firma(){
       checkPage(26); y+=6;
@@ -3569,7 +3657,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     if(V('p-medicacion')){ fn(8); tc(20,20,20); drawText('Medicación relevante: '+V('p-medicacion')+'.'); }
 
     // 4 · Tabla de etapas
-    drawBar('DESARROLLO POR ETAPAS');
+    drawBar('DESARROLLO POR ETAPAS', 44);
     stageTable();
 
     // 5 · Narrativo del estrés
@@ -3593,10 +3681,10 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     drawBullet(nb);
 
     // 6 · Imágenes ECG
-    if(assets.ecgImgs.length){ drawBar('REGISTRO ELECTROCARDIOGRÁFICO'); imgBlock(assets.ecgImgs); }
+    if(assets.ecgImgs.length){ drawBar('REGISTRO ELECTROCARDIOGRÁFICO POR FASE', 48); imgBlock(assets.ecgImgs); }
 
     // 7 · Tabla eco basal
-    drawBar('ECOCARDIOGRAMA BASAL — MEDICIONES');
+    drawBar('ECOCARDIOGRAMA BASAL — MEDICIONES', 40);
     tablaCompacta([
       {titulo:'Dimensiones VI',items:[
         {lbl:'DIVI',val:V('eb-divi')?V('eb-divi')+' mm':''},
@@ -3677,18 +3765,21 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     if(V('res-comment'))drawText(V('res-comment'));
 
     // 10 · Imágenes Bull's Eye
-    if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA"); imgBlock(assets.bullImgs); }
+    if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA", 60); imgBlock(assets.bullImgs); }
 
-    // 11 · Imágenes eco estrés
-    if(assets.estImgs.length){ drawBar('IMÁGENES DEL ECO ESTRÉS'); imgBlock(assets.estImgs); }
+    // 11 · Imágenes ETT (imagen izquierda, texto derecha)
+    if(assets.ettCells&&assets.ettCells.length){ drawBar('IMÁGENES ETT', (assets.ettPerPage===6?45:65)); imgBlockETT(assets.ettCells, assets.ettPerPage); }
 
-    // 12 · Conclusión resumida
-    drawBar('CONCLUSIÓN');
+    // 12 · Conclusión resumida + 13 · Firma — siempre juntas y con espacio (o página nueva)
     var ecgConc; var ee=T('b-ecg-estres');
     if(!ee||/sin cambios/i.test(ee))ecgConc='ECG: sin cambios isquémicos significativos durante el estrés.';
     else ecgConc='ECG: '+ee+'.';
     var estConc='Eco estrés: '+(resMap[rg]||'resultado no especificado')+'.';
-    fb(8.2); tc(20,20,20); [ecgConc,estConc].forEach(function(l){ var ls=doc.splitTextToSize('> '+l,pgW-4); ls.forEach(function(t){ checkPage(6); doc.text(t,mL+2,y); y+=5.2; }); });
+    var concLines=[]; [ecgConc,estConc].forEach(function(l){ doc.splitTextToSize('> '+l,pgW-4).forEach(function(t){concLines.push(t);}); });
+    // Reserva: barra(13) + líneas(5.2) + firma(~40mm). Si no entra, salto de página.
+    ensure(13 + concLines.length*5.2 + 42);
+    drawBar('CONCLUSIÓN');
+    fb(8.2); tc(20,20,20); concLines.forEach(function(t){ doc.text(t,mL+2,y); y+=5.2; });
 
     // 13 · Firma
     firma();
@@ -3702,15 +3793,18 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var btn=document.getElementById('pdf-download-btn');
     try{
       // Precarga de assets (async): bulls rasterizados, dimensiones de imágenes, logo, firma
-      var assets={logo:null,logoDims:{w:1,h:1},firmaImg:null,firmaImgDims:{w:1,h:1},bullImgs:[],ecgImgs:[],estImgs:[]};
+      var assets={logo:null,logoDims:{w:1,h:1},firmaImg:null,firmaImgDims:{w:1,h:1},bullImgs:[],ecgImgs:[],ettCells:[],ettPerPage:(ettPerPage===6?6:4)};
       try{ var lg=localStorage.getItem('ecoestres_logo'); if(lg){ assets.logo=lg; assets.logoDims=await loadDims(lg); } }catch(e){}
       try{ var fm=localStorage.getItem('ecoestres_firma'); if(fm){ assets.firmaImg=fm; assets.firmaImgDims=await loadDims(fm); } }catch(e){}
       // Bulls
       var bs=bullStagesSel();
       for(var i=0;i<bs.length;i++){ var png=await bullToPng(bs[i].stage); if(png){ var d=await loadDims(png); assets.bullImgs.push({src:png,lbl:bs[i].label+((typeof getWMSI==='function'&&getWMSI(bs[i].stage)!=null)?('  ·  WMSI '+getWMSI(bs[i].stage)):''),dims:d}); } }
-      // Imágenes ECG / estrés
-      var ei=imgsSel('ecg'); for(var a=0;a<ei.length;a++){ var de=await loadDims(ei[a].src); assets.ecgImgs.push({src:ei[a].src,lbl:ei[a].lbl,dims:de}); }
-      var si=imgsSel('est'); for(var b=0;b<si.length;b++){ var ds=await loadDims(si[b].src); assets.estImgs.push({src:si[b].src,lbl:si[b].lbl,dims:ds}); }
+      // Imágenes ECG por fase (solo slots con imagen)
+      var ecgSel=(ecgSlots||[]).filter(function(s){return s&&s.img;});
+      for(var a=0;a<ecgSel.length;a++){ var de=await loadDims(ecgSel[a].img); assets.ecgImgs.push({src:ecgSel[a].img,lbl:ecgSel[a].name||'',dims:de}); }
+      // Imágenes ETT (imagen + texto; solo slots con imagen)
+      var ettSel=(ettSlots||[]).filter(function(s){return s&&s.img;});
+      for(var b=0;b<ettSel.length;b++){ var ds=await loadDims(ettSel[b].img); assets.ettCells.push({src:ettSel[b].img,txt:ettSel[b].txt||'',dims:ds}); }
 
       var doc=buildDoc(assets);
       _pdfDoc=doc;
