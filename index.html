@@ -219,25 +219,23 @@ html[data-theme="light"]{
 }
 html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 /* ═══ Login ═══ */
-#ee-login{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;}
+#ee-login{position:fixed;inset:0;z-index:10000;background:#0d0a0b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:24px;box-sizing:border-box;}
 #ee-login.hidden{display:none;}
-.ee-bars{display:flex;align-items:flex-end;gap:7px;height:72px;}
-.ee-bars .bar{width:16px;border-radius:4px 4px 0 0;animation:eeBar 1.2s ease-in-out infinite;}
-.ee-bars .bar:nth-child(1){height:35%;animation-delay:0s;background:var(--lad);}
-.ee-bars .bar:nth-child(2){height:60%;animation-delay:.15s;background:var(--accent);}
-.ee-bars .bar:nth-child(3){height:85%;animation-delay:.3s;background:var(--amber);}
-.ee-bars .bar:nth-child(4){height:50%;animation-delay:.45s;background:var(--green);}
-.ee-bars .bar:nth-child(5){height:70%;animation-delay:.6s;background:var(--accent2);}
-@keyframes eeBar{0%,100%{transform:scaleY(1);opacity:1;}50%{transform:scaleY(.5);opacity:.5;}}
-.ee-login-box{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:34px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;min-width:320px;box-shadow:0 8px 40px rgba(0,0,0,.35);}
-.ee-login-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;}
-.ee-login-title .dot{color:var(--accent);}
-.ee-login-sub{font-size:12px;color:var(--text2);margin-top:-8px;}
-.ee-login-input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:15px;text-align:center;letter-spacing:4px;outline:none;font-family:inherit;}
-.ee-login-input:focus{border-color:var(--accent);}
-.ee-login-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
-.ee-login-btn:hover{background:#be1840;}
-.ee-login-err{font-size:12px;color:var(--red);min-height:15px;text-align:center;}
+.ee-brand{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
+.ee-brand-top{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#4b4045;}
+.ee-brand-title{font-size:34px;font-weight:900;letter-spacing:-.5px;line-height:1.1;}
+.ee-brand-title .b1{color:#ffffff;}
+.ee-brand-title .b2{color:#e11d48;}
+.ee-brand-sub{font-size:12px;color:#6b5b62;letter-spacing:.5px;}
+.ee-ecg{width:min(460px,84vw);height:88px;background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='88' viewBox='0 0 120 88'><polyline points='0,50 22,50 29,42 37,50 49,50 53,57 59,11 65,67 71,50 83,50 93,39 105,50 120,50' fill='none' stroke='%23e11d48' stroke-width='2.6' stroke-linejoin='round' stroke-linecap='round'/></svg>");background-repeat:repeat-x;background-position:0 center;background-size:120px 88px;animation:eeEcgScroll 3s linear infinite;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 86%,transparent 100%);}
+@keyframes eeEcgScroll{from{background-position-x:0;}to{background-position-x:120px;}}
+.ee-login-box{background:#1a1018;border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:30px 34px;display:flex;flex-direction:column;align-items:center;gap:15px;width:min(360px,86vw);box-sizing:border-box;box-shadow:0 14px 50px rgba(0,0,0,.5);}
+.ee-login-input{width:100%;padding:13px 16px;border-radius:11px;border:1px solid rgba(255,255,255,.10);background:#0f0a0d;color:#fff;font-size:16px;text-align:center;letter-spacing:6px;outline:none;font-family:inherit;box-sizing:border-box;}
+.ee-login-input:focus{border-color:#e11d48;}
+.ee-login-btn{width:100%;padding:13px;border-radius:11px;border:none;background:#e11d48;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:filter .15s;}
+.ee-login-btn:hover{filter:brightness(1.08);}
+.ee-login-err{font-size:12px;color:#e11d48;min-height:15px;text-align:center;font-weight:600;}
+.ee-login-foot{font-size:11px;color:#3a3236;letter-spacing:.4px;text-align:center;}
 /* ═══ Header: logo editable + botones ═══ */
 .hdr-logo-edit{position:relative;min-width:30px;height:32px;padding:0 5px;border:1px dashed var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--bg3);flex-shrink:0;}
 .hdr-logo-edit img{max-width:104px;max-height:30px;object-fit:contain;display:none;}
@@ -267,14 +265,18 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 <body>
 <!-- ═══ LOGIN ═══ -->
 <div id="ee-login">
-  <div class="ee-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+  <div class="ee-brand">
+    <div class="ee-brand-top">CeiboMed</div>
+    <div class="ee-brand-title"><span class="b1">Eco</span><span class="b2">Estrés</span><span class="b1">&nbsp;Smart</span></div>
+    <div class="ee-brand-sub">Ecocardiograma de estrés</div>
+  </div>
+  <div class="ee-ecg" aria-hidden="true"></div>
   <div class="ee-login-box">
-    <div class="ee-login-title">Ceibo<span class="dot">Med</span></div>
-    <div class="ee-login-sub">EcoEstrés Smart</div>
     <input class="ee-login-input" id="ee-login-pwd" type="password" placeholder="Contraseña" autocomplete="off">
     <button class="ee-login-btn" id="ee-login-btn">Ingresar</button>
     <div class="ee-login-err" id="ee-login-err"></div>
   </div>
+  <div class="ee-login-foot">© 2026 CeiboMed · Uso clínico exclusivo</div>
 </div>
 <script>
 (function(){
