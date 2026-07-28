@@ -2510,6 +2510,193 @@ function ebTextoInforme(){
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-audit'); if(m&&m.classList.contains('open'))eeAuditClose(); } });
 })();
 </script>
+
+<!-- ═══ Guardados: estudios en localStorage['ecoestres_informes'] ═══ -->
+<style>
+#ee-guardados .ee-modal-box{max-width:840px;max-height:92vh;overflow:auto;}
+.eeg-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.eeg-editing{font-size:11px;color:var(--amber);font-weight:700;}
+.eeg-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.eeg-filters input{flex:1;min-width:130px;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-family:inherit;outline:none;}
+.eeg-filters input:focus{border-color:var(--accent2);}
+#eeg-comparebar:not(:empty){margin-bottom:10px;}
+.eeg-item{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;margin-bottom:7px;}
+.eeg-chk input{width:17px;height:17px;cursor:pointer;accent-color:var(--accent2);}
+.eeg-info{flex:1;min-width:0;}
+.eeg-name{font-size:13px;font-weight:700;color:var(--text);}
+.eeg-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.eeg-acts{display:flex;gap:5px;flex-shrink:0;}
+.eeg-acts .btn{padding:5px 9px;font-size:12px;}
+.eeg-cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:560px){.eeg-cmp{grid-template-columns:1fr;}}
+.eeg-cmp-col{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;}
+.eeg-cmp-hd{font-size:13px;font-weight:700;color:var(--text);display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px;}
+.eeg-cmp-hd span{font-weight:500;color:var(--text2);}
+.eeg-cmp-bull{text-align:center;margin-bottom:8px;}
+.eeg-cmp-lbl{font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:3px;}
+.eeg-cmp-bull svg{width:100%;max-width:230px;}
+</style>
+<div class="ee-modal" id="ee-guardados" onclick="if(event.target===this)eeGuardadosClose()">
+  <div class="ee-modal-box">
+    <h3>🗂 Estudios guardados <button class="x" onclick="eeGuardadosClose()">✕</button></h3>
+    <div id="ee-guardados-body"></div>
+  </div>
+</div>
+<script>
+/* ═══ Módulo Guardados: guardar / listar / editar / filtrar / comparar ═══ */
+(function(){
+  var LSKEY='ecoestres_informes';
+  var _editId=null, _sel=[];
+  function recs(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function save(a){ try{ localStorage.setItem(LSKEY, JSON.stringify(a)); }catch(e){ alert('No se pudo guardar (¿espacio de almacenamiento lleno?): '+e.message); } }
+  function F(r,id){ return (r&&r.vals&&r.vals[id]!=null)?r.vals[id]:''; }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function toast(m){ if(typeof eeToast==='function')eeToast(m); }
+  function fmtFecha(iso){ if(!iso)return '—'; var p=String(iso).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; }
+  var EST={ejercicio:'Esfuerzo',dobutamina:'Dobutamina',dipiridamol:'Dipiridamol',adenosina:'Adenosina'};
+  function wmsiOf(state){ var s=0,c=0; (state||[]).forEach(function(st){ if(st>0){s+=st;c++;} }); return c?(s/c).toFixed(2):'—'; }
+
+  // Renderiza el bull's eye de un registro guardado en un svg dado (sin tocar el estudio vivo)
+  function bullSvgFor(recBull, phase, svgId){
+    if(typeof renderBull!=='function')return;
+    var saved=bull[phase];
+    bull[phase]=(recBull&&Array.isArray(recBull[phase]))?recBull[phase]:Array(17).fill(1);
+    try{ renderBull(phase, svgId, false); }catch(e){}
+    bull[phase]=saved;
+  }
+
+  // Carga un estado guardado en el formulario (para editar)
+  function applyEstado(s){
+    if(!s)return;
+    if(s.vals)Object.keys(s.vals).forEach(function(id){ var el=document.getElementById(id); if(!el)return; var v=s.vals[id]; if(el.type==='checkbox')el.checked=!!v; else el.value=v; });
+    if(s.bull){ ['basal','low','pico','recup','extra'].forEach(function(k){ bull[k]=Array.isArray(s.bull[k])?s.bull[k].slice():Array(17).fill(1); }); }
+    if(Array.isArray(s.ecgImg)){ ecgImg.length=0; s.ecgImg.forEach(function(x){ecgImg.push(x);}); ecgImgCount=s.ecgImgCount||ecgImg.length||2; }
+    if(Array.isArray(s.estImg)){ estImg.length=0; s.estImg.forEach(function(x){estImg.push(x);}); estImgCount=s.estImgCount||estImg.length||2; }
+    if(Array.isArray(s.ecgImgMeta)){ ecgImgMeta.length=0; s.ecgImgMeta.forEach(function(x){ecgImgMeta.push(x);}); }
+    if(Array.isArray(s.estImgMeta)){ estImgMeta.length=0; s.estImgMeta.forEach(function(x){estImgMeta.push(x);}); }
+    if(s.dobuData&&typeof dobuData!=='undefined'){ Object.keys(dobuData).forEach(function(k){delete dobuData[k];}); Object.assign(dobuData,s.dobuData); }
+    if(s.peState&&typeof peState!=='undefined'){ Object.keys(peState).forEach(function(k){delete peState[k];}); Object.assign(peState,s.peState); }
+    if(s.bvInclude&&typeof bvInclude!=='undefined'){ Object.keys(bvInclude).forEach(function(k){delete bvInclude[k];}); Object.assign(bvInclude,s.bvInclude); }
+    if(s.bullExtra&&typeof bullExtra!=='undefined'){ Object.assign(bullExtra,s.bullExtra); }
+    if(typeof peInit==='function')peInit();
+    if(typeof bvBuild==='function')bvBuild();
+    if(typeof ecgImgRender==='function')ecgImgRender();
+    if(typeof estImgRender==='function')estImgRender();
+    if(typeof actualizarUI==='function')actualizarUI();
+  }
+
+  window.eeSaveStudy=function(asNew){
+    var estado=(typeof recolectarEstado==='function')?recolectarEstado():null;
+    if(!estado){ toast('No se pudo leer el estudio actual'); return; }
+    var arr=recs();
+    var rec=Object.assign({}, estado);  // {vals, bull, ecgImg, estImg, ... } compatible con auditoría
+    if(!asNew && _editId){
+      var i=arr.findIndex(function(x){return x.id===_editId;});
+      if(i>=0){ rec.id=_editId; rec.ts=arr[i].ts; rec.updated=Date.now(); arr[i]=rec; }
+      else { rec.id='rep_'+Date.now(); rec.ts=Date.now(); arr.push(rec); _editId=rec.id; }
+      toast('✅ Estudio actualizado');
+    } else {
+      rec.id='rep_'+Date.now()+'_'+Math.floor(Math.random()*1000); rec.ts=Date.now(); arr.push(rec); _editId=rec.id;
+      toast('✅ Estudio guardado');
+    }
+    save(arr);
+    eeGuardadosOpen();
+  };
+
+  window.eeGuardadoEdit=function(id){
+    var arr=recs(); var r=arr.find(function(x){return x.id===id;});
+    if(!r){ toast('Estudio no encontrado'); return; }
+    applyEstado(r); _editId=id;
+    eeGuardadosClose();
+    toast('✏️ Estudio cargado para editar');
+  };
+
+  window.eeGuardadoDelete=function(id){
+    if(!confirm('¿Eliminar este estudio guardado? Esta acción no se puede deshacer.'))return;
+    var arr=recs().filter(function(x){return x.id!==id;});
+    save(arr);
+    _sel=_sel.filter(function(s){return s!==id;});
+    if(_editId===id)_editId=null;
+    eeGuardadosList();
+  };
+
+  window.eeCompareToggle=function(id, on){
+    if(on){ if(_sel.indexOf(id)<0){ if(_sel.length>=2){ toast('Elegí exactamente 2 estudios'); eeGuardadosList(); return; } _sel.push(id); } }
+    else { _sel=_sel.filter(function(s){return s!==id;}); }
+    eeGuardadosList();
+  };
+
+  window.eeComparar=function(){
+    if(_sel.length!==2){ toast('Seleccioná 2 estudios'); return; }
+    var arr=recs(); var a=arr.find(function(x){return x.id===_sel[0];}), b=arr.find(function(x){return x.id===_sel[1];});
+    if(!a||!b){ eeGuardadosList(); return; }
+    var body=document.getElementById('ee-guardados-body');
+    function col(r,tag){
+      return '<div class="eeg-cmp-col"><div class="eeg-cmp-hd">'+esc(F(r,'p-nombre')||'(sin nombre)')+'<span>'+esc(fmtFecha(F(r,'p-fecha')))+'</span></div>'
+        +'<div class="eeg-cmp-bull"><div class="eeg-cmp-lbl">Basal · WMSI '+wmsiOf((r.bull||{}).basal)+'</div><svg id="eeg-cmp-'+tag+'-basal" viewBox="0 0 340 340"></svg></div>'
+        +'<div class="eeg-cmp-bull"><div class="eeg-cmp-lbl">Pico · WMSI '+wmsiOf((r.bull||{}).pico)+'</div><svg id="eeg-cmp-'+tag+'-pico" viewBox="0 0 340 340"></svg></div>'
+        +'</div>';
+    }
+    body.innerHTML='<div class="eeg-top"><button class="btn btn-ghost" onclick="eeGuardadosOpen()">← Volver a la lista</button></div>'
+      +'<div class="eeg-cmp">'+col(a,'A')+col(b,'B')+'</div>';
+    [['A',a],['B',b]].forEach(function(p){ ['basal','pico'].forEach(function(ph){ bullSvgFor(p[1].bull, ph, 'eeg-cmp-'+p[0]+'-'+ph); }); });
+  };
+
+  window.eeGuardadosClearFilter=function(){ var a=document.getElementById('eeg-fnom'),b=document.getElementById('eeg-ffecha'); if(a)a.value=''; if(b)b.value=''; eeGuardadosList(); };
+
+  window.eeGuardadosList=function(){
+    var list=document.getElementById('eeg-list'); if(!list)return;
+    var nom=(document.getElementById('eeg-fnom')||{}).value||''; nom=nom.toLowerCase().trim();
+    var fch=(document.getElementById('eeg-ffecha')||{}).value||'';
+    var R=recs().slice().sort(function(x,y){ return (y.ts||0)-(x.ts||0); });
+    var filt=R.filter(function(r){
+      if(nom){ var n=(String(F(r,'p-nombre'))+' '+String(F(r,'p-hc'))).toLowerCase(); if(n.indexOf(nom)<0)return false; }
+      if(fch){ if(String(F(r,'p-fecha'))!==fch)return false; }
+      return true;
+    });
+    if(!filt.length){ list.innerHTML='<div class="eea-note">'+(R.length?'Ningún estudio coincide con el filtro.':'Todavía no hay estudios guardados. Usá «Guardar como nuevo».')+'</div>'; }
+    else {
+      list.innerHTML=filt.map(function(r){
+        var estr=EST[F(r,'p-estres')]||'';
+        var meta=[fmtFecha(F(r,'p-fecha')), F(r,'p-hc')?('HC '+F(r,'p-hc')):'', estr].filter(Boolean).join(' · ');
+        return '<div class="eeg-item">'
+          +'<label class="eeg-chk"><input type="checkbox" '+(_sel.indexOf(r.id)>=0?'checked':'')+' onchange="eeCompareToggle(\''+r.id+'\',this.checked)"></label>'
+          +'<div class="eeg-info"><div class="eeg-name">'+esc(F(r,'p-nombre')||'(sin nombre)')+(_editId===r.id?' <span class="eeg-editing">· en edición</span>':'')+'</div><div class="eeg-meta">'+esc(meta)+'</div></div>'
+          +'<div class="eeg-acts"><button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
+          +'</div>';
+      }).join('');
+    }
+    var bar=document.getElementById('eeg-comparebar');
+    if(bar){ bar.innerHTML = (_sel.length? '<div class="eea-note" style="margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>'+_sel.length+'/2 seleccionados para comparar.</span>'+(_sel.length===2?'<button class="btn btn-primary" style="padding:5px 12px" onclick="eeComparar()">🔬 Comparar Bull\'s Eye</button>':'')+'</div>' : ''); }
+  };
+
+  window.eeGuardadosOpen=function(){
+    var body=document.getElementById('ee-guardados-body'); if(!body)return;
+    body.innerHTML=
+      '<div class="eeg-top">'
+        +'<button class="btn btn-primary" onclick="eeSaveStudy(true)">➕ Guardar como nuevo</button>'
+        +(_editId?'<button class="btn btn-teal" onclick="eeSaveStudy(false)">♻️ Actualizar este estudio</button><span class="eeg-editing">Editando un estudio guardado</span>':'')
+      +'</div>'
+      +'<div class="eeg-filters">'
+        +'<input id="eeg-fnom" placeholder="Filtrar por paciente o HC…" oninput="eeGuardadosList()">'
+        +'<input id="eeg-ffecha" type="date" oninput="eeGuardadosList()" title="Filtrar por fecha del estudio">'
+        +'<button class="btn btn-ghost" onclick="eeGuardadosClearFilter()">Limpiar</button>'
+      +'</div>'
+      +'<div id="eeg-comparebar"></div>'
+      +'<div id="eeg-list"></div>';
+    eeGuardadosList();
+    document.getElementById('ee-guardados').classList.add('open');
+  };
+  window.eeGuardadosClose=function(){ var m=document.getElementById('ee-guardados'); if(m)m.classList.remove('open'); };
+  window.eeGuardados=function(){ eeGuardadosOpen(); };
+
+  // Al limpiar el estudio, se deja de editar el registro guardado
+  document.addEventListener('DOMContentLoaded',function(){
+    if(typeof nuevoEstudio==='function'){ var _ne=nuevoEstudio; window.nuevoEstudio=function(){ var r=_ne.apply(this,arguments); _editId=null; return r; }; }
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-guardados'); if(m&&m.classList.contains('open'))eeGuardadosClose(); } });
+})();
+</script>
 <script>
 /* ═══ Aceptar punto Y coma como separador decimal en todos los campos numéricos ═══ */
 (function(){
@@ -3139,6 +3326,36 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var jsPDF=window.jspdf.jsPDF;
     var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     var mL=14,mR=196,pgW=182,y=0;
+
+    // ── Saneado de texto para jsPDF ──
+    // Las fuentes estándar (Helvetica WinAnsi) sólo cubren U+0000–U+00FF. Cualquier
+    // carácter fuera de ese rango (— → ↑ ↓ ▸ • ≥ ≤ Δ …) rompe el kerning (letras
+    // separadas) y hace que splitTextToSize cuente mal las líneas (texto que se
+    // superpone con el encabezado siguiente). Se reemplazan por equivalentes ASCII.
+    function pdfSan(s){
+      return String(s==null?'':s)
+        .replace(/[–—]/g,'-')        // – —
+        .replace(/→/g,' a ')              // →
+        .replace(/←/g,' <- ')             // ←
+        .replace(/↑/g,'aumento de ')      // ↑
+        .replace(/↓/g,'descenso de ')     // ↓
+        .replace(/[▸▶‣]/g,'>')  // ▸ ▶ ‣
+        .replace(/•/g,'-')                // •
+        .replace(/≥/g,'>=').replace(/≤/g,'<=').replace(/≠/g,'!=')
+        .replace(/Δ/g,'Delta ')           // Δ
+        .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
+        .replace(/…/g,'...')              // …
+        .replace(/ /g,' ')                // nbsp
+        .replace(/[^\x20-\xFF\t\n\r]/g,'');  // resto fuera de WinAnsi
+    }
+    var _docText=doc.text.bind(doc);
+    doc.text=function(txt,x,yy,opts){
+      if(Array.isArray(txt)) txt=txt.map(function(t){return typeof t==='string'?pdfSan(t):t;});
+      else if(typeof txt==='string') txt=pdfSan(txt);
+      return _docText(txt,x,yy,opts);
+    };
+    var _docSplit=doc.splitTextToSize.bind(doc);
+    doc.splitTextToSize=function(txt,w,o){ return _docSplit(pdfSan(txt),w,o); };
     var _tema={'1':[26,58,92],'2':[26,92,58],'3':[74,26,122],'4':[123,45,66]};
     var TEMA=_tema[String((function(){try{return localStorage.getItem('ecoestres_pdf_color');}catch(e){return null;}})()||'1')]||_tema['1'];
 
@@ -3151,19 +3368,21 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     function checkPage(n){ if(y+(n||10)>284){ doc.addPage(); y=16; } }
 
     function drawBar(txt){
-      y+=1.5; checkPage(11);
+      y+=3.5; checkPage(15);
       fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F');
       fb(8.5); tc(255,255,255); doc.text(String(txt),mL+5,y+4.9);
-      y+=9;
+      y+=10;
     }
     function drawText(txt,size){
       fn(size||8); tc(20,20,20);
       var lines=doc.splitTextToSize(String(txt),pgW-4);
       lines.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5; });
+      y+=1.5;
     }
     function drawBullet(lines){
       fn(8); tc(20,20,20);
-      lines.forEach(function(l){ var ls=doc.splitTextToSize(l,pgW-8); ls.forEach(function(t,i){ checkPage(5.6); doc.text((i===0?'•  ':'   ')+t,mL+3,y); y+=4.8; }); });
+      lines.forEach(function(l){ var ls=doc.splitTextToSize(l,pgW-8); ls.forEach(function(t,i){ checkPage(5.6); doc.text((i===0?'-  ':'   ')+t,mL+3,y); y+=4.8; }); });
+      y+=1.5;
     }
 
     // Encabezado (barra de color con logo, título, médico)
@@ -3346,7 +3565,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       ['Protocolo', proto]
     ]);
     var frcv=[]; [['frcv-hta','HTA'],['frcv-dm','DM'],['frcv-dislip','Dislipemia'],['frcv-tab','Tabaquismo'],['frcv-obes','Obesidad'],['frcv-ahf','AHF EC']].forEach(function(f){ if(CHK(f[0]))frcv.push(f[1]); });
-    if(frcv.length){ fn(8); tc(20,20,20); doc.text('Factores de riesgo: '+frcv.join(', ')+'.',mL+2,y+1); y+=5; }
+    if(frcv.length){ y+=1; drawText('Factores de riesgo: '+frcv.join(', ')+'.'); }
     if(V('p-medicacion')){ fn(8); tc(20,20,20); drawText('Medicación relevante: '+V('p-medicacion')+'.'); }
 
     // 4 · Tabla de etapas
@@ -3454,7 +3673,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     drawBullet(abcd);
     var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
     var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
-    if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); }
+    if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
     if(V('res-comment'))drawText(V('res-comment'));
 
     // 10 · Imágenes Bull's Eye
@@ -3469,7 +3688,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     if(!ee||/sin cambios/i.test(ee))ecgConc='ECG: sin cambios isquémicos significativos durante el estrés.';
     else ecgConc='ECG: '+ee+'.';
     var estConc='Eco estrés: '+(resMap[rg]||'resultado no especificado')+'.';
-    fb(8.2); tc(20,20,20); [ecgConc,estConc].forEach(function(l){ var ls=doc.splitTextToSize('▸ '+l,pgW-4); ls.forEach(function(t){ checkPage(6); doc.text(t,mL+2,y); y+=5.2; }); });
+    fb(8.2); tc(20,20,20); [ecgConc,estConc].forEach(function(l){ var ls=doc.splitTextToSize('> '+l,pgW-4); ls.forEach(function(t){ checkPage(6); doc.text(t,mL+2,y); y+=5.2; }); });
 
     // 13 · Firma
     firma();
