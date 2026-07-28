@@ -1934,9 +1934,10 @@ function ebCalcMasa(){
   const ppvid=+document.getElementById('eb-ppvid')?.value||0;
   const sc=+document.getElementById('eb-sc')?.value||0;
   const dsvi=+document.getElementById('eb-dsvi')?.value||0;
-  // Devereux: 0.8 × 1.04 × ((SIV+DIVI+PPVI)³ − DIVI³) + 0.6
+  // Devereux: 0.8 × 1.04 × ((SIV+DIVI+PPVI)³ − DIVI³) + 0.6 — diámetros en CM (los campos están en mm → /10)
   if(divi&&sivd&&ppvid){
-    const masa=+(0.8*1.04*(Math.pow(sivd+divi+ppvid,3)-Math.pow(divi,3))+0.6).toFixed(1);
+    const dCm=divi/10, sCm=sivd/10, pCm=ppvid/10;
+    const masa=+(0.8*1.04*(Math.pow(sCm+dCm+pCm,3)-Math.pow(dCm,3))+0.6).toFixed(1);
     const el=document.getElementById('eb-masa');if(el)el.value=masa;
     if(sc){const mi=+(masa/sc).toFixed(1);const miEl=document.getElementById('eb-masa-i');if(miEl)miEl.value=mi;
       const res=document.getElementById('eb-vi-res');
