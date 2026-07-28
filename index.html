@@ -2705,9 +2705,226 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     h+='</svg></div>';
     return h;
   }
+  // ═══ Vistas apicales A4C/A2C/A3C — geometría EXACTA de EcoSmart (contractilidad) ═══
+  // Helpers de geometría copiados sin modificar desde ecosmart/index.html
+  function contrSemiancho(t, rxBase, q, bulge){
+    let w = rxBase * Math.cos(t*Math.PI/2) ** q;
+    if (bulge) w *= (1 + bulge*Math.sin(Math.PI*t*0.8));
+    return w;
+  }
+  function contrMuestrearLado(rxBase, apexY, q, bulge, yBottom, signo, nSeg=120){
+    const pts = [];
+    for(let i=0;i<=nSeg;i++){
+      const t = i/nSeg;
+      const y = yBottom - t*(yBottom-apexY);
+      const w = contrSemiancho(t, rxBase, q, bulge);
+      pts.push([120 + signo*w, y, t]);
+    }
+    return pts;
+  }
+  function contrTParaY(y, apexY, yBottom){ return 1 - (y-apexY)/(yBottom-apexY); }
+  function contrPuntoEnT(t, rxBase, q, bulge, yBottom, apexY, signo){
+    const w = contrSemiancho(t, rxBase, q, bulge);
+    const y = yBottom - t*(yBottom-apexY);
+    return [120 + signo*w, y];
+  }
+  const CONTR_G = { rxO:92, apexO:55, qO:0.55, bulgeO:0.04,
+              rxI:70, apexI:150, qI:0.55, bulgeI:0.02, yBottom:320 };
+  function contrPolilinea(pts){ return pts.map(p=>p[0]+","+p[1]).join(" "); }
+
+  // Mapa nombre-de-segmento (EcoSmart) → índice AHA 0-based (EcoEstrés)
+  var BV_KEY2IDX={
+    basal_anterior:0, basal_anteroseptal:1, basal_inferoseptal:2, basal_inferior:3, basal_inferolateral:4, basal_anterolateral:5,
+    mid_anterior:6, mid_anteroseptal:7, mid_inferoseptal:8, mid_inferior:9, mid_inferolateral:10, mid_anterolateral:11,
+    apical_anterior:12, apical_septal:13, apical_inferior:14, apical_lateral:15, apex:16
+  };
+
+  // Genera un polígono de segmento coloreable ligado a bull[stage]
+  function bvSegPoly(pointsStr, idx, stage){
+    var st=(bull[stage]||[])[idx]||0, seg=SEGS[idx];
+    return '<polygon points="'+pointsStr+'" fill="'+col(st)+'" fill-opacity="0.9" stroke="#cfd6e6" stroke-width="1.3" style="cursor:pointer" onclick="cycleBull(\''+stage+'\','+idx+')" oncontextmenu="openPop(event,\''+stage+'\','+idx+');return false;"><title>'+esc(seg.name)+' ('+seg.ter+') — '+SEG_LABELS[st]+'</title></polygon>';
+  }
+
+  // A4C/A2C/A3C — misma geometría exacta que contrDibujarVistaApical, coloreable por etapa
+  function bvApical(stage, titulo, paredIzq, paredDer, bordeExtra, numeros){
+    const yB = CONTR_G.yBottom;
+    const outerL = contrMuestrearLado(CONTR_G.rxO, CONTR_G.apexO, CONTR_G.qO, CONTR_G.bulgeO, yB, -1);
+    const outerR = contrMuestrearLado(CONTR_G.rxO, CONTR_G.apexO, CONTR_G.qO, CONTR_G.bulgeO, yB, +1);
+    const innerL = contrMuestrearLado(CONTR_G.rxI, CONTR_G.apexI, CONTR_G.qI, CONTR_G.bulgeI, yB, -1);
+    const innerR = contrMuestrearLado(CONTR_G.rxI, CONTR_G.apexI, CONTR_G.qI, CONTR_G.bulgeI, yB, +1);
+
+    let html = '<div class="bv-diagram"><svg viewBox="0 0 240 340" width="150">';
+    html += '<text x="120" y="20" text-anchor="middle" font-size="15" font-weight="800" fill="var(--text)">'+titulo+'</text>';
+    const contornoEstilo = `fill="none" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"`;
+    html += `<path d="M ${contrPolilinea(outerL).replace(/ /g,' L ')}" ${contornoEstilo}/>`;
+    html += `<path d="M ${contrPolilinea(outerR).replace(/ /g,' L ')}" ${contornoEstilo}/>`;
+    html += `<path d="M ${contrPolilinea(innerL).replace(/ /g,' L ')}" ${contornoEstilo}/>`;
+    html += `<path d="M ${contrPolilinea(innerR).replace(/ /g,' L ')}" ${contornoEstilo}/>`;
+
+    const apicalMap = {
+      inferior:"inferior", anterior:"anterior",
+      inferoseptal:"septal", anterolateral:"lateral",
+      anteroseptal:"septal", inferolateral:"lateral"
+    };
+    const fracciones = [0, 0.30, 0.62, 1.0];
+    const niveles = ["basal","mid","apical"];
+
+    for(let i=0;i<3;i++){
+      const f0 = fracciones[i], f1 = fracciones[i+1];
+      const nivel = niveles[i];
+      const nombreIzq = nivel==="apical" ? apicalMap[paredIzq] : paredIzq;
+      const nombreDer = nivel==="apical" ? apicalMap[paredDer] : paredDer;
+      const yTop = yB - f0*(yB-CONTR_G.apexI);
+      const yBot = yB - f1*(yB-CONTR_G.apexI);
+      const tExtTop = contrTParaY(yTop, CONTR_G.apexO, yB);
+      const tExtBot = contrTParaY(yBot, CONTR_G.apexO, yB);
+      const subOuterL = outerL.filter(p=>p[2]>=tExtTop-0.001 && p[2]<=tExtBot+0.001);
+      const subOuterR = outerR.filter(p=>p[2]>=tExtTop-0.001 && p[2]<=tExtBot+0.001);
+      const subInnerL = innerL.filter(p=>p[2]>=f0-0.001 && p[2]<=f1+0.001);
+      const subInnerR = innerR.filter(p=>p[2]>=f0-0.001 && p[2]<=f1+0.001);
+      const polyIzq = subOuterL.concat(subInnerL.slice().reverse());
+      const polyDer = subOuterR.concat(subInnerR.slice().reverse());
+      html += bvSegPoly(contrPolilinea(polyIzq), BV_KEY2IDX[nivel+'_'+nombreIzq], stage);
+      html += bvSegPoly(contrPolilinea(polyDer), BV_KEY2IDX[nivel+'_'+nombreDer], stage);
+    }
+
+    const [xL] = contrPuntoEnT(contrTParaY(CONTR_G.apexI, CONTR_G.apexO, yB), CONTR_G.rxO, CONTR_G.qO, CONTR_G.bulgeO, yB, CONTR_G.apexO, -1);
+    const [xR] = contrPuntoEnT(contrTParaY(CONTR_G.apexI, CONTR_G.apexO, yB), CONTR_G.rxO, CONTR_G.qO, CONTR_G.bulgeO, yB, CONTR_G.apexO, +1);
+    html += `<line x1="${xL}" y1="${CONTR_G.apexI}" x2="${xR}" y2="${CONTR_G.apexI}" stroke="#cfd6e6" stroke-width="1.4" pointer-events="none"/>`;
+
+    const tExtApex = contrTParaY(CONTR_G.apexI, CONTR_G.apexO, yB);
+    const capL = outerL.filter(p=>p[2]>=tExtApex-0.001);
+    const capR = outerR.filter(p=>p[2]>=tExtApex-0.001);
+    const capPoly = capL.concat(capR.slice().reverse());
+    html += bvSegPoly(contrPolilinea(capPoly), 16, stage);
+
+    html += `<line x1="${outerL[0][0]-12}" y1="${yB}" x2="${outerL[0][0]+16}" y2="${yB+5}" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" pointer-events="none"/>`;
+    html += `<line x1="${outerR[0][0]-16}" y1="${yB+5}" x2="${outerR[0][0]+12}" y2="${yB}" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" pointer-events="none"/>`;
+
+    if (bordeExtra){
+      const {lado, tContacto, largo, curvatura} = bordeExtra;
+      const signo = lado==="izq" ? -1 : 1;
+      const [x0,y0] = contrPuntoEnT(tContacto, CONTR_G.rxO, CONTR_G.qO, CONTR_G.bulgeO, yB, CONTR_G.apexO, signo);
+      let d = `M ${x0},${y0} `;
+      const n=60;
+      for(let i=1;i<=n;i++){
+        const s=i/n;
+        const x = x0 + signo*(curvatura*Math.sin(s*Math.PI/2)**0.8 + 10*s);
+        const y = y0 + s*largo;
+        d += `L ${x},${y} `;
+      }
+      html += `<path d="${d}" fill="none" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>`;
+    }
+
+    if (numeros) {
+      const apexI = CONTR_G.apexI;
+      function xEnY(pts, targetY) {
+        const sorted = pts.slice().sort((a,b) => b[1]-a[1]);
+        for (let i = 0; i < sorted.length-1; i++) {
+          if (sorted[i][1] >= targetY && sorted[i+1][1] <= targetY) {
+            const r = (targetY - sorted[i][1]) / (sorted[i+1][1] - sorted[i][1]);
+            return sorted[i][0] + r * (sorted[i+1][0] - sorted[i][0]);
+          }
+        }
+        return sorted[0][0];
+      }
+      const centrosFrac = [0.15, 0.46, 0.81];
+      const centrosY = centrosFrac.map(f => yB - f*(yB-apexI));
+      const labelStyle = `font-size="13" font-weight="700"
+        text-anchor="middle" dominant-baseline="middle"
+        pointer-events="none" paint-order="stroke"
+        stroke="var(--bg2)" stroke-width="3.5"
+        fill="var(--text)"`;
+      [0,1,2].forEach(i => {
+        const y = centrosY[i];
+        const xOL = xEnY(outerL, y);
+        const xIL = xEnY(innerL, y);
+        const xOR = xEnY(outerR, y);
+        const xIR = xEnY(innerR, y);
+        const xL = (xOL + xIL) / 2;
+        const xR = (xOR + xIR) / 2;
+        html += `<text x="${xL.toFixed(1)}" y="${centrosY[i].toFixed(1)}" ${labelStyle}>${numeros.izq[i]}</text>`;
+        html += `<text x="${xR.toFixed(1)}" y="${centrosY[i].toFixed(1)}" ${labelStyle}>${numeros.der[i]}</text>`;
+      });
+      const yApex = CONTR_G.apexO + (apexI - CONTR_G.apexO) * 0.5;
+      html += `<text x="120" y="${yApex.toFixed(1)}" ${labelStyle}>${numeros.apex}</text>`;
+    }
+
+    html += '</svg></div>';
+    return html;
+  }
+
+  // PEL — Paraesternal Eje Largo (nuevo): horizontal, ápex a la izquierda, VI centro-izquierda,
+  // VD arriba, sin aorta. Mismo estilo visual (banda miocárdica coloreable) que las apicales.
+  function bvPel(stage){
+    var yB=CONTR_G.yBottom;
+    var oL=contrMuestrearLado(CONTR_G.rxO,CONTR_G.apexO,CONTR_G.qO,CONTR_G.bulgeO,yB,-1); // inferolateral (abajo)
+    var oR=contrMuestrearLado(CONTR_G.rxO,CONTR_G.apexO,CONTR_G.qO,CONTR_G.bulgeO,yB,+1); // anteroseptal (arriba)
+    var iL=contrMuestrearLado(CONTR_G.rxI,CONTR_G.apexI,CONTR_G.qI,CONTR_G.bulgeI,yB,-1);
+    var iR=contrMuestrearLado(CONTR_G.rxI,CONTR_G.apexI,CONTR_G.qI,CONTR_G.bulgeI,yB,+1);
+    var s=0.58, offX=22, offY=100;
+    function R(p){ return [ (p[1]-CONTR_G.apexO)*s+offX, (120-p[0])*s+offY ]; } // rota: ápex→izq, base→der
+    function poly(pts){ return pts.map(function(p){var q=R(p);return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' '); }
+    function emit(pts,idx){
+      var st=(bull[stage]||[])[idx]||0, seg=SEGS[idx];
+      var sx=0,sy=0; pts.forEach(function(p){var q=R(p);sx+=q[0];sy+=q[1];}); var cx=sx/pts.length, cy=sy/pts.length;
+      var g='<polygon points="'+poly(pts)+'" fill="'+col(st)+'" fill-opacity="0.9" stroke="#cfd6e6" stroke-width="1.3" style="cursor:pointer" onclick="cycleBull(\''+stage+'\','+idx+')" oncontextmenu="openPop(event,\''+stage+'\','+idx+');return false;"><title>'+esc(seg.name)+' ('+seg.ter+') — '+SEG_LABELS[st]+'</title></polygon>';
+      g+='<text x="'+cx.toFixed(1)+'" y="'+cy.toFixed(1)+'" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="middle" pointer-events="none" paint-order="stroke" stroke="var(--bg2)" stroke-width="3" fill="var(--text)">'+seg.id+'</text>';
+      return g;
+    }
+    var html='<div class="bv-diagram"><svg viewBox="0 0 205 185" width="165">';
+    html+='<text x="102" y="16" text-anchor="middle" font-size="15" font-weight="800" fill="var(--text)">PEL</text>';
+    var contorno='fill="none" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"';
+    html+='<polyline points="'+poly(oL)+'" '+contorno+'/>';
+    html+='<polyline points="'+poly(oR)+'" '+contorno+'/>';
+    html+='<polyline points="'+poly(iL)+'" '+contorno+'/>';
+    html+='<polyline points="'+poly(iR)+'" '+contorno+'/>';
+    var apicalMap={inferolateral:'lateral', anteroseptal:'septal'};
+    var fracciones=[0,0.30,0.62,1.0], niveles=['basal','mid','apical'];
+    for(var i=0;i<3;i++){
+      var f0=fracciones[i], f1=fracciones[i+1], nivel=niveles[i];
+      var nomTop = nivel==='apical'?apicalMap['anteroseptal']:'anteroseptal';
+      var nomBot = nivel==='apical'?apicalMap['inferolateral']:'inferolateral';
+      var yTop=yB-f0*(yB-CONTR_G.apexI), yBot=yB-f1*(yB-CONTR_G.apexI);
+      var tET=contrTParaY(yTop,CONTR_G.apexO,yB), tEB=contrTParaY(yBot,CONTR_G.apexO,yB);
+      var soR=oR.filter(function(p){return p[2]>=tET-0.001&&p[2]<=tEB+0.001;});
+      var siR=iR.filter(function(p){return p[2]>=f0-0.001&&p[2]<=f1+0.001;});
+      var soL=oL.filter(function(p){return p[2]>=tET-0.001&&p[2]<=tEB+0.001;});
+      var siL=iL.filter(function(p){return p[2]>=f0-0.001&&p[2]<=f1+0.001;});
+      html+=emit(soR.concat(siR.slice().reverse()), BV_KEY2IDX[nivel+'_'+nomTop]);
+      html+=emit(soL.concat(siL.slice().reverse()), BV_KEY2IDX[nivel+'_'+nomBot]);
+    }
+    // ápex (izquierda)
+    var tApex=contrTParaY(CONTR_G.apexI,CONTR_G.apexO,yB);
+    var capR=oR.filter(function(p){return p[2]>=tApex-0.001;});
+    var capL=oL.filter(function(p){return p[2]>=tApex-0.001;});
+    html+=emit(capR.concat(capL.slice().reverse()), 16);
+    // plano mitral (base, derecha) — sin aorta
+    var bR=R(oR[0]), bL=R(oL[0]), iRb=R(iR[0]), iLb=R(iL[0]);
+    html+='<line x1="'+bR[0].toFixed(1)+'" y1="'+bR[1].toFixed(1)+'" x2="'+(bR[0]+7).toFixed(1)+'" y2="'+(bR[1]-4).toFixed(1)+'" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" pointer-events="none"/>';
+    html+='<line x1="'+bL[0].toFixed(1)+'" y1="'+bL[1].toFixed(1)+'" x2="'+(bL[0]+7).toFixed(1)+'" y2="'+(bL[1]+4).toFixed(1)+'" stroke="#cfd6e6" stroke-width="2" stroke-linecap="round" pointer-events="none"/>';
+    // VD arriba (contorno anatómico, no coloreable)
+    var rvBase=oR.filter(function(p){return p[2]<=0.5;});
+    var rvLow=rvBase.map(function(p){return R(p);});
+    var rvUp=rvLow.map(function(pt,k){ var u=k/(rvLow.length-1); var b=24*Math.sin(Math.PI*Math.min(u*1.15,1)); return [pt[0],pt[1]-b-4]; });
+    var rvPath='M '+rvLow.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' L ')+' L '+rvUp.slice().reverse().map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' L ')+' Z';
+    html+='<path d="'+rvPath+'" fill="var(--bg4)" fill-opacity="0.55" stroke="#cfd6e6" stroke-width="1.6" stroke-linejoin="round" pointer-events="none"/>';
+    var vdi=Math.floor(rvLow.length*0.45);
+    html+='<text x="'+rvLow[vdi][0].toFixed(1)+'" y="'+((rvLow[vdi][1]+rvUp[vdi][1])/2).toFixed(1)+'" font-size="12" font-weight="800" text-anchor="middle" dominant-baseline="middle" fill="var(--text2)" pointer-events="none">VD</text>';
+    var vic=R([120,(CONTR_G.apexI+yB)/2+34]);
+    html+='<text x="'+vic[0].toFixed(1)+'" y="'+vic[1].toFixed(1)+'" font-size="12" font-weight="800" text-anchor="middle" dominant-baseline="middle" fill="var(--text2)" pointer-events="none">VI</text>';
+    html+='</svg></div>';
+    return html;
+  }
+
   window.bvRenderDiagrams=function(stage){
     var host=document.getElementById('bv-diagrams-'+stage); if(!host)return;
-    host.innerHTML=longAxis('4c',stage)+longAxis('2c',stage)+longAxis('3c',stage)+shortAxis(stage);
+    host.innerHTML=
+      bvApical(stage,'A4C','inferoseptal','anterolateral',{lado:"izq", tContacto:0.80, largo:160, curvatura:55},{ izq:[3,9,14], der:[6,12,16], apex:17 })
+     +bvApical(stage,'A2C','inferior','anterior',null,{ izq:[4,10,15], der:[1,7,13], apex:17 })
+     +bvApical(stage,'A3C','inferolateral','anteroseptal',{lado:"der", tContacto:0.38, largo:130, curvatura:65},{ izq:[5,11,16], der:[2,8,14], apex:17 })
+     +bvPel(stage)
+     +shortAxis(stage);
   };
   function legend(){
     return SEG_LABELS.map(function(l,i){ return '<div class="bull-leg-item"><div class="bull-dot" style="background:'+SEG_COLORS[i]+'"></div>'+l+' ('+i+')</div>'; }).join('');
