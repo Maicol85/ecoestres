@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EcoEstrés Smart — CeiboMed</title>
+<style>
+:root {
+  --bg:#0D1117; --bg2:#161B22; --bg3:#1C2333; --bg4:#212840;
+  --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.14);
+  --text:#E6EDF3; --text2:#8B949E; --text3:#484F58;
+  --accent:#E11D48; --accent2:#0D9488; --amber:#F59E0B;
+  --green:#22C55E; --yellow:#EAB308; --red:#EF4444;
+  --lad:#3B82F6; --rca:#EF4444; --lcx:#22C55E;
+  --radius:10px; --sidebar:220px; --header:54px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
+     display:flex;flex-direction:column;height:100%;font-size:13px;-webkit-font-smoothing:antialiased;}
+header{position:fixed;top:0;left:0;right:0;height:var(--header);
+  background:rgba(13,17,23,.95);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 18px;gap:12px;z-index:200;backdrop-filter:blur(12px);}
+.hdr-logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;letter-spacing:-.3px;}
+.hdr-logo .dot{color:var(--accent);}
+.hdr-logo .sub{font-size:11px;font-weight:500;color:var(--text2);padding:2px 8px;
+  background:rgba(14,148,136,.15);border-radius:20px;border:1px solid rgba(13,148,136,.25);margin-left:2px;}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.hdr-inst{font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);padding:3px 10px;border-radius:20px;}
+.hdr-save-btn{font-size:12px;font-weight:600;padding:6px 14px;border-radius:7px;
+  background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s;}
+.hdr-save-btn:hover{background:#be1840;}
+#hdr-status{font-size:11px;color:var(--green);font-weight:600;opacity:0;transition:opacity .3s;}
+.sidebar{position:fixed;top:var(--header);left:0;bottom:0;width:var(--sidebar);
+  background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding:14px 0;}
+.nav-section{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1.4px;
+  text-transform:uppercase;padding:10px 16px 4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 16px;
+  color:var(--text2);cursor:pointer;font-size:12px;font-weight:500;
+  border-left:2px solid transparent;transition:all .15s;}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.nav-item.active{background:rgba(225,29,72,.1);color:var(--text);border-left-color:var(--accent);}
+.nav-item .ni{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+main{margin-top:var(--header);margin-left:var(--sidebar);padding:20px;min-height:calc(100vh - var(--header));}
+.page{display:none;} .page.active{display:block;}
+.page-title{font-size:18px;font-weight:700;margin-bottom:3px;}
+.page-sub{font-size:12px;color:var(--text2);margin-bottom:18px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;}
+.card-head{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;
+  letter-spacing:.6px;padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;}
+.card-body{padding:16px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.fg{margin-bottom:11px;}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
+input,select,textarea{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:7px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent2);}
+input[readonly]{opacity:.6;cursor:default;}
+textarea{resize:vertical;min-height:72px;}
+.mini{padding:4px 7px;font-size:11px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
+  border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#fff;} .btn-primary:hover{background:#be1840;}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);}
+.btn-teal{background:var(--accent2);color:#fff;} .btn-teal:hover{filter:brightness(1.1);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;background:var(--bg3);
+  padding:4px;border-radius:9px;border:1px solid var(--border);}
+.tab-btn{padding:6px 13px;border-radius:7px;font-size:11px;font-weight:600;
+  cursor:pointer;border:none;background:transparent;color:var(--text2);font-family:inherit;transition:all .15s;}
+.tab-btn.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.tab-pane{display:none;} .tab-pane.active{display:block;}
+.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.kpi-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;}
+.kpi-val{font-size:26px;font-weight:800;line-height:1;color:var(--text);}
+.kpi-sub{font-size:10px;color:var(--text2);margin-top:3px;}
+.kpi.good{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.05);}
+.kpi.warn{border-color:rgba(234,179,8,.3);background:rgba(234,179,8,.05);}
+.kpi.danger{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05);}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:700;}
+.tag-green{background:rgba(34,197,94,.15);color:#22C55E;}
+.tag-yellow{background:rgba(234,179,8,.15);color:#EAB308;}
+.tag-red{background:rgba(239,68,68,.15);color:#EF4444;}
+.tag-blue{background:rgba(59,130,246,.15);color:#3B82F6;}
+.tag-teal{background:rgba(13,148,136,.15);color:#0D9488;}
+.pill{display:inline-flex;padding:2px 9px;border-radius:12px;font-size:10px;font-weight:600;
+  background:var(--bg4);color:var(--text2);margin:2px;border:1px solid var(--border2);}
+.warn-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;
+  padding:9px 12px;font-size:11px;color:#FDA4AF;margin:8px 0;line-height:1.5;display:flex;gap:8px;}
+.note-box{background:rgba(13,148,136,.07);border:1px solid rgba(13,148,136,.2);border-radius:8px;
+  padding:9px 12px;font-size:11px;color:var(--text2);margin:8px 0;line-height:1.5;display:flex;gap:8px;}
+.info-box{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;
+  padding:9px 12px;font-size:11px;color:#93C5FD;margin:8px 0;line-height:1.5;}
+.result-box{border-radius:9px;padding:12px 14px;font-size:12px;font-weight:600;line-height:1.5;display:none;margin-top:10px;}
+.result-box.show{display:block;}
+.rb-pos{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#FCA5A5;}
+.rb-neg{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86EFAC;}
+.rb-inc{background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);color:#FDE68A;}
+.prog-wrap{background:var(--bg3);border-radius:4px;height:7px;overflow:hidden;margin-top:5px;}
+.prog-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+.fill-green{background:var(--green);} .fill-amber{background:var(--amber);} .fill-red{background:var(--red);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--bg3);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.4px;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;} tr:hover td{background:rgba(255,255,255,.02);}
+.step-card{border:1px solid var(--border);border-radius:9px;margin-bottom:8px;overflow:hidden;}
+.step-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;
+  cursor:pointer;background:var(--bg3);font-size:12px;font-weight:700;transition:background .15s;user-select:none;}
+.step-hdr:hover{background:var(--bg4);}
+.step-hdr .arr{font-size:10px;transition:transform .2s;color:var(--text2);}
+.step-hdr.open .arr{transform:rotate(180deg);}
+.step-body{display:none;padding:14px;background:var(--bg2);}
+.step-body.open{display:block;}
+.bull-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.bull-legend{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.bull-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2);font-weight:600;}
+.bull-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.wmsi-box{text-align:center;background:var(--bg3);border:1px solid var(--border);
+  border-radius:9px;padding:10px 20px;min-width:120px;}
+.wmsi-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;}
+.wmsi-val{font-size:28px;font-weight:800;line-height:1.1;color:var(--text);}
+.wmsi-cat{font-size:11px;font-weight:600;margin-top:2px;}
+.ter-panel{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+.ter-card{border-radius:8px;padding:10px 12px;border:1px solid;}
+.ter-lad{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.25);}
+.ter-rca{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25);}
+.ter-lcx{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25);}
+.ter-name{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.ter-lad .ter-name{color:#3B82F6;} .ter-rca .ter-name{color:#EF4444;} .ter-lcx .ter-name{color:#22C55E;}
+.ter-status{font-size:11px;font-weight:700;margin-top:5px;}
+.crit-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.crit-item:last-child{border-bottom:none;}
+.crit-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.crit-txt{flex:1;line-height:1.45;}
+.crit-sub{font-size:10px;color:var(--text2);margin-top:2px;}
+.crit-met{font-size:10px;font-weight:700;margin-left:auto;flex-shrink:0;padding:2px 7px;border-radius:10px;align-self:center;}
+.crit-met.yes{background:rgba(239,68,68,.2);color:#FCA5A5;}
+.crit-met.no{background:rgba(34,197,94,.1);color:#86EFAC;}
+.crit-met.nd{background:var(--bg4);color:var(--text3);}
+.dobu-viab{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;}
+.dobu-viab.bifasico{background:rgba(245,158,11,.2);color:#F59E0B;}
+.dobu-viab.mejora{background:rgba(34,197,94,.15);color:var(--green);}
+.dobu-viab.necro{background:rgba(239,68,68,.15);color:var(--red);}
+.dobu-viab.nd{background:var(--bg4);color:var(--text3);}
+.img-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.img-slot{position:relative;border:1.5px dashed var(--border2);border-radius:9px;
+  background:var(--bg3);min-height:120px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;transition:border-color .2s;}
+.img-slot:hover{border-color:var(--accent2);}
+.img-slot.has-img{border-style:solid;border-color:var(--border);}
+.img-slot img{max-width:100%;max-height:200px;display:block;pointer-events:none;}
+.img-remove{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;
+  border:none;background:var(--red);color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.img-add-lbl{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--text2);pointer-events:none;}
+.img-add-lbl span{font-size:24px;}
+.pop{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+  padding:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:500;min-width:200px;display:none;}
+.pop.open{display:block;}
+.pop-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.pop-states{display:flex;flex-direction:column;gap:4px;}
+.pop-btn{padding:6px 10px;border-radius:7px;border:1px solid transparent;cursor:pointer;
+  font-size:11px;font-weight:700;font-family:inherit;background:transparent;transition:all .15s;text-align:left;}
+.pop-btn.sel{border-color:currentColor;}
+.pop-close{margin-top:10px;display:block;width:100%;padding:7px;border-radius:7px;
+  border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit;font-weight:600;}
+.mob-toggle{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;display:none;}
+.sidebar-overlay.open{display:block;}
+@media(max-width:820px){
+  :root{--sidebar:0px;}
+  .sidebar{transform:translateX(-240px);width:240px;transition:transform .25s;}
+  .sidebar.open{transform:translateX(0);}
+  main{margin-left:0;padding:14px;}
+  .mob-toggle{display:block;}
+  .grid2,.grid3,.grid4,.ter-panel{grid-template-columns:1fr;}
+}
+@media print{
+  header,.sidebar,.btn,.tabs,.sidebar-overlay{display:none!important;}
+  main{margin:0!important;padding:0!important;}
+  .page{display:block!important;} .page:not(.active){display:none!important;}
+}
+/* ═══ Tema claro ═══ */
+html[data-theme="light"]{
+  --bg:#F4F6FA; --bg2:#FFFFFF; --bg3:#EDF1F7; --bg4:#E3E9F2;
+  --border:rgba(12,18,28,.10); --border2:rgba(12,18,28,.18);
+  --text:#1A2330; --text2:#5A6675; --text3:#98A4B3;
+}
+html[data-theme="light"] header{background:rgba(255,255,255,.95);}
+/* ═══ Login ═══ */
+#ee-login{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;}
+#ee-login.hidden{display:none;}
+.ee-bars{display:flex;align-items:flex-end;gap:7px;height:72px;}
+.ee-bars .bar{width:16px;border-radius:4px 4px 0 0;animation:eeBar 1.2s ease-in-out infinite;}
+.ee-bars .bar:nth-child(1){height:35%;animation-delay:0s;background:var(--lad);}
+.ee-bars .bar:nth-child(2){height:60%;animation-delay:.15s;background:var(--accent);}
+.ee-bars .bar:nth-child(3){height:85%;animation-delay:.3s;background:var(--amber);}
+.ee-bars .bar:nth-child(4){height:50%;animation-delay:.45s;background:var(--green);}
+.ee-bars .bar:nth-child(5){height:70%;animation-delay:.6s;background:var(--accent2);}
+@keyframes eeBar{0%,100%{transform:scaleY(1);opacity:1;}50%{transform:scaleY(.5);opacity:.5;}}
+.ee-login-box{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:34px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;min-width:320px;box-shadow:0 8px 40px rgba(0,0,0,.35);}
+.ee-login-title{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.5px;}
+.ee-login-title .dot{color:var(--accent);}
+.ee-login-sub{font-size:12px;color:var(--text2);margin-top:-8px;}
+.ee-login-input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:15px;text-align:center;letter-spacing:4px;outline:none;font-family:inherit;}
+.ee-login-input:focus{border-color:var(--accent);}
+.ee-login-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}
+.ee-login-btn:hover{background:#be1840;}
+.ee-login-err{font-size:12px;color:var(--red);min-height:15px;text-align:center;}
+/* ═══ Header: logo editable + botones ═══ */
+.hdr-logo-edit{position:relative;min-width:30px;height:32px;padding:0 5px;border:1px dashed var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--bg3);flex-shrink:0;}
+.hdr-logo-edit img{max-width:104px;max-height:30px;object-fit:contain;display:none;}
+.hdr-logo-edit .ph{font-size:8px;color:var(--text2);display:flex;flex-direction:column;align-items:center;line-height:1.05;}
+.hdr-logo-del{position:absolute;top:-6px;right:-6px;width:15px;height:15px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:9px;line-height:1;cursor:pointer;padding:0;display:none;}
+.hdr-ibtn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;line-height:1;}
+.hdr-ibtn:hover{background:var(--bg3);color:var(--text);}
+.hdr-med{font-size:11px;color:var(--text2);white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis;}
+/* ═══ Panel médico (modal) ═══ */
+.ee-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;}
+.ee-modal.open{display:flex;}
+.ee-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px 22px;width:100%;max-width:400px;box-shadow:0 16px 50px rgba(0,0,0,.4);}
+.ee-modal-box h3{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.ee-modal-box .x{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;}
+.ee-modal-box label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px;}
+.ee-modal-box input{width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;}
+.ee-modal-box input:focus{border-color:var(--accent);}
+/* ═══ Botones fijos derecha ═══ */
+.ee-float{position:fixed;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:190;}
+.ee-float-btn{border:none;cursor:pointer;color:#fff;border-radius:8px 0 0 8px;padding:12px 10px;font-size:11px;font-weight:700;box-shadow:-3px 2px 10px rgba(0,0,0,.35);background:var(--accent);transition:filter .15s;white-space:nowrap;}
+.ee-float-btn:hover{filter:brightness(1.1);}
+.ee-float-lab{background:var(--accent2);}
+.ee-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--accent2);color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 8px 26px rgba(0,0,0,.4);z-index:9500;opacity:0;transition:opacity .25s;}
+@media print{ .ee-float,#ee-login,.ee-modal,.hdr-ibtn,.hdr-logo-edit,.hdr-logo-del,.ee-toast{display:none!important;} }
+</style>
+</head>
+<body>
+<!-- ═══ LOGIN ═══ -->
+<div id="ee-login">
+  <div class="ee-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+  <div class="ee-login-box">
+    <div class="ee-login-title">Ceibo<span class="dot">Med</span></div>
+    <div class="ee-login-sub">EcoEstrés Smart</div>
+    <input class="ee-login-input" id="ee-login-pwd" type="password" placeholder="Contraseña" autocomplete="off">
+    <button class="ee-login-btn" id="ee-login-btn">Ingresar</button>
+    <div class="ee-login-err" id="ee-login-err"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var PWD='EE1';
+  var scr=document.getElementById('ee-login'), inp=document.getElementById('ee-login-pwd'),
+      btn=document.getElementById('ee-login-btn'), err=document.getElementById('ee-login-err');
+  function tryLogin(){
+    if(inp.value===PWD){ scr.classList.add('hidden'); }
+    else{ err.textContent='Contraseña incorrecta'; inp.value=''; inp.focus(); setTimeout(function(){err.textContent='';},2000); }
+  }
+  btn.addEventListener('click',tryLogin);
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter')tryLogin(); });
+  setTimeout(function(){inp.focus();},60);
+})();
+</script>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<header>
+  <button class="mob-toggle" onclick="toggleSidebar()">☰</button>
+  <div class="hdr-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="#E11D48" opacity=".12"/>
+      <path d="M14 4C10 4 7 7 7 11c0 4 4 6 7 9 3-3 7-5 7-9 0-4-3-7-7-7Z" stroke="#E11D48" stroke-width="1.4" fill="none"/>
+      <path d="M14 20v4M8 22l3 0 1.5-3.5L14 26l1.5-4L17 22l3 0" stroke="#0D9488" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Ceibo<span class="dot">Med</span>
+    <span class="sub">EcoEstrés Smart</span>
+    <div class="hdr-logo-edit" id="ee-logo-wrap" onclick="eeLogoClick(event)" title="Logo del centro (click para cargar)">
+      <span class="ph" id="ee-logo-ph"><span style="font-size:13px">＋</span>Logo</span>
+      <img id="ee-logo-img" alt="logo del centro">
+      <button class="hdr-logo-del" id="ee-logo-del" onclick="eeLogoDel(event)" title="Quitar logo">✕</button>
+      <input type="file" id="ee-logo-file" accept="image/*" style="display:none" onchange="eeLogoUpload(event)">
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span id="hdr-status">✓ Guardado</span>
+    <span class="hdr-med" id="hdr-med" onclick="medOpen()" title="Datos del médico (click para editar)"></span>
+    <span class="hdr-inst" id="hdr-inst">GREMEDA · Artigas</span>
+    <button class="hdr-ibtn" onclick="medOpen()" title="Datos del médico">👤</button>
+    <button class="hdr-ibtn" id="ee-theme-btn" onclick="eeToggleTheme()" title="Modo día / noche">🌙</button>
+    <button class="hdr-ibtn" onclick="exportarDatos()" title="Exportar JSON">⬇️</button>
+    <label class="hdr-ibtn" title="Importar JSON" style="cursor:pointer">⬆️<input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
+    <button class="hdr-ibtn" onclick="nuevoEstudio()" title="Limpiar estudio">🗑</button>
+    <button class="hdr-save-btn" onclick="guardar()">💾 Guardar</button>
+  </div>
+</header>
+<nav class="sidebar" id="sidebar">
+  <div class="nav-section">Estudio</div>
+  <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
+  <div class="nav-item" onclick="goTo('paciente')"><span class="ni">👤</span> Paciente</div>
+  <div class="nav-item" onclick="goTo('protocolo')"><span class="ni">📋</span> Protocolo ABCD-FLPR</div>
+  <div class="nav-item" onclick="goTo('bullo')"><span class="ni">🎯</span> Bull's Eye 17 seg</div>
+  <div class="nav-section">Análisis</div>
+  <div class="nav-item" onclick="goTo('criterios')"><span class="ni">⚡</span> Criterios de positividad</div>
+  <div class="nav-item" onclick="goTo('territorio')"><span class="ni">🗺️</span> Territorio vascular</div>
+  <div class="nav-item" onclick="goTo('viabilidad')"><span class="ni">❤️</span> Viabilidad (bifásico)</div>
+  <div class="nav-item" onclick="goTo('cfvr')"><span class="ni">🩸</span> CFVR / Strain</div>
+  <div class="nav-item" onclick="goTo('ecg')"><span class="ni">📈</span> ECG / Arritmias</div>
+  <div class="nav-section">Informe</div>
+  <div class="nav-item" onclick="goTo('imagenes')"><span class="ni">🖼️</span> Imágenes</div>
+  <div class="nav-item" onclick="goTo('informe')"><span class="ni">📝</span> Informe narrativo</div>
+  <div class="nav-item" onclick="goTo('config')"><span class="ni">⚙️</span> Configuración</div>
+</nav>
+<main>
+
+<!-- ═══ ECO BASAL ═══ -->
+<div class="page active" id="page-ecobasal">
+  <div class="page-title">🫀 Ecocardiograma Basal</div>
+  <div class="page-sub">Evaluación estructural y funcional pre-estrés. Completa antes de iniciar el protocolo.</div>
+
+  <div class="tabs" id="ecobasal-tabs">
+    <button class="tab-btn active" onclick="ebTab('vi',this)">VI / Sist.</button>
+    <button class="tab-btn" onclick="ebTab('diast',this)">Diástole</button>
+    <button class="tab-btn" onclick="ebTab('vd',this)">VD</button>
+    <button class="tab-btn" onclick="ebTab('ai-ad',this)">AI / AD</button>
+    <button class="tab-btn" onclick="ebTab('aorta',this)">Aorta</button>
+    <button class="tab-btn" onclick="ebTab('valvulas',this)">Válvulas</button>
+    <button class="tab-btn" onclick="ebTab('pericardio',this)">Pericardio</button>
+  </div>
+
+  <!-- VI / SISTÓLICA -->
+  <div class="tab-pane active" id="ebtab-vi">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head">📐 Dimensiones VI (Modo M / 2D)</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label>DIVI (mm)</label><input type="number" id="eb-divi" step="0.1" placeholder="48" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label>DSVI (mm)</label><input type="number" id="eb-dsvi" step="0.1" placeholder="30" oninput="ebCalcFAC()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>SIVd (mm)</label><input type="number" id="eb-sivd" step="0.1" placeholder="9" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label>PPVId (mm)</label><input type="number" id="eb-ppvid" step="0.1" placeholder="9" oninput="ebCalcMasa()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Fracción acortamiento (%)</label><input type="number" id="eb-fac" readonly placeholder="—"></div>
+            <div class="fg"><label>Masa VI (g) — Devereux</label><input type="number" id="eb-masa" readonly placeholder="—"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Masa VI indexada (g/m²)</label><input type="number" id="eb-masa-i" readonly placeholder="—"></div>
+            <div class="fg"><label>SC (m²)</label><input type="number" id="eb-sc" step="0.01" placeholder="1.80" oninput="ebCalcMasa()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>RWT (grosor relativo pared)</label><input type="number" id="eb-rwt" readonly placeholder="—"></div>
+            <div class="fg"><label>Geometría VI</label><div id="eb-geom-vi" style="font-size:11px;font-weight:600;margin-top:8px;color:var(--text2)">—</div></div>
+          </div>
+          <div id="eb-vi-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">💓 Función Sistólica VI</div>
+        <div class="card-body">
+          <div class="fg"><label>FEVI — método</label>
+            <select id="eb-fevi-metodo">
+              <option value="visual">Visual / estimación</option>
+              <option value="simpson">Simpson biplanar (4C + 2C)</option>
+              <option value="teich">Teicholz (Modo M)</option>
+              <option value="3d">3D</option>
+            </select>
+          </div>
+          <div class="fg"><label>FEVI (%)</label><input type="number" id="eb-fevi" placeholder="60" oninput="ebEvalFEVI()"></div>
+          <div id="eb-fevi-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:10px"></div>
+
+          <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:6px">Simpson biplanar</div>
+          <div class="grid2">
+            <div class="fg"><label>Vol. diastólico 4C (mL)</label><input type="number" id="eb-vd4c" placeholder="120" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label>Vol. sistólico 4C (mL)</label><input type="number" id="eb-vs4c" placeholder="45" oninput="ebCalcSimpson()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Vol. diastólico 2C (mL)</label><input type="number" id="eb-vd2c" placeholder="115" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label>Vol. sistólico 2C (mL)</label><input type="number" id="eb-vs2c" placeholder="42" oninput="ebCalcSimpson()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>VTDVI biplano (mL)</label><input type="number" id="eb-vtd" readonly placeholder="—"></div>
+            <div class="fg"><label>VTSVI biplano (mL)</label><input type="number" id="eb-vts" readonly placeholder="—"></div>
+          </div>
+          <div class="fg"><label>FEVI Simpson biplano (%)</label><input type="number" id="eb-fevi-simpson" readonly placeholder="—"></div>
+          <div id="eb-fevi-simp-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+
+          <div style="height:1px;background:var(--border);margin:12px 0"></div>
+          <div class="fg"><label>GLS basal (%) — si disponible</label><input type="number" id="eb-gls" step="0.1" placeholder="-20" oninput="ebEvalGLS()"></div>
+          <div id="eb-gls-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIASTÓLICA -->
+  <div class="tab-pane" id="ebtab-diast">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head">🌊 Doppler transmitral</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label>Onda E (cm/s)</label><input type="number" id="eb-e" step="0.1" placeholder="70" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label>Onda A (cm/s)</label><input type="number" id="eb-a" step="0.1" placeholder="60" oninput="ebCalcDiast()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Relación E/A</label><input type="number" id="eb-ea" readonly placeholder="—"></div>
+            <div class="fg"><label>Tiempo desaceleración E (ms)</label><input type="number" id="eb-td" placeholder="200" oninput="ebCalcDiast()"></div>
+          </div>
+          <div class="fg"><label>TRIV (ms)</label><input type="number" id="eb-triv" placeholder="80"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ TD normal: 160–200 ms. TD &lt;160 ms con E/A &gt;2 → patrón restrictivo. TD &gt;220 ms con E/A &lt;0.8 → relajación alterada.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">📍 TDI — Doppler Tisular Mitral</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label>e' septal (cm/s)</label><input type="number" id="eb-e-sep" step="0.1" placeholder="8" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label>e' lateral (cm/s)</label><input type="number" id="eb-e-lat" step="0.1" placeholder="10" oninput="ebCalcDiast()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>e' promedio (cm/s)</label><input type="number" id="eb-e-prom" readonly placeholder="—"></div>
+            <div class="fg"><label>Relación E/e promedio</label><input type="number" id="eb-eeprom" readonly placeholder="—"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>E/e' septal</label><input type="number" id="eb-ee-sep" readonly placeholder="—"></div>
+            <div class="fg"><label>E/e' lateral</label><input type="number" id="eb-ee-lat" readonly placeholder="—"></div>
+          </div>
+          <div class="fg"><label>s' septal (cm/s)</label><input type="number" id="eb-s-sep" step="0.1" placeholder="8"></div>
+          <div id="eb-diast-res" style="font-size:12px;font-weight:600;margin-top:8px;line-height:1.6"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📊 Clasificación disfunción diastólica (ASE/EACVI 2016)</div>
+      <div class="card-body">
+        <div id="eb-diast-class" style="font-size:12px;color:var(--text2);line-height:1.7">Completar Doppler transmitral y TDI para clasificación automática.</div>
+        <div style="margin-top:12px">
+          <div class="fg"><label>Grado manual (si difiere del automático)</label>
+            <select id="eb-diast-grado">
+              <option value="">— Automático —</option>
+              <option value="normal">Normal</option>
+              <option value="gr1">Grado I — Relajación alterada</option>
+              <option value="gr2">Grado II — Pseudonormal</option>
+              <option value="gr3">Grado III — Restrictivo reversible</option>
+              <option value="gr3b">Grado III — Restrictivo irreversible</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VD -->
+  <div class="tab-pane" id="ebtab-vd">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head">📐 Dimensiones VD</div>
+        <div class="card-body">
+          <div class="fg"><label>DTDVD basal (mm) — apical 4C</label><input type="number" id="eb-vd-bas" step="0.1" placeholder="36" oninput="ebEvalVD()"></div>
+          <div class="fg"><label>DTDVD medio (mm)</label><input type="number" id="eb-vd-med" step="0.1" placeholder="28"></div>
+          <div class="fg"><label>DTDVD longitudinal (mm)</label><input type="number" id="eb-vd-long" step="0.1" placeholder="70"></div>
+          <div class="fg"><label>Grosor pared libre VD (mm)</label><input type="number" id="eb-vd-pared" step="0.1" placeholder="4" oninput="ebEvalVD()"></div>
+          <div id="eb-vd-dim-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ VD basal normal: ≤41 mm (♀) / ≤41 mm (♂). Pared libre &gt;5 mm = hipertrofia VD.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">💓 Función sistólica VD</div>
+        <div class="card-body">
+          <div class="fg"><label>TAPSE (mm)</label><input type="number" id="eb-tapse" step="0.1" placeholder="22" oninput="ebEvalVD()"></div>
+          <div id="eb-tapse-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+          <div class="fg"><label>S' tricuspídea TDI (cm/s)</label><input type="number" id="eb-s-tric" step="0.1" placeholder="12" oninput="ebEvalVD()"></div>
+          <div id="eb-stric-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+          <div class="grid2">
+            <div class="fg"><label>Área diastólica VD (cm²)</label><input type="number" id="eb-vd-ad" step="0.1" placeholder="16" oninput="ebCalcFAC_VD()"></div>
+            <div class="fg"><label>Área sistólica VD (cm²)</label><input type="number" id="eb-vd-as" step="0.1" placeholder="8" oninput="ebCalcFAC_VD()"></div>
+          </div>
+          <div class="fg"><label>FAC VD (%)</label><input type="number" id="eb-fac-vd" readonly placeholder="—"></div>
+          <div id="eb-fac-vd-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ TAPSE normal: ≥17 mm. S' normal: ≥9.5 cm/s. FAC normal: ≥35%.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI / AD -->
+  <div class="tab-pane" id="ebtab-ai-ad">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head">🫁 Aurícula Izquierda</div>
+        <div class="card-body">
+          <div class="fg"><label>Diámetro AI — paraesternal (mm)</label><input type="number" id="eb-ai-diam" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
+          <div id="eb-ai-diam-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+          <div class="grid2">
+            <div class="fg"><label>Vol. AI 4C (mL)</label><input type="number" id="eb-ai-vol4c" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
+            <div class="fg"><label>Vol. AI 2C (mL)</label><input type="number" id="eb-ai-vol2c" step="0.1" placeholder="36" oninput="ebEvalAI()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Vol. AI biplano (mL)</label><input type="number" id="eb-ai-vol" readonly placeholder="—"></div>
+            <div class="fg"><label>Vol. AI indexado (mL/m²)</label><input type="number" id="eb-ai-vol-i" readonly placeholder="—"></div>
+          </div>
+          <div id="eb-ai-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ Vol. AI indexado normal: ≤34 mL/m². &gt;34: leve. &gt;41: moderado. &gt;48: severo.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">🫁 Aurícula Derecha</div>
+        <div class="card-body">
+          <div class="fg"><label>Área AD (cm²)</label><input type="number" id="eb-ad-area" step="0.1" placeholder="14" oninput="ebEvalAD()"></div>
+          <div id="eb-ad-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+          <div class="fg"><label>VCI (mm)</label><input type="number" id="eb-vci" step="0.1" placeholder="18" oninput="ebCalcPAD()"></div>
+          <div class="fg"><label>Colapso VCI con inspiración</label>
+            <select id="eb-vci-colapso" onchange="ebCalcPAD()">
+              <option value="">—</option>
+              <option value=">50">Normal &gt;50%</option>
+              <option value="<50">Reducido &lt;50%</option>
+              <option value="no">Sin colapso</option>
+            </select>
+          </div>
+          <div class="fg"><label>PAD estimada (mmHg)</label><input type="number" id="eb-pad" readonly placeholder="—"></div>
+          <div id="eb-pad-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ Área AD normal: ≤18 cm². VCI &lt;21 mm + colapso &gt;50% → PAD 3 mmHg. VCI &gt;21 mm o colapso &lt;50% → PAD 8 mmHg. Ambos patológicos → PAD 15 mmHg.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AORTA -->
+  <div class="tab-pane" id="ebtab-aorta">
+    <div class="card">
+      <div class="card-head">🩸 Aorta</div>
+      <div class="card-body">
+        <div class="grid3">
+          <div class="fg"><label>Anillo aórtico (mm)</label><input type="number" id="eb-ao-anillo" step="0.1" placeholder="22"></div>
+          <div class="fg"><label>Senos de Valsalva (mm)</label><input type="number" id="eb-ao-senos" step="0.1" placeholder="33" oninput="ebEvalAorta()"></div>
+          <div class="fg"><label>Unión sinotubular (mm)</label><input type="number" id="eb-ao-ust" step="0.1" placeholder="28"></div>
+        </div>
+        <div class="grid3">
+          <div class="fg"><label>Aorta ascendente (mm)</label><input type="number" id="eb-ao-asc" step="0.1" placeholder="32" oninput="ebEvalAorta()"></div>
+          <div class="fg"><label>Arco aórtico (mm)</label><input type="number" id="eb-ao-arco" step="0.1" placeholder="28"></div>
+          <div class="fg"><label>Aorta descendente (mm)</label><input type="number" id="eb-ao-desc" step="0.1" placeholder="24"></div>
+        </div>
+        <div id="eb-ao-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+        <div class="note-box" style="margin-top:8px">ℹ️ Senos de Valsalva: ≤40 mm normal (♂), ≤36 mm (♀). Aorta ascendente: ≤38 mm. Indexar en pacientes con SC muy diferente a 1.7 m².</div>
+        <div class="fg" style="margin-top:10px"><label>Observaciones aorta</label>
+          <textarea id="eb-ao-obs" placeholder="Ej: Dilatación moderada de senos de Valsalva. Sin elongación ni calcificación…" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VÁLVULAS -->
+  <div class="tab-pane" id="ebtab-valvulas">
+    <div class="grid2">
+      <!-- MITRAL -->
+      <div class="card">
+        <div class="card-head">💚 Válvula Mitral</div>
+        <div class="card-body">
+          <div class="fg"><label>Morfología</label>
+            <select id="eb-vm-morf">
+              <option value="normal">Normal</option>
+              <option value="mmm">Engrosamiento / Mixomatosa</option>
+              <option value="prolapso">Prolapso</option>
+              <option value="calcificada">Calcificada / Restricción</option>
+              <option value="reumatica">Reumática</option>
+              <option value="bioprotes">Bioprótesis</option>
+              <option value="mec">Prótesis mecánica</option>
+            </select>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>GM medio (mmHg)</label><input type="number" id="eb-vm-gm" step="0.1" placeholder="3" oninput="ebEvalVM()"></div>
+            <div class="fg"><label>TP (ms)</label><input type="number" id="eb-vm-tp" placeholder="60" oninput="ebEvalVM()"></div>
+          </div>
+          <div class="fg"><label>Área válvular por PHT (cm²)</label><input type="number" id="eb-vm-area-pht" readonly placeholder="—"></div>
+          <div class="fg"><label>IM (insuficiencia mitral)</label>
+            <select id="eb-im-grado">
+              <option value="no">Sin IM</option>
+              <option value="leve">Leve (I)</option>
+              <option value="leve-mod">Leve-moderada (II)</option>
+              <option value="mod">Moderada (III)</option>
+              <option value="sev">Severa (IV)</option>
+            </select>
+          </div>
+          <div id="eb-vm-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- AÓRTICA -->
+      <div class="card">
+        <div class="card-head">🔴 Válvula Aórtica</div>
+        <div class="card-body">
+          <div class="fg"><label>Morfología</label>
+            <select id="eb-va-morf">
+              <option value="tricusp">Tricúspide normal</option>
+              <option value="bicusp">Bicúspide</option>
+              <option value="calcif">Esclerosis / Calcificación</option>
+              <option value="reumatica">Reumática</option>
+              <option value="bioprotes">Bioprótesis</option>
+              <option value="mec">Prótesis mecánica</option>
+              <option value="tavi">TAVI</option>
+            </select>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Vmax (m/s)</label><input type="number" id="eb-va-vmax" step="0.1" placeholder="1.2" oninput="ebEvalVA()"></div>
+            <div class="fg"><label>GM medio (mmHg)</label><input type="number" id="eb-va-gm" step="0.1" placeholder="5" oninput="ebEvalVA()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>ITVao (cm)</label><input type="number" id="eb-va-itv" step="0.1" placeholder="22" oninput="ebCalcAVA()"></div>
+            <div class="fg"><label>DTSVI (mm)</label><input type="number" id="eb-va-dtsvi" step="0.1" placeholder="22" oninput="ebCalcAVA()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>ITVtsvi (cm)</label><input type="number" id="eb-va-itvtsvi" step="0.1" placeholder="18" oninput="ebCalcAVA()"></div>
+            <div class="fg"><label>AVA por ecuación continuidad (cm²)</label><input type="number" id="eb-va-ava" readonly placeholder="—"></div>
+          </div>
+          <div class="fg"><label>IAo (insuficiencia aórtica)</label>
+            <select id="eb-iao-grado">
+              <option value="no">Sin IAo</option>
+              <option value="leve">Leve</option>
+              <option value="leve-mod">Leve-moderada</option>
+              <option value="mod">Moderada</option>
+              <option value="sev">Severa</option>
+            </select>
+          </div>
+          <div id="eb-va-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+        </div>
+      </div>
+
+      <!-- TRICÚSPIDE -->
+      <div class="card">
+        <div class="card-head">🟡 Válvula Tricúspide</div>
+        <div class="card-body">
+          <div class="fg"><label>Morfología</label>
+            <select id="eb-vt-morf">
+              <option value="normal">Normal</option>
+              <option value="dilatacion">Dilatación anular</option>
+              <option value="calcif">Calcificación</option>
+              <option value="reumatica">Reumática</option>
+            </select>
+          </div>
+          <div class="fg"><label>Velocidad máx. IT (m/s)</label><input type="number" id="eb-it-vmax" step="0.1" placeholder="2.5" oninput="ebCalcPSAP()"></div>
+          <div class="fg"><label>Gradiente IT (mmHg)</label><input type="number" id="eb-it-grad" readonly placeholder="—"></div>
+          <div class="fg"><label>PSAP estimada (mmHg)</label><input type="number" id="eb-psap" readonly placeholder="—"></div>
+          <div id="eb-psap-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+          <div class="fg" style="margin-top:8px"><label>IT (insuficiencia tricuspídea)</label>
+            <select id="eb-it-grado">
+              <option value="no">Sin IT / mínima (fisiológica)</option>
+              <option value="leve">Leve</option>
+              <option value="mod">Moderada</option>
+              <option value="sev">Severa</option>
+            </select>
+          </div>
+          <div class="note-box" style="margin-top:8px">ℹ️ PSAP = gradiente IT + PAD. PSAP &gt;40 mmHg = HTP moderada. &gt;60 mmHg = severa.</div>
+        </div>
+      </div>
+
+      <!-- PULMONAR -->
+      <div class="card">
+        <div class="card-head">🟢 Válvula Pulmonar</div>
+        <div class="card-body">
+          <div class="fg"><label>Morfología</label>
+            <select id="eb-vp-morf">
+              <option value="normal">Normal</option>
+              <option value="calcif">Calcificación</option>
+              <option value="displasica">Displásica</option>
+            </select>
+          </div>
+          <div class="fg"><label>Gradiente máximo VP (mmHg)</label><input type="number" id="eb-vp-grad" step="0.1" placeholder="8" oninput="ebEvalVP()"></div>
+          <div id="eb-vp-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+          <div class="fg" style="margin-top:8px"><label>IP (insuficiencia pulmonar)</label>
+            <select id="eb-ip-grado">
+              <option value="no">Sin IP / fisiológica</option>
+              <option value="leve">Leve</option>
+              <option value="mod">Moderada</option>
+              <option value="sev">Severa</option>
+            </select>
+          </div>
+          <div class="fg"><label>PSVD (mmHg)</label><input type="number" id="eb-psvd" step="0.1" placeholder="25"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERICARDIO -->
+  <div class="tab-pane" id="ebtab-pericardio">
+    <div class="card">
+      <div class="card-head">🫧 Pericardio</div>
+      <div class="card-body">
+        <div class="fg"><label>Derrame pericárdico</label>
+          <select id="eb-peri-derrame">
+            <option value="no">Sin derrame</option>
+            <option value="minimo">Mínimo (&lt;5 mm)</option>
+            <option value="leve">Leve (5–10 mm)</option>
+            <option value="mod">Moderado (10–20 mm)</option>
+            <option value="grande">Grande (&gt;20 mm)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Localización</label>
+          <select id="eb-peri-loc">
+            <option value="">No aplica</option>
+            <option value="circunferencial">Circunferencial</option>
+            <option value="posterior">Predominio posterior</option>
+            <option value="anterior">Predominio anterior</option>
+            <option value="localizado">Localizado</option>
+          </select>
+        </div>
+        <div class="fg"><label>Signos de taponamiento</label>
+          <select id="eb-peri-tapon">
+            <option value="no">No</option>
+            <option value="riesgo">En riesgo (colapso auricular)</option>
+            <option value="si">Presente (colapso VD + variación respiratoria)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Engrosamiento / Calcificación pericárdica</label>
+          <select id="eb-peri-eng">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+        <div class="fg"><label>Observaciones</label>
+          <textarea id="eb-peri-obs" placeholder="Descripción del derrame, características, sospecha etiológica…" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ═══ PACIENTE ═══ -->
+<div class="page" id="page-paciente">
+  <div class="page-title">👤 Datos del paciente y estudio</div>
+  <div class="page-sub">Información clínica base y probabilidad pre-test ESC 2019.</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-head">🧾 Datos del paciente</div>
+      <div class="card-body">
+        <div class="grid2">
+          <div class="fg"><label>Apellido y nombre</label><input id="p-nombre" placeholder="García, Juan"></div>
+          <div class="fg"><label>HC / ID</label><input id="p-hc" placeholder="123456"></div>
+        </div>
+        <div class="grid3">
+          <div class="fg"><label>Fecha de nacimiento</label><input type="date" id="p-fnac" oninput="calcEdad()"></div>
+          <div class="fg"><label>Edad (años)</label><input type="number" id="p-edad" placeholder="55" oninput="onEdadChange()"></div>
+          <div class="fg"><label>Sexo</label><select id="p-sexo" onchange="ptpCad()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Fecha del estudio</label><input type="date" id="p-fecha"></div>
+          <div class="fg"><label>Médico solicitante</label><input id="p-medico" placeholder="Dr. Pérez"></div>
+        </div>
+        <div class="fg"><label>Indicación clínica</label>
+          <select id="p-ind"><option value="">Seleccionar…</option><option>Diagnóstico de enfermedad coronaria</option><option>Evaluación pronóstica de EC conocida</option><option>Viabilidad miocárdica</option><option>Evaluación preoperatoria</option><option>Evaluación de valvulopatía dinámica</option><option>Eco estrés diastólico</option><option>Seguimiento post-revascularización</option><option>Otro</option></select>
+        </div>
+        <div class="fg"><label>Factores de riesgo</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-hta"> HTA</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-dm"> DM</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-dislip"> Dislipemia</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-tab"> Tabaquismo</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-obes"> Obesidad</label>
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-ahf"> AHF EC</label>
+          </div>
+        </div>
+        <div class="fg"><label>Medicación relevante</label><input id="p-medicacion" placeholder="Atenolol 50mg, AAS 100mg…"></div>
+        <div class="fg"><label>Beta-bloqueantes suspendidos</label>
+          <select id="p-bb"><option value="">No aplica</option><option value="si">Sí — 48h antes</option><option value="no">No suspendidos</option></select>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-head">🎯 Probabilidad pre-test (ESC 2019)</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label>Síntomas</label>
+              <select id="ptp-sint" onchange="ptpCad()"><option value="">Seleccionar…</option><option value="asint">Asintomático</option><option value="atip">Dolor atípico</option><option value="tip">Dolor típico</option></select>
+            </div>
+            <div>
+              <div id="ptp-result" style="font-size:13px;font-weight:700;margin-top:20px"></div>
+              <div id="ptp-rec" style="font-size:11px;color:var(--text2);line-height:1.4;margin-top:4px"></div>
+            </div>
+          </div>
+          <div id="ptp-bar-wrap" style="display:none;margin-top:8px">
+            <div class="prog-wrap"><div class="prog-fill" id="ptp-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">🏃 Tipo de estrés y protocolo</div>
+        <div class="card-body">
+          <div class="fg"><label>Protocolo</label>
+            <select id="p-estres" onchange="onEstresChange()">
+              <option value="ejercicio">Ejercicio (treadmill / bicicleta)</option>
+              <option value="dobutamina">Dobutamina</option>
+              <option value="dipiridamol">Dipiridamol</option>
+              <option value="adenosina">Adenosina</option>
+            </select>
+          </div>
+          <div id="dobu-wrap" style="display:none">
+            <div class="note-box">ℹ️ Dobutamina: 5→10→20→30→40 mcg/kg/min (etapas de 3 min). Atropina hasta 1mg si no alcanza FC objetivo.</div>
+            <div class="fg" style="margin-top:6px"><label>Peso (kg)</label><input type="number" id="p-peso" placeholder="70" oninput="calcDobuDosis()"></div>
+          </div>
+          <div id="dipiri-wrap" style="display:none">
+            <div class="note-box">ℹ️ Dipiridamol: 0.56 mg/kg en 4min → esperar 4min → 0.28 mg/kg adicional si no hay respuesta (total 0.84 mg/kg en 10min).</div>
+          </div>
+          <div class="fg" style="margin-top:6px"><label>Contraste ecocardiográfico</label>
+            <select id="p-contraste"><option value="no">Sin contraste</option><option value="si">Con contraste (realce endocárdico)</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">📊 Parámetros hemodinámicos</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label>FC basal (lpm)</label><input type="number" id="b-fc-bas" placeholder="70"></div>
+            <div class="fg"><label>PA basal (mmHg)</label><input id="b-pa-bas" placeholder="130/80"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>FC máxima alcanzada</label><input type="number" id="b-fc-max" placeholder="145" oninput="calcFCpct()"></div>
+            <div class="fg"><label>FC máxima teórica</label><input type="number" id="b-fc-teo" readonly placeholder="—"></div>
+          </div>
+          <div class="fg">
+            <label>% FC máx. teórica — <span id="fc-pct-txt" style="color:var(--text)"></span></label>
+            <div class="prog-wrap"><div class="prog-fill" id="fc-pct-bar" style="width:0%"></div></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>PA pico (mmHg)</label><input id="b-pa-pico" placeholder="180/90"></div>
+            <div class="fg"><label>METs alcanzados</label><input type="number" id="b-mets" step="0.5" placeholder="8.5"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Duración estrés (min)</label><input type="number" id="b-dur" placeholder="8"></div>
+            <div class="fg"><label>Motivo suspensión</label>
+              <select id="b-stop"><option value="">—</option><option>Protocolo completado</option><option>FC objetivo alcanzada</option><option>Angina</option><option>Cambios ECG</option><option>Hipotensión</option><option>Fatiga/disnea</option><option>Arritmia</option><option>Decisión médica</option></select>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Síntomas durante estrés</label>
+              <select id="b-sintomas"><option value="no">Sin síntomas</option><option value="angina">Angina típica</option><option value="angina-at">Equivalente anginoso</option><option value="disnea">Disnea de esfuerzo</option><option value="palpitaciones">Palpitaciones</option><option value="mareo">Mareo/presíncope</option></select>
+            </div>
+            <div class="fg"><label>¿Estrés adecuado?</label>
+              <select id="b-adec"><option value="">—</option><option value="si">Sí ≥85% FC teórica</option><option value="no">No — subóptimo</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>Atropina</label>
+            <div style="display:flex;gap:12px;align-items:center;margin-top:4px;flex-wrap:wrap">
+              <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" id="b-atropina-chk"> Administrada</label>
+              <input id="b-atropina-dosis" placeholder="dosis (ej. 0.5mg)" style="width:160px">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROTOCOLO ABCD-FLPR ═══ -->
+<div class="page" id="page-protocolo">
+  <div class="page-title">📋 Protocolo ABCD-FLPR</div>
+  <div class="page-sub">Evaluación sistemática AHA/ESC. Hacer click en cada letra para expandir.</div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅐 Adecuación del estrés</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid2">
+      <div class="fg"><label>FC objetivo (85% FCmax teórica)</label><input id="a-fc-obj" readonly placeholder="—"></div>
+      <div class="fg"><label>Dosis dobutamina máxima</label><input id="a-dosis-dobu" placeholder="40 mcg/kg/min"></div>
+    </div>
+    <div style="margin:6px 0 4px;font-size:11px;font-weight:700;color:var(--accent2)">Criterios:</div>
+    <div><span class="pill">FC ≥85% máx. teórica</span><span class="pill">Dobu ≥40 mcg/kg/min</span><span class="pill">Dipiri 0.84 mg/kg/10min</span><span class="pill">Adenosina 140 mcg/kg/min</span></div>
+    <div class="note-box" style="margin-top:8px">ℹ️ FCmax teórica = 220 − edad. Con dobutamina, agregar atropina hasta 1mg si no alcanza FC objetivo.</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅑 ECG basal y durante el estrés</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid2">
+      <div class="fg"><label>ECG basal</label><select id="b-ecg-bas"><option value="normal">Normal</option><option value="bri">BRI</option><option value="brd">BRD</option><option value="hvi">HVI con strain</option><option value="st">Cambios ST basales</option><option value="wcpw">WPW</option><option value="otro">Otro</option></select></div>
+      <div class="fg"><label>Cambios ECG durante estrés</label><select id="b-ecg-estres"><option value="no">Sin cambios significativos</option><option value="st-dep">Depresión ST ≥1mm horiz./desc.</option><option value="st-ele">Elevación ST ≥1mm</option><option value="arritmia">Arritmia significativa</option><option value="bri-func">BRI funcional (FC-dependiente)</option></select></div>
+    </div>
+    <div class="fg"><label>Descripción ECG detallada</label><textarea id="b-ecg-desc" placeholder="ST infradesnivelado 1.5mm en V4-V6 en pico de estrés, normaliza en recuperación…" rows="2"></textarea></div>
+    <div class="warn-box">⚠️ BRI durante estrés a FC &lt;125 lpm → origen isquémico (DA). BRI a FC &gt;125 lpm → funcional.</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅒 Contractilidad (motilidad parietal)</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="note-box">ℹ️ Ver bull's eye en módulo "Bull's Eye 17 seg". Aquí se registra la evaluación global.</div>
+    <div style="overflow-x:auto;margin-top:10px">
+      <table>
+        <tr><th>Parámetro</th><th>Basal</th><th>Pico estrés</th><th>Recuperación</th></tr>
+        <tr><td>Motilidad global</td>
+          <td><select id="c-mot-bas" class="mini" style="width:auto"><option value="normal">Normal</option><option value="hipog">Hipokinesia global</option><option value="seg">Alteración segmentaria</option></select></td>
+          <td><select id="c-mot-pic" class="mini" style="width:auto"><option value="normal">Normal</option><option value="nueva">Nueva alteración segmentaria</option><option value="empeora">Empeoramiento</option><option value="mejora">Mejoría (viabilidad)</option></select></td>
+          <td><select id="c-mot-rec" class="mini" style="width:auto"><option value="normaliza">Normaliza</option><option value="persiste">Persiste alterada</option></select></td>
+        </tr>
+        <tr><td>FEVI estimada (%)</td>
+          <td><input type="number" id="c-fevi-bas" placeholder="60" class="mini" oninput="onFeviChange()"></td>
+          <td><input type="number" id="c-fevi-pic" placeholder="65" class="mini" oninput="onFeviChange()"></td>
+          <td><input type="number" id="c-fevi-rec" placeholder="58" class="mini"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="note-box" style="margin-top:10px">ℹ️ Isquemia: nueva alteración en ≥2 segmentos adyacentes o empeoramiento de alteración previa. Viabilidad: mejoría con dosis bajas de dobutamina (5–10 mcg/kg/min).</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅓 Dilatación del VI y otros signos</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid2">
+      <div class="fg"><label>Dilatación transitoria VI</label><select id="d-dilat" onchange="evalCriterios()"><option value="no">No presente</option><option value="si">Presente — isquemia multivaso</option></select></div>
+      <div class="fg"><label>IM inducida</label><select id="d-im" onchange="evalCriterios()"><option value="no">No</option><option value="leve">Leve</option><option value="mod">Moderada</option><option value="sev">Severa</option></select></div>
+    </div>
+    <div class="fg"><label>Respuesta de PA al estrés</label><select id="d-pa" onchange="evalCriterios()"><option value="normal">Normal (↑ PAS &gt;10mmHg)</option><option value="hipo">Hipotensión (↓ PAS &gt;10mmHg) — signo ominoso</option><option value="insuf">Respuesta insuficiente</option><option value="hiper">Hipertensiva excesiva</option></select></div>
+    <div class="warn-box">⚠️ Hipotensión con estrés = caída &gt;10mmHg PAS basal → suspender inmediatamente. Marcador de disfunción grave.</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅕 Flujo coronario (CFVR)</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid2">
+      <div class="fg"><label>CFVR DA (resumen)</label><input type="number" id="f-cfvr-da" step="0.1" placeholder="2.5" oninput="evalCFVRprot()"></div>
+      <div id="f-cfvr-da-res" style="font-size:11px;font-weight:600;align-self:flex-end;padding-bottom:11px"></div>
+    </div>
+    <div class="note-box">ℹ️ Ver módulo CFVR/Strain para evaluación completa de las 3 arterias.</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅛 Lung B-lines (líneas B pulmonares)</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid2">
+      <div class="fg"><label>Líneas B basales</label><select id="l-bas"><option value="0">0 — Normal</option><option value="1">1-2/campo — Borderline</option><option value="2">≥3/campo — Congestión</option></select></div>
+      <div class="fg"><label>Líneas B post-estrés</label><select id="l-post" onchange="evalCriterios()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
+    </div>
+    <div class="fg"><label>Zonas evaluadas</label><input id="l-zonas" placeholder="Ej. 4 zonas anteriores bilaterales"></div>
+    <div class="note-box">ℹ️ Líneas B post-estrés ≥3/campo → congestión venocapilar inducida → disfunción diastólica con estrés o isquemia con falla VI.</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅟 Presión (estimación hemodinámica)</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid2">
+      <div>
+        <div class="grid2">
+          <div class="fg"><label>PSAP basal (mmHg)</label><input type="number" id="p-psap-bas" placeholder="28"></div>
+          <div class="fg"><label>PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP()"></div>
+        </div>
+        <div id="p-psap-res" style="font-size:11px;font-weight:600;margin-bottom:8px"></div>
+        <div class="fg"><label>E/e' basal</label><input type="number" id="p-ee-bas" step="0.1" placeholder="8.5" oninput="evalEE()"></div>
+        <div id="p-ee-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+      </div>
+      <div>
+        <div class="fg"><label>E/e' en pico de estrés</label><input type="number" id="p-ee-pic" step="0.1" placeholder="13" oninput="evalEEpico()"></div>
+        <div id="p-ee-pic-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+        <div class="fg"><label>Patrón diastólico basal</label><select id="p-diast"><option value="normal">Normal</option><option value="gr1">Grado I — Relajación alterada</option><option value="gr2">Grado II — Pseudonormal</option><option value="gr3">Grado III — Restrictivo</option></select></div>
+      </div>
+    </div>
+    <div class="note-box">ℹ️ PSAP pico &gt;60mmHg o aumento &gt;20mmHg = HTP inducida. E/e' pico ≥15 = PCP elevada (eco estrés diastólico positivo).</div>
+  </div></div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅡 Recuperación</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="grid3">
+      <div class="fg"><label>Tiempo recup. motilidad (min)</label><input type="number" id="r-trecup" step="0.5" placeholder="3"></div>
+      <div class="fg"><label>FC a 3 min recuperación</label><input type="number" id="r-fc3" placeholder="90"></div>
+      <div class="fg"><label>Síntomas en recuperación</label><select id="r-sint"><option value="no">Sin síntomas</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="arritmia">Arritmia</option></select></div>
+    </div>
+    <div class="note-box">ℹ️ Recuperación tardía (&gt;3 min) de la motilidad → isquemia severa. Persistencia en reposo → necrosis o aturdimiento miocárdico.</div>
+  </div></div>
+</div>
+
+<!-- ═══ BULL'S EYE ═══ -->
+<div class="page" id="page-bullo">
+  <div class="page-title">🎯 Bull's Eye — 17 segmentos AHA</div>
+  <div class="page-sub">Click para ciclar • Click derecho para selección directa • WMSI automático.</div>
+  <div class="tabs" id="bull-tabs">
+    <button class="tab-btn active" onclick="switchBullTab('basal',this)">Basal</button>
+    <button class="tab-btn" onclick="switchBullTab('pico',this)">Pico estrés</button>
+    <button class="tab-btn" onclick="switchBullTab('recup',this)">Recuperación</button>
+    <button class="tab-btn" onclick="switchBullTab('comp',this)">Comparativa ×3</button>
+  </div>
+  <div class="tab-pane active" id="bull-tab-basal"><div class="card"><div class="card-body">
+    <div class="bull-wrap">
+      <div class="bull-legend">
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#6B7280"></div>No eval. (0)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#22C55E"></div>Normal (1)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#EAB308"></div>Hipokinesia (2)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#F97316"></div>Akinesia (3)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#8B5CF6"></div>Diskinesia (4)</div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);text-align:center">Click = ciclar · Click derecho = selección directa</div>
+      <svg id="bull-svg-basal" viewBox="0 0 340 340" width="300" height="300" style="cursor:pointer;flex-shrink:0"></svg>
+      <div class="wmsi-box"><div class="wmsi-lbl">WMSI Basal</div><div class="wmsi-val" id="wmsi-val-basal">—</div><div class="wmsi-cat" id="wmsi-cat-basal"></div></div>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="resetBull('basal')">↺ Reiniciar</button>
+      <button class="btn btn-ghost" onclick="setAllBull('basal',1)">Todo normal</button>
+    </div>
+  </div></div></div>
+
+  <div class="tab-pane" id="bull-tab-pico"><div class="card"><div class="card-body">
+    <div class="bull-wrap">
+      <div class="bull-legend">
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#6B7280"></div>No eval. (0)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#22C55E"></div>Normal (1)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#EAB308"></div>Hipokinesia (2)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#F97316"></div>Akinesia (3)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#8B5CF6"></div>Diskinesia (4)</div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);text-align:center">Click = ciclar · Click derecho = selección directa</div>
+      <svg id="bull-svg-pico" viewBox="0 0 340 340" width="300" height="300" style="cursor:pointer;flex-shrink:0"></svg>
+      <div class="wmsi-box"><div class="wmsi-lbl">WMSI Pico</div><div class="wmsi-val" id="wmsi-val-pico">—</div><div class="wmsi-cat" id="wmsi-cat-pico"></div></div>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="resetBull('pico')">↺ Reiniciar</button>
+      <button class="btn btn-ghost" onclick="copyBull('basal','pico')">Copiar desde basal</button>
+    </div>
+  </div></div></div>
+
+  <div class="tab-pane" id="bull-tab-recup"><div class="card"><div class="card-body">
+    <div class="bull-wrap">
+      <div class="bull-legend">
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#6B7280"></div>No eval. (0)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#22C55E"></div>Normal (1)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#EAB308"></div>Hipokinesia (2)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#F97316"></div>Akinesia (3)</div>
+        <div class="bull-leg-item"><div class="bull-dot" style="background:#8B5CF6"></div>Diskinesia (4)</div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);text-align:center">Click = ciclar · Click derecho = selección directa</div>
+      <svg id="bull-svg-recup" viewBox="0 0 340 340" width="300" height="300" style="cursor:pointer;flex-shrink:0"></svg>
+      <div class="wmsi-box"><div class="wmsi-lbl">WMSI Recuperación</div><div class="wmsi-val" id="wmsi-val-recup">—</div><div class="wmsi-cat" id="wmsi-cat-recup"></div></div>
+    </div>
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-ghost" onclick="resetBull('recup')">↺ Reiniciar</button>
+      <button class="btn btn-ghost" onclick="copyBull('pico','recup')">Copiar desde pico</button>
+    </div>
+  </div></div></div>
+
+  <div class="tab-pane" id="bull-tab-comp"><div class="card"><div class="card-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase">BASAL</div>
+        <svg id="bull-comp-basal" viewBox="0 0 340 340" width="220" height="220" style="cursor:default"></svg>
+        <div class="wmsi-box" style="margin-top:8px;padding:7px 12px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:20px" id="wmsi-comp-basal">—</div></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:8px;text-transform:uppercase">PICO ESTRÉS</div>
+        <svg id="bull-comp-pico" viewBox="0 0 340 340" width="220" height="220" style="cursor:default"></svg>
+        <div class="wmsi-box" style="margin-top:8px;padding:7px 12px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:20px" id="wmsi-comp-pico">—</div></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:8px;text-transform:uppercase">RECUPERACIÓN</div>
+        <svg id="bull-comp-recup" viewBox="0 0 340 340" width="220" height="220" style="cursor:default"></svg>
+        <div class="wmsi-box" style="margin-top:8px;padding:7px 12px"><div class="wmsi-lbl">WMSI</div><div class="wmsi-val" style="font-size:20px" id="wmsi-comp-recup">—</div></div>
+      </div>
+    </div>
+    <div id="comp-delta" style="margin-top:14px;text-align:center;font-size:13px;color:var(--text2)"></div>
+  </div></div></div>
+</div>
+
+<!-- ═══ CRITERIOS ═══ -->
+<div class="page" id="page-criterios">
+  <div class="page-title">⚡ Criterios de positividad</div>
+  <div class="page-sub">Evaluación automática en tiempo real a partir de los datos ingresados.</div>
+  <div class="grid2">
+    <div>
+      <div class="card"><div class="card-head">📋 Criterios diagnósticos</div><div class="card-body" id="crit-panel"><div style="color:var(--text2)">Completá los módulos Paciente, Protocolo y Bull's Eye.</div></div></div>
+      <div class="card"><div class="card-head">✅ Resultado del estudio</div><div class="card-body">
+        <div class="fg"><label>Resultado global</label>
+          <select id="res-global" onchange="updateResult()"><option value="">Seleccionar…</option><option value="neg">Negativo para isquemia</option><option value="pos">Positivo para isquemia</option><option value="inc">Indeterminado / No concluyente</option><option value="via">Viabilidad presente</option><option value="novia">Sin viabilidad</option></select>
+        </div>
+        <div class="result-box" id="result-box"></div>
+        <div class="fg" style="margin-top:10px"><label>Comentario clínico</label><textarea id="res-comment" placeholder="Contexto clínico, observaciones adicionales…"></textarea></div>
+      </div></div>
+    </div>
+    <div class="card"><div class="card-head">📊 Resumen WMSI + FEVI</div><div class="card-body">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:8px">WMSI por etapa</div>
+      <div class="grid3" style="margin-bottom:12px">
+        <div class="kpi" id="kpi-wmsi-bas"><div class="kpi-lbl">Basal</div><div class="kpi-val" id="kpi-wmsi-bas-val">—</div><div class="kpi-sub">WMSI</div></div>
+        <div class="kpi" id="kpi-wmsi-pic"><div class="kpi-lbl">Pico</div><div class="kpi-val" id="kpi-wmsi-pic-val">—</div><div class="kpi-sub">WMSI</div></div>
+        <div class="kpi" id="kpi-wmsi-rec"><div class="kpi-lbl">Recuperación</div><div class="kpi-val" id="kpi-wmsi-rec-val">—</div><div class="kpi-sub">WMSI</div></div>
+      </div>
+      <div id="wmsi-delta-txt" style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:14px"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:8px">FEVI por etapa</div>
+      <div class="grid3">
+        <div class="kpi" id="kpi-fevi-bas"><div class="kpi-lbl">Basal</div><div class="kpi-val" id="kpi-fevi-bas-val">—</div><div class="kpi-sub">%</div></div>
+        <div class="kpi" id="kpi-fevi-pic"><div class="kpi-lbl">Pico</div><div class="kpi-val" id="kpi-fevi-pic-val">—</div><div class="kpi-sub">%</div></div>
+        <div class="kpi" id="kpi-delta-fevi"><div class="kpi-lbl">Δ FEVI</div><div class="kpi-val" id="kpi-delta-fevi-val">—</div><div class="kpi-sub">Basal→Pico</div></div>
+      </div>
+      <div id="fevi-delta-txt" style="font-size:12px;color:var(--text2);text-align:center;margin-top:8px"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ═══ TERRITORIO ═══ -->
+<div class="page" id="page-territorio">
+  <div class="page-title">🗺️ Territorio vascular</div>
+  <div class="page-sub">Distribución de alteraciones segmentarias en pico de estrés por arteria coronaria.</div>
+  <div class="grid2">
+    <div class="card"><div class="card-head">🩺 Análisis por arteria — Pico</div><div class="card-body">
+      <div class="ter-panel">
+        <div class="ter-card ter-lad"><div class="ter-name">LAD (DA)</div><div style="font-size:10px;color:var(--text2)" id="ter-lad-segs">Segs: 1,2,7,8,13,14,17</div><div class="ter-status" id="ter-lad-status">—</div></div>
+        <div class="ter-card ter-rca"><div class="ter-name">RCA (CD)</div><div style="font-size:10px;color:var(--text2)" id="ter-rca-segs">Segs: 3,4,5,9,10,11,15</div><div class="ter-status" id="ter-rca-status">—</div></div>
+        <div class="ter-card ter-lcx"><div class="ter-name">LCx (Cx)</div><div style="font-size:10px;color:var(--text2)" id="ter-lcx-segs">Segs: 6,12,16</div><div class="ter-status" id="ter-lcx-status">—</div></div>
+      </div>
+      <div id="ter-conclusion" style="margin-top:14px;font-size:12px;color:var(--text2);line-height:1.6"></div>
+    </div></div>
+    <div class="card"><div class="card-head">📋 Segmentos alterados en pico</div><div class="card-body">
+      <div id="ter-seg-list" style="font-size:12px;line-height:2"><div style="color:var(--text2)">Sin datos. Completar bull's eye en pico.</div></div>
+      <div style="margin-top:14px;font-size:10px;color:var(--text2);line-height:1.8">
+        <span style="color:#3B82F6;font-weight:700">LAD:</span> segs 1,2,7,8,13,14,17<br>
+        <span style="color:#EF4444;font-weight:700">RCA:</span> segs 3,4,5,9,10,11,15<br>
+        <span style="color:#22C55E;font-weight:700">LCx:</span> segs 6,12,16
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ═══ VIABILIDAD ═══ -->
+<div class="page" id="page-viabilidad">
+  <div class="page-title">❤️ Viabilidad miocárdica — Protocolo bifásico</div>
+  <div class="page-sub">Dobutamina dosis bajas (5–10 mcg/kg/min) → dosis altas (20–40 mcg/kg/min). Respuesta bifásica = viabilidad.</div>
+  <div class="info-box" style="margin-bottom:14px">🔵 <strong>Respuesta bifásica:</strong> mejoría con dosis bajas + deterioro con dosis altas = viabilidad con isquemia residual → beneficio potencial de revascularización. Sin respuesta = necrosis.</div>
+  <div class="card"><div class="card-head">📊 Evaluación segmentaria por dosis</div><div class="card-body">
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Seg</th><th>Nombre</th><th>Territorio</th><th>Basal</th><th style="color:var(--accent2)">5–10 mcg</th><th style="color:var(--amber)">20–30 mcg</th><th style="color:var(--red)">40 mcg</th><th>Patrón</th></tr></thead>
+        <tbody id="dobu-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text2);padding:20px">Completar bull's eye primero para ver los segmentos alterados.</td></tr></tbody>
+      </table>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-head">✅ Conclusión de viabilidad</div><div class="card-body">
+    <div id="viab-conclusion" style="font-size:13px;color:var(--text2);line-height:1.7">Completar la tabla de dosis.</div>
+    <div class="fg" style="margin-top:12px"><label>Observaciones clínicas</label>
+      <textarea id="viab-obs" placeholder="Ej: Viabilidad presente en segmentos 9, 10, 11 (RCA). Respuesta bifásica con mejoría a dosis bajas y deterioro a 40 mcg/kg/min…"></textarea>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══ CFVR / STRAIN ═══ -->
+<div class="page" id="page-cfvr">
+  <div class="page-title">🩸 CFVR / Strain longitudinal</div>
+  <div class="page-sub">Reserva de flujo coronario (3 arterias) y strain global longitudinal basal y pico.</div>
+  <div class="grid2">
+    <div class="card"><div class="card-head">🩸 CFVR — Reserva de Flujo Coronario</div><div class="card-body">
+      <div class="note-box">ℹ️ CFVR = Vel. pico adenosina / Vel. pico basal (Doppler pulsado en DA distal). Normal ≥2.5. Útil en enfermedad microvascular y evaluación de estenosis borderline.</div>
+      <table style="margin-top:10px">
+        <tr><th>Arteria</th><th>Vel. basal (cm/s)</th><th>Vel. pico (cm/s)</th><th>CFVR</th><th>Interpretación</th></tr>
+        <tr>
+          <td style="font-weight:700;color:#3B82F6">DA</td>
+          <td><input type="number" id="cfvr-da-bas" placeholder="25" class="mini" oninput="calcCFVR('da')"></td>
+          <td><input type="number" id="cfvr-da-pic" placeholder="62" class="mini" oninput="calcCFVR('da')"></td>
+          <td id="cfvr-da-val" style="font-weight:700">—</td><td id="cfvr-da-int" style="font-size:11px">—</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#EF4444">CD</td>
+          <td><input type="number" id="cfvr-cd-bas" placeholder="22" class="mini" oninput="calcCFVR('cd')"></td>
+          <td><input type="number" id="cfvr-cd-pic" placeholder="55" class="mini" oninput="calcCFVR('cd')"></td>
+          <td id="cfvr-cd-val" style="font-weight:700">—</td><td id="cfvr-cd-int" style="font-size:11px">—</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:#22C55E">Cx</td>
+          <td><input type="number" id="cfvr-cx-bas" placeholder="20" class="mini" oninput="calcCFVR('cx')"></td>
+          <td><input type="number" id="cfvr-cx-pic" placeholder="50" class="mini" oninput="calcCFVR('cx')"></td>
+          <td id="cfvr-cx-val" style="font-weight:700">—</td><td id="cfvr-cx-int" style="font-size:11px">—</td>
+        </tr>
+      </table>
+    </div></div>
+    <div class="card"><div class="card-head">📐 GLS — Strain Longitudinal Global</div><div class="card-body">
+      <div class="grid2">
+        <div class="fg"><label>GLS basal (%)</label><input type="number" id="gls-bas" step="0.1" placeholder="-20" oninput="evalGLS()"></div>
+        <div class="fg"><label>GLS pico estrés (%)</label><input type="number" id="gls-pic" step="0.1" placeholder="-23" oninput="evalGLS()"></div>
+      </div>
+      <div id="gls-res" style="font-size:12px;font-weight:600;margin:6px 0"></div>
+      <div class="grid2" style="margin-top:8px">
+        <div class="fg"><label>Reserva de strain (Δ%)</label><input type="number" id="gls-reserva" readonly placeholder="—"></div>
+        <div class="fg"><label>Interpretación</label><div id="gls-interp" style="font-size:11px;margin-top:8px;font-weight:600;color:var(--text2)">—</div></div>
+      </div>
+      <div class="note-box" style="margin-top:10px">ℹ️ GLS normal ≤−20%. Zona gris: −16% a −20%. Disfunción subclínica: &gt;−16%. Reserva de strain (mejoría &gt;2%) = respuesta normal al estrés.</div>
+      <div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">GLS por territorio (opcional)</div>
+      <div class="grid3">
+        <div class="fg"><label style="color:#3B82F6">GLS LAD</label><input type="number" id="gls-lad" step="0.1" placeholder="-20"></div>
+        <div class="fg"><label style="color:#EF4444">GLS RCA</label><input type="number" id="gls-rca" step="0.1" placeholder="-19"></div>
+        <div class="fg"><label style="color:#22C55E">GLS LCx</label><input type="number" id="gls-lcx" step="0.1" placeholder="-21"></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ═══ ECG ═══ -->
+<div class="page" id="page-ecg">
+  <div class="page-title">📈 ECG y arritmias</div>
+  <div class="page-sub">Registro electrocardiográfico por etapa e imágenes del ECG (pegar con Ctrl+V).</div>
+  <div class="card"><div class="card-head">📋 Registro ECG por etapa</div><div class="card-body">
+    <div style="overflow-x:auto">
+      <table>
+        <tr><th>Etapa</th><th>FC (lpm)</th><th>PA (mmHg)</th><th>Ritmo</th><th>ST</th><th>Comentario</th></tr>
+        <tr><td style="font-weight:600">Basal</td>
+          <td><input type="number" id="ecg-fc-bas" placeholder="70" class="mini"></td>
+          <td><input id="ecg-pa-bas" placeholder="130/80" class="mini"></td>
+          <td><select id="ecg-rit-bas" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>Flutter</option><option>MP</option><option>Otro</option></select></td>
+          <td><select id="ecg-st-bas" class="mini" style="width:auto"><option>Normal</option><option>Depresión</option><option>Elevación</option><option>Inespecífico</option></select></td>
+          <td><input id="ecg-com-bas" placeholder="…" class="mini"></td>
+        </tr>
+        <tr><td style="font-weight:600;color:var(--amber)">Estrés bajo</td>
+          <td><input type="number" id="ecg-fc-low" placeholder="100" class="mini"></td>
+          <td><input id="ecg-pa-low" placeholder="150/85" class="mini"></td>
+          <td><select id="ecg-rit-low" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>TVNS</option><option>Otro</option></select></td>
+          <td><select id="ecg-st-low" class="mini" style="width:auto"><option>Normal</option><option>Depresión</option><option>Elevación</option><option>Inespecífico</option></select></td>
+          <td><input id="ecg-com-low" placeholder="…" class="mini"></td>
+        </tr>
+        <tr><td style="font-weight:600;color:var(--accent)">Pico</td>
+          <td><input type="number" id="ecg-fc-pic" placeholder="145" class="mini"></td>
+          <td><input id="ecg-pa-pic" placeholder="185/90" class="mini"></td>
+          <td><select id="ecg-rit-pic" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>TVNS</option><option>TV</option><option>Otro</option></select></td>
+          <td><select id="ecg-st-pic" class="mini" style="width:auto"><option>Normal</option><option>Depresión ≥1mm</option><option>Depresión ≥2mm</option><option>Elevación ≥1mm</option><option>Inespecífico</option></select></td>
+          <td><input id="ecg-com-pic" placeholder="…" class="mini"></td>
+        </tr>
+        <tr><td style="font-weight:600;color:var(--accent2)">Recuperación</td>
+          <td><input type="number" id="ecg-fc-rec" placeholder="85" class="mini"></td>
+          <td><input id="ecg-pa-rec" placeholder="140/80" class="mini"></td>
+          <td><select id="ecg-rit-rec" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>Otro</option></select></td>
+          <td><select id="ecg-st-rec" class="mini" style="width:auto"><option>Normal</option><option>Depresión persiste</option><option>Normaliza</option><option>Elevación persiste</option></select></td>
+          <td><input id="ecg-com-rec" placeholder="…" class="mini"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="fg" style="margin-top:12px"><label>Descripción global de arritmias</label>
+      <textarea id="ecg-arritmias" placeholder="Extrasistolia ventricular aislada. TVNS en pico (3 latidos, 170 lpm)…" rows="2"></textarea>
+    </div>
+  </div></div>
+  <div class="card"><div class="card-head">🖼️ Imágenes ECG (Ctrl+V para pegar)</div><div class="card-body">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--text2);font-weight:600">Slots:</span>
+      <div id="ecg-img-count-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
+    <div class="img-grid" id="ecg-img-grid"></div>
+    <input type="file" id="ecg-img-file" accept="image/*" style="display:none" onchange="ecgImgChosen(event)">
+  </div></div>
+</div>
+
+<!-- ═══ IMÁGENES ═══ -->
+<div class="page" id="page-imagenes">
+  <div class="page-title">🖼️ Imágenes del estudio</div>
+  <div class="page-sub">Clips y capturas del eco estrés. Drag &amp; drop para reordenar. Ctrl+V para pegar.</div>
+  <div class="card"><div class="card-body">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span style="font-size:11px;color:var(--text2);font-weight:600">Cantidad de slots:</span>
+      <div id="est-img-count-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
+    <div class="img-grid" id="est-img-grid"></div>
+    <input type="file" id="est-img-file" accept="image/*" style="display:none" onchange="estImgChosen(event)">
+  </div></div>
+</div>
+
+<!-- ═══ INFORME ═══ -->
+<div class="page" id="page-informe">
+  <div class="page-title">📝 Informe narrativo</div>
+  <div class="page-sub">Generación automática a partir de todos los módulos.</div>
+  <div class="card" style="margin-bottom:14px"><div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-teal" onclick="generarInforme()">📝 Generar informe</button>
+    <button class="btn btn-ghost" onclick="imprimirInforme()">🖨️ Imprimir</button>
+    <button class="btn btn-ghost" onclick="copiarInforme()">📋 Copiar texto</button>
+  </div></div>
+  <div class="card"><div class="card-head">📄 Texto del informe</div><div class="card-body">
+    <textarea id="informe-txt" style="min-height:340px;font-size:12px;line-height:1.7" placeholder="Presioná 'Generar informe' para autocompletar, o escribí directamente…"></textarea>
+  </div></div>
+</div>
+
+<!-- ═══ CONFIG ═══ -->
+<div class="page" id="page-config">
+  <div class="page-title">⚙️ Configuración</div>
+  <div class="page-sub">Institución, exportación e importación de datos.</div>
+  <div class="grid2">
+    <div class="card"><div class="card-head">🏥 Institución</div><div class="card-body">
+      <div class="fg"><label>Nombre institución</label><input id="cfg-inst" placeholder="GREMEDA" oninput="guardarConfig()"></div>
+      <div class="fg"><label>Ciudad / Departamento</label><input id="cfg-ciudad" placeholder="Artigas, Uruguay" oninput="guardarConfig()"></div>
+      <div class="fg"><label>Médico informante (por defecto)</label><input id="cfg-medico" placeholder="Dr. Maicol Dos Santos" oninput="guardarConfig()"></div>
+      <div class="fg"><label>Matrícula</label><input id="cfg-matricula" placeholder="CJPP ..." oninput="guardarConfig()"></div>
+      <div class="fg"><label>Firma (pie del informe)</label><input id="cfg-firma" placeholder="Firma / aclaración" oninput="guardarConfig()"></div>
+    </div></div>
+    <div class="card"><div class="card-head">💾 Datos</div><div class="card-body">
+      <div class="btn-row" style="flex-direction:column;gap:8px">
+        <button class="btn btn-ghost" onclick="exportarDatos()" style="justify-content:flex-start">⬇️ Exportar backup JSON</button>
+        <label class="btn btn-ghost" style="justify-content:flex-start;cursor:pointer">⬆️ Importar backup JSON<input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
+        <button class="btn btn-ghost" onclick="nuevoEstudio()" style="justify-content:flex-start">🔄 Nuevo estudio</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+</main>
+
+<!-- BULL POP -->
+<div class="pop" id="bull-pop">
+  <div class="pop-title" id="bull-pop-title">Segmento</div>
+  <div class="pop-states" id="bull-pop-states"></div>
+  <button class="pop-close" onclick="closePop()">✓ Listo</button>
+</div>
+<script>
+'use strict';
+const SEGS=[
+  {id:1,name:'Anterior basal',ter:'LAD'},{id:2,name:'Anteroseptal basal',ter:'LAD'},
+  {id:3,name:'Inferoseptal basal',ter:'RCA'},{id:4,name:'Inferior basal',ter:'RCA'},
+  {id:5,name:'Inferolateral basal',ter:'RCA'},{id:6,name:'Anterolateral basal',ter:'LCx'},
+  {id:7,name:'Anterior medio',ter:'LAD'},{id:8,name:'Anteroseptal medio',ter:'LAD'},
+  {id:9,name:'Inferoseptal medio',ter:'RCA'},{id:10,name:'Inferior medio',ter:'RCA'},
+  {id:11,name:'Inferolateral medio',ter:'RCA'},{id:12,name:'Anterolateral medio',ter:'LCx'},
+  {id:13,name:'Anterior apical',ter:'LAD'},{id:14,name:'Septal apical',ter:'LAD'},
+  {id:15,name:'Inferior apical',ter:'RCA'},{id:16,name:'Lateral apical',ter:'LCx'},
+  {id:17,name:'Apex',ter:'LAD'},
+];
+const SEG_LABELS=['No eval.','Normal','Hipokinesia','Akinesia','Diskinesia'];
+const SEG_COLORS=['#6B7280','#22C55E','#EAB308','#F97316','#8B5CF6'];
+const TER_COLORS={LAD:'#3B82F6',RCA:'#EF4444',LCx:'#22C55E'};
+let bull={basal:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1)};
+let bullInited={basal:false,pico:false,recup:false};
+let popPhase=null,popIdx=-1;
+let ecgImg=[null,null],ecgImgCount=2,ecgImgActive=0;
+let estImg=[null,null],estImgCount=2,estImgActive=0;
+let dobuData={};
+const KEY='ecoestres_smart_v1';
+
+function guardar(){
+  const s=recolectarEstado();
+  try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
+  const el=document.getElementById('hdr-status');
+  el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',1800);
+}
+function recolectarEstado(){
+  const vals={};
+  document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
+  document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
+  return{vals,bull,ecgImg,ecgImgCount,estImg,estImgCount,dobuData};
+}
+function cargarEstado(){
+  let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
+  if(!raw)return;
+  try{
+    const s=JSON.parse(raw);
+    if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
+    if(s.bull)bull=s.bull;
+    if(s.ecgImg){ecgImg=s.ecgImg;ecgImgCount=s.ecgImgCount||2;}
+    if(s.estImg){estImg=s.estImg;estImgCount=s.estImgCount||2;}
+    if(s.dobuData)dobuData=s.dobuData;
+  }catch(e){}
+  actualizarUI();
+}
+function guardarConfig(){
+  const inst=document.getElementById('cfg-inst')?.value||'GREMEDA';
+  const ciudad=document.getElementById('cfg-ciudad')?.value||'';
+  document.getElementById('hdr-inst').textContent=[inst,ciudad].filter(Boolean).join(' · ');
+  guardar();
+}
+function nuevoEstudio(){
+  if(!confirm('¿Limpiar todos los datos del estudio actual?'))return;
+  bull={basal:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1)};
+  bullInited={basal:false,pico:false,recup:false};
+  ecgImg=[null,null];ecgImgCount=2;estImg=[null,null];estImgCount=2;dobuData={};
+  document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.readOnly)return;if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
+  document.querySelectorAll('input[type=checkbox]').forEach(el=>el.checked=false);
+  const fd=document.getElementById('p-fecha');if(fd)fd.value=new Date().toISOString().slice(0,10);
+  actualizarUI();
+}
+function exportarDatos(){
+  const b=new Blob([JSON.stringify(recolectarEstado(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ecoestres_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function importarDatos(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{const s=JSON.parse(ev.target.result);
+    if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
+    if(s.bull)bull=s.bull;if(s.ecgImg){ecgImg=s.ecgImg;ecgImgCount=s.ecgImgCount||2;}
+    if(s.estImg){estImg=s.estImg;estImgCount=s.estImgCount||2;}if(s.dobuData)dobuData=s.dobuData;
+    actualizarUI();alert('✅ Datos importados');
+  }catch(err){alert('Error: '+err.message);}};
+  r.readAsText(f);
+}
+
+function goTo(page){
+  closeSidebar();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+page+"'"))n.classList.add('active');});
+  if(page==='bullo')initBulls();
+  if(page==='criterios'){evalCriterios();updateWMSIresumen();}
+  if(page==='territorio')updateTerritorio();
+  if(page==='viabilidad')renderDobuTable();
+  if(page==='imagenes')estImgRender();
+  if(page==='ecg')ecgImgRender();
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function toggleStep(hdr){const body=hdr.nextElementSibling;const open=body.classList.contains('open');body.classList.toggle('open',!open);hdr.classList.toggle('open',!open);hdr.querySelector('.arr').textContent=open?'▼':'▲';}
+function switchBullTab(id,el){
+  document.querySelectorAll('#page-bullo .tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('bull-tab-'+id).classList.add('active');
+  document.querySelectorAll('#bull-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(id==='comp')renderBullComp();
+  else if(!bullInited[id]){bullInited[id]=true;renderBull(id);}
+}
+function actualizarUI(){
+  calcEdad();calcFCpct();onEstresChange();ptpCad();
+  ['basal','pico','recup'].forEach(p=>{if(bullInited[p])renderBull(p);});
+  ecgImgRender();estImgRender();renderDobuTable();
+  const inst=document.getElementById('cfg-inst')?.value||'GREMEDA';
+  const ciudad=document.getElementById('cfg-ciudad')?.value||'';
+  document.getElementById('hdr-inst').textContent=[inst,ciudad].filter(Boolean).join(' · ');
+}
+
+function calcEdad(){
+  const fnac=document.getElementById('p-fnac')?.value;if(!fnac)return;
+  const age=Math.floor((Date.now()-new Date(fnac))/(365.25*24*3600*1000));
+  if(age>0&&age<130){document.getElementById('p-edad').value=age;onEdadChange();}
+}
+function onEdadChange(){
+  const age=+document.getElementById('p-edad')?.value||0;if(!age)return;
+  const teo=220-age;
+  const ft=document.getElementById('b-fc-teo');if(ft)ft.value=teo;
+  const fo=document.getElementById('a-fc-obj');if(fo)fo.value=Math.round(teo*0.85);
+  calcFCpct();ptpCad();
+}
+function calcFCpct(){
+  const teo=+document.getElementById('b-fc-teo')?.value||0;
+  const max=+document.getElementById('b-fc-max')?.value||0;
+  if(!teo||!max)return;
+  const pct=Math.round(max/teo*100);
+  const bar=document.getElementById('fc-pct-bar'),txt=document.getElementById('fc-pct-txt');
+  const cls=pct>=85?'fill-green':pct>=75?'fill-amber':'fill-red';
+  if(bar){bar.style.width=Math.min(pct,100)+'%';bar.className='prog-fill '+cls;}
+  if(txt){txt.textContent=pct+'%';txt.style.color=pct>=85?'var(--green)':pct>=75?'var(--amber)':'var(--red)';}
+}
+function onEstresChange(){
+  const v=document.getElementById('p-estres')?.value;
+  document.getElementById('dobu-wrap').style.display=v==='dobutamina'?'block':'none';
+  document.getElementById('dipiri-wrap').style.display=v==='dipiridamol'?'block':'none';
+}
+function calcDobuDosis(){
+  const p=+document.getElementById('p-peso')?.value||0;
+  const el=document.getElementById('dobu-dosis-max');
+  if(p&&el)el.value='5→10→20→30→40 mcg/kg/min (peso: '+p+'kg)';
+}
+function onFeviChange(){evalCriterios();updateWMSIresumen();}
+
+function ptpCad(){
+  const edad=+document.getElementById('p-edad')?.value||0;
+  const sexo=document.getElementById('p-sexo')?.value||'';
+  const sint=document.getElementById('ptp-sint')?.value||'';
+  const res=document.getElementById('ptp-result'),rec=document.getElementById('ptp-rec');
+  const bw=document.getElementById('ptp-bar-wrap'),bar=document.getElementById('ptp-bar');
+  if(!res||!rec)return;
+  if(!edad||!sexo||!sint){res.innerHTML='';rec.textContent='';if(bw)bw.style.display='none';return;}
+  const TBL={tip:[[3,5],[22,10],[32,13],[44,16],[52,27]],atip:[[4,3],[10,6],[17,6],[26,11],[34,19]],asint:[[1,1],[3,2],[11,3],[22,6],[24,10]]};
+  const ai=edad<40?0:edad<50?1:edad<60?2:edad<70?3:4;
+  const pct=(TBL[sint]?.[ai])?.[sexo==='F'?1:0]??0;
+  let cls,txt,recTxt;
+  if(pct<5){cls='tag-green';txt='Muy baja';recTxt='ESC: no requiere estudio funcional adicional.';}
+  else if(pct<=15){cls='tag-green';txt='Baja';recTxt='ESC: considerar TAC coronaria con calcio score.';}
+  else if(pct<=65){cls='tag-yellow';txt='Intermedia';recTxt='ESC: eco estrés o TAC coronaria indicados.';}
+  else{cls='tag-red';txt='Alta';recTxt='ESC: considerar coronariografía directa.';}
+  res.innerHTML='PTP <strong>'+pct+'%</strong> — <span class="tag '+cls+'">'+txt+'</span>';
+  rec.textContent=recTxt;
+  if(bw)bw.style.display='block';
+  if(bar){bar.style.width=Math.min(pct,100)+'%';bar.className='prog-fill '+(pct<15?'fill-green':pct<=65?'fill-amber':'fill-red');}
+}
+
+function calcCFVR(art){
+  const bas=+document.getElementById('cfvr-'+art+'-bas')?.value||0;
+  const pic=+document.getElementById('cfvr-'+art+'-pic')?.value||0;
+  const vEl=document.getElementById('cfvr-'+art+'-val'),iEl=document.getElementById('cfvr-'+art+'-int');
+  if(!bas||!pic){if(vEl)vEl.textContent='—';if(iEl)iEl.textContent='—';return;}
+  const cfvr=(pic/bas).toFixed(2);
+  if(vEl){vEl.textContent=cfvr;vEl.style.color=+cfvr>=2.5?'var(--green)':+cfvr>=2?'var(--amber)':'var(--red)';}
+  if(iEl){if(+cfvr>=2.5){iEl.textContent='✅ Normal (≥2.5)';iEl.style.color='var(--green)';}else if(+cfvr>=2){iEl.textContent='⚠️ Borderline';iEl.style.color='var(--amber)';}else{iEl.textContent='❌ Reducida (<2.0)';iEl.style.color='var(--red)';}}
+}
+function evalCFVRprot(){
+  const v=+document.getElementById('f-cfvr-da')?.value||0;const el=document.getElementById('f-cfvr-da-res');if(!el)return;
+  if(!v){el.textContent='';return;}
+  if(v>=2.5){el.style.color='var(--green)';el.textContent='✅ Normal (≥2.5)';}
+  else if(v>=2){el.style.color='var(--amber)';el.textContent='⚠️ Borderline';}
+  else{el.style.color='var(--red)';el.textContent='❌ Reducida — enfermedad microvascular';}
+}
+function evalGLS(){
+  const bas=+document.getElementById('gls-bas')?.value||0;const pic=+document.getElementById('gls-pic')?.value||0;
+  const res=document.getElementById('gls-res'),resv=document.getElementById('gls-reserva'),interp=document.getElementById('gls-interp');
+  if(!res)return;if(!bas){res.textContent='';if(resv)resv.value='';return;}
+  let txt,col;
+  if(bas<=-20){txt='✅ GLS basal normal (≤−20%)';col='var(--green)';}
+  else if(bas>=-16){txt='⚠️ GLS basal borderline (−16 a −20%)';col='var(--amber)';}
+  else{txt='❌ GLS basal reducido (>−16%) — disfunción subclínica';col='var(--red)';}
+  if(pic){const d=Math.abs(pic)-Math.abs(bas);if(resv)resv.value=d.toFixed(1);
+    txt+=d>2?' · ✅ Reserva de strain presente (Δ'+d.toFixed(1)+'%)':(d>=0?' · ⚠️ Reserva marginal':' · ❌ Sin reserva de strain');
+    if(interp)interp.textContent=d>2?'Respuesta normal al estrés':d>=0?'Respuesta dudosa':'Respuesta anormal (isquemia)';}
+  res.textContent=txt;res.style.color=col;
+}
+function evalPSAP(){
+  const v=+document.getElementById('p-psap-pic')?.value||0;const el=document.getElementById('p-psap-res');if(!el)return;
+  if(!v){el.textContent='';return;}
+  if(v>60){el.style.color='var(--red)';el.textContent='❌ HTP inducida (>60mmHg) — suspender estudio';}
+  else if(v>50){el.style.color='var(--amber)';el.textContent='⚠️ Elevación significativa (>50mmHg)';}
+  else{el.style.color='var(--green)';el.textContent='✅ Normal (<50mmHg)';}
+}
+function evalEE(){
+  const v=+document.getElementById('p-ee-bas')?.value||0;const el=document.getElementById('p-ee-res');if(!el)return;
+  if(!v){el.textContent='';return;}
+  if(v>14){el.style.color='var(--red)';el.textContent="❌ E/e' basal elevado (>14)";}
+  else if(v>10){el.style.color='var(--amber)';el.textContent="⚠️ E/e' basal borderline (10–14)";}
+  else{el.style.color='var(--green)';el.textContent="✅ E/e' basal normal (<10)";}
+}
+function evalEEpico(){
+  const v=+document.getElementById('p-ee-pic')?.value||0;const el=document.getElementById('p-ee-pic-res');if(!el)return;
+  if(!v){el.textContent='';return;}
+  if(v>=15){el.style.color='var(--red)';el.textContent="❌ E/e' pico ≥15 — eco estrés diastólico positivo";}
+  else if(v>=13){el.style.color='var(--amber)';el.textContent="⚠️ E/e' pico borderline (13–14)";}
+  else{el.style.color='var(--green)';el.textContent="✅ E/e' pico normal (<13)";}
+}
+function updateResult(){
+  const v=document.getElementById('res-global')?.value;const box=document.getElementById('result-box');
+  const msgs={neg:{cls:'rb-neg',txt:'✅ Estudio negativo para isquemia inducible. Bajo riesgo cardiovascular a corto plazo.'},
+    pos:{cls:'rb-pos',txt:'❌ Estudio positivo para isquemia. Correlacionar clínicamente y evaluar coronariografía.'},
+    inc:{cls:'rb-inc',txt:'⚠️ Estudio indeterminado. Considerar protocolo alternativo o coronariografía según clínica.'},
+    via:{cls:'rb-neg',txt:'✅ Viabilidad miocárdica presente. Evaluar revascularización.'},
+    novia:{cls:'rb-pos',txt:'❌ Sin viabilidad. Bajo beneficio esperado de revascularización.'}};
+  if(msgs[v]){box.className='result-box show '+msgs[v].cls;box.textContent=msgs[v].txt;}
+  else box.className='result-box';
+}
+
+// BULL'S EYE
+function initBulls(){['basal','pico','recup'].forEach(p=>{if(!bullInited[p]){bullInited[p]=true;renderBull(p);}});}
+function arcPath(cx,cy,r1,r2,s,e){
+  const rs=s*Math.PI/180,re=e*Math.PI/180;
+  const x1=cx+r1*Math.cos(rs),y1=cy+r1*Math.sin(rs),x2=cx+r1*Math.cos(re),y2=cy+r1*Math.sin(re);
+  const x3=cx+r2*Math.cos(re),y3=cy+r2*Math.sin(re),x4=cx+r2*Math.cos(rs),y4=cy+r2*Math.sin(rs);
+  const lg=Math.abs(e-s)>180?1:0,sw=e<s?0:1;
+  return`M${x1},${y1} A${r1},${r1} 0 ${lg},${sw} ${x2},${y2} L${x3},${y3} A${r2},${r2} 0 ${lg},${sw?0:1} ${x4},${y4} Z`;
+}
+function renderBull(phase,svgId,interactive){
+  const id=svgId||'bull-svg-'+phase;const svg=document.getElementById(id);if(!svg)return;
+  const cx=170,cy=170,state=bull[phase];
+  const OFFSET=-60;
+  const rings=[{r1:130,r2:92,segs:[0,1,2,3,4,5],step:60},{r1:92,r2:54,segs:[6,7,8,9,10,11],step:60},{r1:54,r2:24,segs:[12,13,14,15],step:90}];
+  let html='';
+  rings.forEach(ring=>ring.segs.forEach((segIdx,s)=>{
+    const seg=SEGS[segIdx];
+    const startDeg=OFFSET-(s*ring.step),endDeg=startDeg-ring.step,midDeg=startDeg-ring.step/2,midR=(ring.r1+ring.r2)/2;
+    const lx=cx+midR*Math.cos(midDeg*Math.PI/180),ly=cy+midR*Math.sin(midDeg*Math.PI/180);
+    const fill=SEG_COLORS[state[segIdx]||0];
+    const iact=interactive!==false;
+    const evts=iact?`onclick="cycleBull('${phase}',${segIdx})" oncontextmenu="openPop(event,'${phase}',${segIdx});return false;" style="cursor:pointer"`:'style="cursor:default"';
+    html+=`<path d="${arcPath(cx,cy,ring.r1,ring.r2,startDeg,endDeg)}" fill="${fill}" fill-opacity="0.88" stroke="#0D1117" stroke-width="2.5" ${evts}><title>${seg.name} (${seg.ter}) — ${SEG_LABELS[state[segIdx]||0]}</title></path>`;
+    html+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#fff" font-weight="800" pointer-events="none">${seg.id}</text>`;
+  }));
+  const apexSt=state[16]||0;
+  const iact=interactive!==false;
+  const evts=iact?`onclick="cycleBull('${phase}',16)" oncontextmenu="openPop(event,'${phase}',16);return false;" style="cursor:pointer"`:'style="cursor:default"';
+  html+=`<circle cx="${cx}" cy="${cy}" r="24" fill="${SEG_COLORS[apexSt]}" fill-opacity="0.88" stroke="#0D1117" stroke-width="2.5" ${evts}><title>Apex (LAD) — ${SEG_LABELS[apexSt]}</title></circle>`;
+  html+=`<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#fff" font-weight="800" pointer-events="none">17</text>`;
+  html+=`<text x="${cx}" y="18" text-anchor="middle" font-size="9" fill="${TER_COLORS.LAD}" font-weight="800">LAD</text>`;
+  html+=`<text x="315" y="${cy}" text-anchor="end" font-size="9" fill="${TER_COLORS.LCx}" font-weight="800">LCx</text>`;
+  html+=`<text x="25" y="${cy}" text-anchor="start" font-size="9" fill="${TER_COLORS.RCA}" font-weight="800">RCA</text>`;
+  svg.innerHTML=html;
+  if(interactive!==false)updateWMSI(phase);
+}
+function cycleBull(phase,idx){bull[phase][idx]=(bull[phase][idx]+1)%5;renderBull(phase);evalCriterios();updateWMSIresumen();updateTerritorio();}
+function openPop(e,phase,idx){
+  e.preventDefault();popPhase=phase;popIdx=idx;
+  const seg=SEGS[idx],pop=document.getElementById('bull-pop');
+  document.getElementById('bull-pop-title').textContent=`Seg ${seg.id} — ${seg.name} (${seg.ter})`;
+  document.getElementById('bull-pop-states').innerHTML=SEG_LABELS.map((lbl,i)=>`<button class="pop-btn${bull[phase][idx]===i?' sel':''}" style="background:${SEG_COLORS[i]}22;color:${SEG_COLORS[i]};border-color:${bull[phase][idx]===i?SEG_COLORS[i]:'transparent'}" onclick="setBullState('${phase}',${idx},${i})">${lbl}</button>`).join('');
+  pop.style.left=Math.min(e.clientX,window.innerWidth-220)+'px';pop.style.top=Math.min(e.clientY,window.innerHeight-200)+'px';pop.classList.add('open');
+}
+function setBullState(phase,idx,st){bull[phase][idx]=st;renderBull(phase);document.querySelectorAll('.pop-btn').forEach((b,i)=>{b.classList.toggle('sel',i===st);b.style.borderColor=i===st?SEG_COLORS[i]:'transparent';});evalCriterios();updateWMSIresumen();updateTerritorio();}
+function closePop(){document.getElementById('bull-pop').classList.remove('open');popPhase=null;popIdx=-1;}
+document.addEventListener('click',e=>{const pop=document.getElementById('bull-pop');if(pop?.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest?.('svg'))closePop();});
+function resetBull(phase){bull[phase]=Array(17).fill(1);renderBull(phase);evalCriterios();updateWMSIresumen();updateTerritorio();}
+function setAllBull(phase,st){bull[phase]=Array(17).fill(st);renderBull(phase);evalCriterios();updateWMSIresumen();updateTerritorio();}
+function copyBull(from,to){bull[to]=[...bull[from]];renderBull(to);evalCriterios();updateWMSIresumen();updateTerritorio();}
+function getWMSI(phase){const state=bull[phase];let sum=0,count=0;state.forEach(st=>{if(st>0){sum+=st;count++;}});return count>0?+(sum/count).toFixed(2):null;}
+function updateWMSI(phase){
+  const wmsi=getWMSI(phase);
+  const vEl=document.getElementById('wmsi-val-'+phase),cEl=document.getElementById('wmsi-cat-'+phase);
+  if(vEl)vEl.textContent=wmsi!==null?wmsi:'—';if(!cEl)return;
+  if(wmsi===null){cEl.textContent='';return;}
+  if(wmsi<=1.0){cEl.textContent='Normal';cEl.style.color='var(--green)';}
+  else if(wmsi<=1.5){cEl.textContent='Disfunción leve';cEl.style.color='var(--amber)';}
+  else if(wmsi<=2.0){cEl.textContent='Disfunción moderada';cEl.style.color='var(--red)';}
+  else{cEl.textContent='Disfunción severa';cEl.style.color='var(--red)';}
+}
+function renderBullComp(){
+  ['basal','pico','recup'].forEach(phase=>{renderBull(phase,'bull-comp-'+phase,false);const w=getWMSI(phase);const el=document.getElementById('wmsi-comp-'+phase);if(el)el.textContent=w!==null?w:'—';});
+  const wb=getWMSI('basal'),wp=getWMSI('pico');
+  const el=document.getElementById('comp-delta');
+  if(el&&wb!==null&&wp!==null){const d=(wp-wb).toFixed(2);el.innerHTML=`ΔWMSI Basal→Pico: <strong style="color:${wp>wb?'var(--red)':'var(--green)'}">${d>0?'+':''}${d} (${wp>wb?'↑ empeora':'↓ mejora'})</strong>`;}
+}
+
+// CRITERIOS
+function getAnormPico(){const state=bull.pico,bas=bull.basal;const segs=[],nuevos=[];state.forEach((st,i)=>{if(st>1){segs.push({idx:i,st,seg:SEGS[i],nuevo:bas[i]<=1});if(bas[i]<=1)nuevos.push(i);}});return{segs,nuevos};}
+function evalCriterios(){
+  const panel=document.getElementById('crit-panel');if(!panel)return;
+  const{segs,nuevos}=getAnormPico();
+  const fb=+document.getElementById('c-fevi-bas')?.value||0,fp=+document.getElementById('c-fevi-pic')?.value||0;
+  const dF=fb&&fp?fp-fb:null;
+  const dilat=document.getElementById('d-dilat')?.value==='si';
+  const dPa=document.getElementById('d-pa')?.value==='hipo';
+  const imSev=['mod','sev'].includes(document.getElementById('d-im')?.value||'');
+  const psapP=+document.getElementById('p-psap-pic')?.value||0;
+  const lPost=+(document.getElementById('l-post')?.value||0);
+  const ecgP=document.getElementById('b-ecg-estres')?.value||'no';
+  const crit=[
+    {txt:'≥2 segmentos nuevos con alteración de motilidad',sub:nuevos.length+' segmento(s) nuevo(s)',met:nuevos.length>=2,nd:nuevos.length===0&&segs.length===0},
+    {txt:'Caída de FEVI ≥10% con el estrés',sub:dF!==null?'ΔFEVI: '+(dF>0?'+':'')+dF+'%':'FEVI no ingresada',met:dF!==null&&dF<=-10,nd:dF===null},
+    {txt:'Dilatación transitoria del VI',sub:'Isquemia multivaso/severa',met:dilat,nd:false},
+    {txt:'Hipotensión inducida (↓ PAS >10mmHg)',sub:'Disfunción sistólica grave',met:dPa,nd:false},
+    {txt:'IM moderada-severa inducida',sub:'Disfunción papilar isquémica',met:imSev,nd:false},
+    {txt:'PSAP pico >60mmHg',sub:psapP?'PSAP pico: '+psapP+'mmHg':'No ingresada',met:psapP>60,nd:!psapP},
+    {txt:'Depresión ST ≥1mm en ECG',sub:'Valor diagnóstico adicional',met:ecgP==='st-dep',nd:false},
+    {txt:'Líneas B ≥3/campo post-estrés',sub:'Congestión venocapilar inducida',met:lPost>=2,nd:false},
+  ];
+  const pos=crit.filter(c=>c.met).length;
+  panel.innerHTML=`<div style="font-size:12px;font-weight:700;margin-bottom:12px;color:${pos>=1?'var(--red)':'var(--green)'}">${pos>=1?'❌ '+pos+' criterio(s) de positividad cumplido(s)':'✅ Sin criterios de positividad automáticos'}</div>`+
+    crit.map(c=>`<div class="crit-item"><div class="crit-icon">${c.met?'🔴':c.nd?'⚪':'🟢'}</div><div class="crit-txt">${c.txt}<div class="crit-sub">${c.sub}</div></div><div class="crit-met ${c.met?'yes':c.nd?'nd':'no'}">${c.met?'CUMPLIDO':c.nd?'S/D':'No cumplido'}</div></div>`).join('');
+}
+function updateWMSIresumen(){
+  ['basal','pico','recup'].forEach(phase=>{
+    const w=getWMSI(phase);const short=phase.slice(0,3);
+    const el=document.getElementById('kpi-wmsi-'+short),vEl=document.getElementById('kpi-wmsi-'+short+'-val');
+    if(vEl)vEl.textContent=w!==null?w:'—';
+    if(el)el.className='kpi'+(w===null?'':(w<=1?' good':w<=1.5?' warn':' danger'));
+  });
+  const wb=getWMSI('basal'),wp=getWMSI('pico');
+  const dEl=document.getElementById('wmsi-delta-txt');
+  if(dEl&&wb!==null&&wp!==null){const d=(wp-wb).toFixed(2);dEl.innerHTML='ΔWMSI Basal→Pico: <strong style="color:'+(wp>wb?'var(--red)':'var(--green)')+'">  '+(d>0?'+':'')+d+'</strong>';}
+  const fb=+document.getElementById('c-fevi-bas')?.value||0,fp=+document.getElementById('c-fevi-pic')?.value||0;
+  const bv=document.getElementById('kpi-fevi-bas-val'),pv=document.getElementById('kpi-fevi-pic-val'),dv=document.getElementById('kpi-delta-fevi-val');
+  if(bv)bv.textContent=fb||'—';if(pv)pv.textContent=fp||'—';
+  if(dv&&fb&&fp){const d=fp-fb;dv.textContent=(d>0?'+':'')+d+'%';const dk=document.getElementById('kpi-delta-fevi');if(dk)dk.className='kpi'+(d<=-10?' danger':d>=0?' good':' warn');}
+}
+
+// TERRITORIO
+function updateTerritorio(){
+  const state=bull.pico;
+  const ts={LAD:{a:0,segs:[]},RCA:{a:0,segs:[]},LCx:{a:0,segs:[]}};
+  state.forEach((st,i)=>{if(st>1){ts[SEGS[i].ter].a++;ts[SEGS[i].ter].segs.push(SEGS[i].id);}});
+  const set=(id,ter)=>{
+    const sEl=document.getElementById('ter-'+id+'-segs'),stEl=document.getElementById('ter-'+id+'-status');
+    const d=ts[ter];
+    if(sEl)sEl.textContent=`Evaluados: ${SEGS.filter(s=>s.ter===ter).length} — Alterados: ${d.a}${d.segs.length?' ('+d.segs.join(', ')+')':''}`;
+    if(stEl){if(d.a===0){stEl.textContent='✅ Sin alteraciones';stEl.style.color='var(--green)';}else if(d.a===1){stEl.textContent='⚠️ 1 segmento alterado';stEl.style.color='var(--amber)';}else{stEl.textContent='❌ '+d.a+' seg. — isquemia en '+ter;stEl.style.color='var(--red)';}}
+  };
+  set('lad','LAD');set('rca','RCA');set('lcx','LCx');
+  const af=Object.entries(ts).filter(([,d])=>d.a>=2).map(([t])=>t);
+  const cEl=document.getElementById('ter-conclusion');
+  if(cEl){if(af.length===0)cEl.textContent='Sin territorios con ≥2 segmentos alterados en pico.';else if(af.length===1)cEl.innerHTML='<strong>Sugestivo de compromiso de '+af[0]+'.</strong> Distribución compatible con estenosis en ese territorio.';else cEl.innerHTML='<strong>⚠️ Patrón multivaso:</strong> alteraciones en '+af.join(' + ')+'. Considerar enfermedad coronaria multivaso.';}
+  const lEl=document.getElementById('ter-seg-list');
+  if(lEl){const an=[];state.forEach((st,i)=>{if(st>1)an.push({seg:SEGS[i],st});});
+    if(an.length===0)lEl.innerHTML='<div style="color:var(--green)">✅ Sin segmentos alterados en pico.</div>';
+    else lEl.innerHTML=an.map(a=>`<div style="display:flex;gap:8px;align-items:center"><span style="color:${TER_COLORS[a.seg.ter]};font-weight:700;min-width:36px">${a.seg.ter}</span><span>Seg ${a.seg.id} — ${a.seg.name}</span><span class="tag ${a.st===2?'tag-yellow':a.st===4?'tag-blue':'tag-red'}">${SEG_LABELS[a.st]}</span></div>`).join('');}
+}
+
+// VIABILIDAD
+function renderDobuTable(){
+  const tbody=document.getElementById('dobu-tbody');if(!tbody)return;
+  const sv=SEGS.filter((seg,i)=>bull.basal[i]>1||bull.pico[i]>1);
+  if(sv.length===0){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:20px">Sin segmentos alterados. Completar bull\'s eye primero.</td></tr>';return;}
+  tbody.innerHTML=sv.map(seg=>{
+    const i=SEGS.indexOf(seg);const d=dobuData[i]||{};
+    const p=getViabPatron(i);const tc=TER_COLORS[seg.ter];
+    return`<tr><td style="font-weight:700">${seg.id}</td><td style="font-size:11px">${seg.name}</td><td style="font-weight:700;color:${tc}">${seg.ter}</td>`+
+    ['bas','low','mid','high'].map(f=>`<td><select class="mini" style="width:auto" onchange="setDobu(${i},'${f}',this.value)">${['','Normal','Hipokinesia','Akinesia','Diskinesia'].map(v=>`<option${v===(d[f]||'')?'selected':''}>${v}</option>`).join('')}</select></td>`).join('')+
+    `<td><span class="dobu-viab ${p.cls}">${p.txt}</span></td></tr>`;
+  }).join('');
+  updateViabConclusion(sv);
+}
+function setDobu(idx,field,val){if(!dobuData[idx])dobuData[idx]={};dobuData[idx][field]=val;renderDobuTable();}
+function getViabPatron(idx){
+  const d=dobuData[idx]||{};const rank={'':- 1,'Normal':1,'Hipokinesia':2,'Akinesia':3,'Diskinesia':4};
+  const bas=rank[d.bas]??-1,low=rank[d.low]??-1,high=rank[d.high]??-1;
+  if(bas<0||low<0)return{cls:'nd',txt:'S/D'};
+  if(low<bas&&high>low)return{cls:'bifasico',txt:'⭐ Bifásico (viabilidad)'};
+  if(low<bas)return{cls:'mejora',txt:'✅ Mejoría (viabilidad)'};
+  if(low>=bas&&high>=bas)return{cls:'necro',txt:'❌ Sin respuesta (necrosis)'};
+  return{cls:'nd',txt:'Indeterminado'};
+}
+function updateViabConclusion(sv){
+  const el=document.getElementById('viab-conclusion');if(!el)return;
+  const bif=[],mej=[],nec=[];
+  sv.forEach(seg=>{const i=SEGS.indexOf(seg);const p=getViabPatron(i);if(p.cls==='bifasico')bif.push(seg.name);else if(p.cls==='mejora')mej.push(seg.name);else if(p.cls==='necro')nec.push(seg.name);});
+  let txt='';
+  if(bif.length)txt+=`<div style="color:var(--amber);font-weight:700;margin-bottom:6px">⭐ Respuesta bifásica (viabilidad con isquemia residual):</div><div style="margin-bottom:10px">${bif.join(', ')}</div>`;
+  if(mej.length)txt+=`<div style="color:var(--green);font-weight:700;margin-bottom:6px">✅ Mejoría simple:</div><div style="margin-bottom:10px">${mej.join(', ')}</div>`;
+  if(nec.length)txt+=`<div style="color:var(--red);font-weight:700;margin-bottom:6px">❌ Sin respuesta (probable necrosis):</div><div style="margin-bottom:10px">${nec.join(', ')}</div>`;
+  if(!txt)txt='<div style="color:var(--text2)">Completar la tabla de dosis.</div>';
+  el.innerHTML=txt;
+}
+
+// IMÁGENES
+function compress(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{let w=im.width,h=im.height,ratio=Math.min(900/w,700/h,1);w=Math.round(w*ratio);h=Math.round(h*ratio);const cv=document.createElement('canvas');cv.width=w;cv.height=h;const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,w,h);c.drawImage(im,0,0,w,h);cb(cv.toDataURL('image/jpeg',.7));};im.src=r.result;};r.readAsDataURL(file);}
+function renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVal,counts){
+  const cb=document.getElementById(countId);
+  if(cb)cb.innerHTML=(counts||[2,4,6,8]).map(n=>`<button class="btn btn-ghost" style="padding:5px 12px;${countVal===n?'background:var(--accent2);color:#fff;border-color:var(--accent2);':''}" onclick="${countSetter}(${n})">${n}</button>`).join('')+`<button class="btn btn-ghost" style="padding:5px 12px" onclick="${countSetter}(null)">＋</button>`;
+  const grid=document.getElementById(gridId);if(!grid)return;grid.innerHTML='';
+  imgArr.forEach((slot,idx)=>{
+    const cell=document.createElement('div');cell.className='img-slot'+(slot?' has-img':'');cell.dataset.idx=idx;
+    if(slot){cell.setAttribute('draggable','true');cell.innerHTML=`<img src="${slot}"><button class="img-remove" onclick="${removeFn}(${idx})">✕</button>`;}
+    else{cell.innerHTML=`<div class="img-add-lbl"><span>➕</span>Agregar</div>`;cell.onclick=()=>pickFn(idx);}
+    cell.addEventListener('dragstart',e=>{if(slot)e.dataTransfer.setData('text/plain',String(idx));});
+    cell.addEventListener('dragover',e=>e.preventDefault());
+    cell.addEventListener('drop',e=>{e.preventDefault();const f=parseInt(e.dataTransfer.getData('text/plain'));if(!isNaN(f)){const t=imgArr[f];imgArr[f]=imgArr[idx];imgArr[idx]=t;renderImgGrid(gridId,imgArr,countId,pickFn,removeFn,countSetter,countVal,counts);}});
+    grid.appendChild(cell);
+  });
+}
+function ecgImgRender(){while(ecgImg.length<ecgImgCount)ecgImg.push(null);renderImgGrid('ecg-img-grid',ecgImg,'ecg-img-count-btns',ecgImgPick,ecgImgRemove,'setEcgImgCount',ecgImgCount,[2,4,6,8]);}
+function setEcgImgCount(n){ecgImgCount=n||ecgImg.length+1;while(ecgImg.length<ecgImgCount)ecgImg.push(null);ecgImgRender();}
+function ecgImgPick(idx){ecgImgActive=idx;document.getElementById('ecg-img-file').click();}
+function ecgImgChosen(e){const f=e.target.files[0];if(f)compress(f,d=>{ecgImg[ecgImgActive]=d;ecgImgRender();});e.target.value='';}
+function ecgImgRemove(idx){ecgImg[idx]=null;ecgImgRender();}
+function estImgRender(){while(estImg.length<estImgCount)estImg.push(null);renderImgGrid('est-img-grid',estImg,'est-img-count-btns',estImgPick,estImgRemove,'setEstImgCount',estImgCount,[2,4,6,8,10]);}
+function setEstImgCount(n){estImgCount=n||estImg.length+1;while(estImg.length<estImgCount)estImg.push(null);estImgRender();}
+function estImgPick(idx){estImgActive=idx;document.getElementById('est-img-file').click();}
+function estImgChosen(e){const f=e.target.files[0];if(f)compress(f,d=>{estImg[estImgActive]=d;estImgRender();});e.target.value='';}
+function estImgRemove(idx){estImg[idx]=null;estImgRender();}
+document.addEventListener('paste',e=>{
+  const page=document.querySelector('.page.active');if(!page)return;
+  const items=e.clipboardData?.items||[];
+  for(const item of items){if(item.type?.startsWith('image')){e.preventDefault();const f=item.getAsFile();if(!f)break;
+    if(page.id==='page-imagenes')compress(f,d=>{const i=estImg.findIndex(s=>!s);if(i>=0){estImg[i]=d;}else{estImg.push(d);estImgCount=estImg.length;}estImgRender();});
+    if(page.id==='page-ecg')compress(f,d=>{const i=ecgImg.findIndex(s=>!s);if(i>=0){ecgImg[i]=d;}else{ecgImg.push(d);ecgImgCount=ecgImg.length;}ecgImgRender();});
+    break;}}
+});
+
+// INFORME
+function gv(id){return document.getElementById(id)?.value||'';}
+function gst(id){const el=document.getElementById(id);return el&&el.value?el.options[el.selectedIndex].text:'';}
+function generarInforme(){
+  // Include eco basal text
+  const ebLines = ebTextoInforme();
+
+  const nombre=gv('p-nombre'),hc=gv('p-hc'),fecha=gv('p-fecha'),edad=gv('p-edad'),sexo=gv('p-sexo');
+  const ind=gst('p-ind'),estres=gst('p-estres'),adec=document.getElementById('b-adec')?.value;
+  const mets=gv('b-mets'),fcmax=gv('b-fc-max'),fcteo=gv('b-fc-teo');
+  const fcpct=fcteo&&fcmax?Math.round(+fcmax/+fcteo*100):null;
+  const stop=gst('b-stop'),sint=gst('b-sintomas'),ecgBas=gst('b-ecg-bas'),ecgEst=gst('b-ecg-estres');
+  const atropina=document.getElementById('b-atropina-chk')?.checked,atropinaD=gv('b-atropina-dosis');
+  const resGlobal=document.getElementById('res-global')?.value;
+  const resMap={neg:'negativo para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'indeterminado / no concluyente',via:'con viabilidad miocárdica presente',novia:'sin viabilidad miocárdica'};
+  const wmsiB=getWMSI('basal'),wmsiP=getWMSI('pico'),wmsiR=getWMSI('recup');
+  const{segs}=getAnormPico();
+  const feviB=gv('c-fevi-bas'),feviP=gv('c-fevi-pic');
+  const glsBas=gv('gls-bas'),glsPic=gv('gls-pic');
+  const cfvrDaB=gv('cfvr-da-bas'),cfvrDaP=gv('cfvr-da-pic');
+  const cfvrDa=cfvrDaB&&cfvrDaP?(+cfvrDaP/+cfvrDaB).toFixed(2):null;
+  const eePic=gv('p-ee-pic'),psapPic=gv('p-psap-pic'),lPost=document.getElementById('l-post')?.value;
+  const arritmias=gv('ecg-arritmias'),resComment=gv('res-comment');
+  const inst=gv('cfg-inst')||'GREMEDA',ciudad=gv('cfg-ciudad'),medico=gv('cfg-medico');
+  const ts={LAD:{a:0},RCA:{a:0},LCx:{a:0}};bull.pico.forEach((st,i)=>{if(st>1)ts[SEGS[i].ter].a++;});
+  const af=Object.entries(ts).filter(([,d])=>d.a>=2).map(([t])=>t);
+  const p=[];
+  p.push('ECOCARDIOGRAMA DE ESTRÉS');
+  p.push('Institución: '+inst+(ciudad?' — '+ciudad:''));
+  if(nombre)p.push('Paciente: '+nombre+(hc?' (HC: '+hc+')':'')+(edad?' — '+edad+' años':'')+(sexo?' — '+({M:'Masculino',F:'Femenino'}[sexo]||sexo):''));
+  if(fecha)p.push('Fecha: '+fecha);if(medico)p.push('Médico informante: '+medico);p.push('');
+  if(ind)p.push('INDICACIÓN: '+ind+'.');p.push('');
+  if(ebLines.length){p.push('ECOCARDIOGRAMA BASAL:');ebLines.forEach(l=>p.push(l));p.push('');}
+  let prot='PROTOCOLO: Eco estrés con '+estres.toLowerCase()+'.';
+  if(mets)prot+=' METs: '+mets+'.';if(fcpct)prot+=' FC máxima alcanzada: '+fcmax+' lpm ('+fcpct+'% FCmax teórica).';
+  if(adec==='si')prot+=' Estrés adecuado.';else if(adec==='no')prot+=' Estrés subóptimo.';
+  if(atropina)prot+=' Atropina'+(atropinaD?' '+atropinaD:'')+'.';
+  if(stop)prot+=' Suspensión: '+stop+'.';if(sint&&sint!=='Sin síntomas')prot+=' Síntomas: '+sint+'.';
+  p.push(prot);
+  if(ecgBas||ecgEst){let el='ECG: '+(ecgBas&&ecgBas!=='Normal'?'Basal: '+ecgBas+'. ':'Basal normal. ')+(ecgEst&&ecgEst!=='Sin cambios significativos'?'Estrés: '+ecgEst+'. ':'Sin cambios ECG. ');if(arritmias)el+=arritmias+'.';p.push(el);}
+  p.push('');p.push('MOTILIDAD PARIETAL:');
+  if(wmsiB!==null)p.push('— Basal: WMSI '+wmsiB+(feviB?' (FEVI '+feviB+'%)':'')+'.') ;
+  if(wmsiP!==null){if(segs.length===0)p.push('— Pico: sin alteraciones. WMSI '+wmsiP+(feviP?' (FEVI '+feviP+'%)':'')+'.');else{const an=segs.map(s=>SEG_LABELS[s.st].toLowerCase()+' seg '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')').join('; ');p.push('— Pico: '+an+'. WMSI '+wmsiP+(feviP?' (FEVI '+feviP+'%)':'')+'.');}}
+  if(wmsiR!==null)p.push('— Recuperación: WMSI '+wmsiR+'.');
+  if(af.length)p.push('Patrón isquémico sugestivo de compromiso en: '+af.join(', ')+'.');
+  p.push('');
+  if(glsBas||glsPic){let gl='GLS: basal '+glsBas+'%';if(glsPic){gl+=', pico '+glsPic+'%';const d=Math.abs(+glsPic)-Math.abs(+glsBas);gl+=' (Δ '+(d>0?'+':'')+d.toFixed(1)+'% — reserva '+(d>2?'presente':'reducida')+')';}p.push(gl+'.');}
+  if(cfvrDa)p.push('CFVR DA: '+cfvrDa+' ('+(+cfvrDa>=2.5?'normal':'reducida')+').');
+  if(psapPic)p.push('PSAP pico: '+psapPic+'mmHg ('+(+psapPic>60?'HTP inducida':+psapPic>50?'elevación significativa':'normal')+').');
+  if(eePic)p.push("E/e' pico: "+eePic+' ('+(+eePic>=15?'eco estrés diastólico positivo':+eePic>=13?'borderline':'normal')+').');
+  if(lPost==='2')p.push('Líneas B ≥3/campo post-estrés: presente.');
+  p.push('');
+  if(resGlobal)p.push('CONCLUSIÓN: Estudio '+(resMap[resGlobal]||resGlobal)+'.');
+  if(resComment)p.push(resComment);
+  p.push('');if(medico)p.push('Médico informante: '+medico);if(inst)p.push(inst+(ciudad?' — '+ciudad:''));
+  const el=document.getElementById('informe-txt');if(el)el.value=p.join('\n');
+}
+function copiarInforme(){const txt=document.getElementById('informe-txt')?.value||'';navigator.clipboard.writeText(txt).then(()=>alert('✅ Copiado al portapapeles'));}
+function imprimirInforme(){generarInforme();setTimeout(()=>window.print(),150);}
+
+// INIT
+document.addEventListener('DOMContentLoaded',()=>{
+  const hoy=new Date().toISOString().slice(0,10);
+  const fd=document.getElementById('p-fecha');if(fd)fd.value=hoy;
+  initBulls();ecgImgRender();estImgRender();
+  cargarEstado();
+  setInterval(guardar,30000);
+  const listeners=[
+    ['p-fnac','input',calcEdad],['p-edad','input',onEdadChange],
+    ['b-fc-max','input',calcFCpct],['p-peso','input',calcDobuDosis],
+    ['c-fevi-bas','input',onFeviChange],['c-fevi-pic','input',onFeviChange],
+    ['p-psap-pic','input',evalPSAP],['p-ee-bas','input',evalEE],['p-ee-pic','input',evalEEpico],
+    ['gls-bas','input',evalGLS],['gls-pic','input',evalGLS],
+    ['f-cfvr-da','input',evalCFVRprot],
+    ['d-dilat','change',evalCriterios],['d-pa','change',evalCriterios],
+    ['d-im','change',evalCriterios],['l-post','change',evalCriterios],
+  ];
+  listeners.forEach(([id,ev,fn])=>document.getElementById(id)?.addEventListener(ev,fn));
+  // Eco basal listeners
+  const ebListeners=[
+    ['eb-divi','input',ebCalcMasa],['eb-dsvi','input',ebCalcMasa],
+    ['eb-sivd','input',ebCalcMasa],['eb-ppvid','input',ebCalcMasa],['eb-sc','input',ebCalcMasa],
+    ['eb-fevi','input',ebEvalFEVI],
+    ['eb-vd4c','input',ebCalcSimpson],['eb-vs4c','input',ebCalcSimpson],
+    ['eb-vd2c','input',ebCalcSimpson],['eb-vs2c','input',ebCalcSimpson],
+    ['eb-gls','input',ebEvalGLS],
+    ['eb-e','input',ebCalcDiast],['eb-a','input',ebCalcDiast],
+    ['eb-e-sep','input',ebCalcDiast],['eb-e-lat','input',ebCalcDiast],['eb-td','input',ebCalcDiast],
+    ['eb-vd-bas','input',ebEvalVD],['eb-vd-pared','input',ebEvalVD],
+    ['eb-tapse','input',ebEvalVD],['eb-s-tric','input',ebEvalVD],
+    ['eb-vd-ad','input',ebCalcFAC_VD],['eb-vd-as','input',ebCalcFAC_VD],
+    ['eb-ai-diam','input',ebEvalAI],['eb-ai-vol4c','input',ebEvalAI],['eb-ai-vol2c','input',ebEvalAI],
+    ['eb-ad-area','input',ebEvalAD],['eb-vci','input',ebCalcPAD],['eb-vci-colapso','change',ebCalcPAD],
+    ['eb-it-vmax','input',ebCalcPSAP],
+    ['eb-ao-senos','input',ebEvalAorta],['eb-ao-asc','input',ebEvalAorta],
+    ['eb-vm-tp','input',ebEvalVM],
+    ['eb-va-vmax','input',ebEvalVA],['eb-va-gm','input',ebEvalVA],
+    ['eb-va-dtsvi','input',ebCalcAVA],['eb-va-itvtsvi','input',ebCalcAVA],['eb-va-itv','input',ebCalcAVA],
+    ['eb-vp-grad','input',ebEvalVP],
+  ];
+  ebListeners.forEach(([id,ev,fn])=>document.getElementById(id)?.addEventListener(ev,fn));
+
+  ['da','cd','cx'].forEach(a=>{
+    document.getElementById('cfvr-'+a+'-bas')?.addEventListener('input',()=>calcCFVR(a));
+    document.getElementById('cfvr-'+a+'-pic')?.addEventListener('input',()=>calcCFVR(a));
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// ECO BASAL — FUNCIONES
+// ═══════════════════════════════════════════════════════════
+function ebTab(id, el){
+  document.querySelectorAll('#page-ecobasal .tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('ebtab-'+id).classList.add('active');
+  document.querySelectorAll('#ecobasal-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function ebCalcMasa(){
+  const divi=+document.getElementById('eb-divi')?.value||0;
+  const sivd=+document.getElementById('eb-sivd')?.value||0;
+  const ppvid=+document.getElementById('eb-ppvid')?.value||0;
+  const sc=+document.getElementById('eb-sc')?.value||0;
+  const dsvi=+document.getElementById('eb-dsvi')?.value||0;
+  // Devereux: 0.8 × 1.04 × ((SIV+DIVI+PPVI)³ − DIVI³) + 0.6
+  if(divi&&sivd&&ppvid){
+    const masa=+(0.8*1.04*(Math.pow(sivd+divi+ppvid,3)-Math.pow(divi,3))+0.6).toFixed(1);
+    const el=document.getElementById('eb-masa');if(el)el.value=masa;
+    if(sc){const mi=+(masa/sc).toFixed(1);const miEl=document.getElementById('eb-masa-i');if(miEl)miEl.value=mi;
+      const res=document.getElementById('eb-vi-res');
+      if(res){if(mi>115&&document.getElementById('p-sexo')?.value==='F'||mi>131&&document.getElementById('p-sexo')?.value!=='F'){res.textContent='⚠️ HVI (masa indexada elevada)';res.style.color='var(--amber)';}else{res.textContent='✅ Masa VI normal';res.style.color='var(--green)';}}
+    }
+  }
+  // RWT = 2×PPVId / DIVId
+  if(divi&&ppvid){
+    const rwt=+(2*ppvid/divi).toFixed(2);
+    const el=document.getElementById('eb-rwt');if(el)el.value=rwt;
+    const geom=document.getElementById('eb-geom-vi');
+    if(geom){
+      const masa=+document.getElementById('eb-masa')?.value||0;
+      const masaI=+document.getElementById('eb-masa-i')?.value||0;
+      const normal= masaI<=131; // simplified
+      if(rwt<=0.42&&normal){geom.textContent='Normal';geom.style.color='var(--green)';}
+      else if(rwt<=0.42&&!normal){geom.textContent='Dilatación excéntrica';geom.style.color='var(--amber)';}
+      else if(rwt>0.42&&normal){geom.textContent='Remodelado concéntrico';geom.style.color='var(--amber)';}
+      else{geom.textContent='Hipertrofia concéntrica';geom.style.color='var(--red)';}
+    }
+  }
+  if(divi&&dsvi){
+    const fac=+((divi-dsvi)/divi*100).toFixed(1);
+    const facEl=document.getElementById('eb-fac');if(facEl)facEl.value=fac;
+  }
+}
+
+function ebEvalFEVI(){
+  const v=+document.getElementById('eb-fevi')?.value||0;
+  const el=document.getElementById('eb-fevi-res');if(!el)return;
+  if(!v){el.textContent='';return;}
+  if(v>=55){el.style.color='var(--green)';el.textContent='✅ FEVI conservada (≥55%)';}
+  else if(v>=40){el.style.color='var(--amber)';el.textContent='⚠️ FEVI levemente reducida (40–54%) — HFmrEF';}
+  else{el.style.color='var(--red)';el.textContent='❌ FEVI reducida (<40%) — HFrEF';}
+}
+
+function ebCalcSimpson(){
+  const vd4c=+document.getElementById('eb-vd4c')?.value||0;
+  const vs4c=+document.getElementById('eb-vs4c')?.value||0;
+  const vd2c=+document.getElementById('eb-vd2c')?.value||0;
+  const vs2c=+document.getElementById('eb-vs2c')?.value||0;
+  if(vd4c&&vd2c){
+    const vtd=+((vd4c+vd2c)/2).toFixed(1);
+    const vtdEl=document.getElementById('eb-vtd');if(vtdEl)vtdEl.value=vtd;
+  }
+  if(vs4c&&vs2c){
+    const vts=+((vs4c+vs2c)/2).toFixed(1);
+    const vtsEl=document.getElementById('eb-vts');if(vtsEl)vtsEl.value=vts;
+  }
+  const vtd=+document.getElementById('eb-vtd')?.value||0;
+  const vts=+document.getElementById('eb-vts')?.value||0;
+  if(vtd&&vts){
+    const fevi=+((vtd-vts)/vtd*100).toFixed(1);
+    const el=document.getElementById('eb-fevi-simpson');if(el)el.value=fevi;
+    const res=document.getElementById('eb-fevi-simp-res');
+    if(res){if(fevi>=55){res.style.color='var(--green)';res.textContent='✅ Normal (≥55%)';}
+    else if(fevi>=40){res.style.color='var(--amber)';res.textContent='⚠️ Levemente reducida';}
+    else{res.style.color='var(--red)';res.textContent='❌ Reducida (<40%)';}}
+    // Sync to main FEVI fields if empty
+    const mainFevi=document.getElementById('eb-fevi');
+    if(mainFevi&&!mainFevi.value){mainFevi.value=fevi;ebEvalFEVI();}
+    // Sync to protocolo FEVI basal
+    const cFeviBas=document.getElementById('c-fevi-bas');
+    if(cFeviBas&&!cFeviBas.value){cFeviBas.value=fevi;onFeviChange();}
+  }
+}
+
+function ebEvalGLS(){
+  const v=+document.getElementById('eb-gls')?.value||0;
+  const el=document.getElementById('eb-gls-res');if(!el)return;
+  if(!v){el.textContent='';return;}
+  if(v<=-20){el.style.color='var(--green)';el.textContent='✅ GLS normal (≤−20%)';}
+  else if(v>=-16){el.style.color='var(--amber)';el.textContent='⚠️ GLS borderline (−16 a −20%)';}
+  else{el.style.color='var(--red)';el.textContent='❌ GLS reducido (>−16%) — disfunción subclínica';}
+  // Sync to CFVR/strain module gls-bas
+  const glsBas=document.getElementById('gls-bas');
+  if(glsBas&&!glsBas.value){glsBas.value=v;evalGLS();}
+}
+
+function ebCalcDiast(){
+  const e=+document.getElementById('eb-e')?.value||0;
+  const a=+document.getElementById('eb-a')?.value||0;
+  const esep=+document.getElementById('eb-e-sep')?.value||0;
+  const elat=+document.getElementById('eb-e-lat')?.value||0;
+  const td=+document.getElementById('eb-td')?.value||0;
+  if(e&&a){
+    const ea=+(e/a).toFixed(2);
+    const eaEl=document.getElementById('eb-ea');if(eaEl)eaEl.value=ea;
+  }
+  if(esep&&elat){
+    const eprom=+((esep+elat)/2).toFixed(1);
+    const epEl=document.getElementById('eb-e-prom');if(epEl)epEl.value=eprom;
+    if(e){
+      const eeprom=+(e/eprom).toFixed(1);
+      const eeEl=document.getElementById('eb-eeprom');if(eeEl)eeEl.value=eeprom;
+    }
+  }
+  if(e&&esep){const eesep=+(e/esep).toFixed(1);const el=document.getElementById('eb-ee-sep');if(el)el.value=eesep;}
+  if(e&&elat){const eelat=+(e/elat).toFixed(1);const el=document.getElementById('eb-ee-lat');if(el)el.value=eelat;}
+
+  // ASE/EACVI 2016 classification (simplified)
+  const ea=+document.getElementById('eb-ea')?.value||0;
+  const eeprom=+document.getElementById('eb-eeprom')?.value||0;
+  const classEl=document.getElementById('eb-diast-class');
+  if(classEl&&ea){
+    let cls='', txt='';
+    if(ea<0.8&&td>200){cls='tag-yellow';txt='Grado I — Relajación alterada (E/A &lt;0.8, TD &gt;200ms)';}
+    else if(ea>=0.8&&ea<=1.5&&eeprom&&eeprom>=10&&eeprom<=14){cls='tag-yellow';txt='Grado II — Pseudonormal (E/A 0.8-1.5, E/e prom 10-14)';}
+    else if((ea>=2||(eeprom&&eeprom>14))||(td<160&&ea>1.5)){cls='tag-red';txt='Grado III — Patrón restrictivo (E/A ≥2 o E/e &gt;14)';}
+    else if(ea>=0.8&&ea<=2&&td>=160&&td<=200){cls='tag-green';txt='Normal (E/A 0.8–2, TD 160–200ms)';}
+    if(txt) classEl.innerHTML=`<span class="tag ${cls}" style="font-size:12px;padding:4px 12px">${txt}</span>`;
+  }
+}
+
+function ebEvalVD(){
+  const vdBas=+document.getElementById('eb-vd-bas')?.value||0;
+  const pared=+document.getElementById('eb-vd-pared')?.value||0;
+  const tapse=+document.getElementById('eb-tapse')?.value||0;
+  const stric=+document.getElementById('eb-s-tric')?.value||0;
+  const dimRes=document.getElementById('eb-vd-dim-res');
+  if(dimRes&&vdBas){if(vdBas>41){dimRes.style.color='var(--amber)';dimRes.textContent='⚠️ VD dilatado (>41mm)';}else{dimRes.style.color='var(--green)';dimRes.textContent='✅ Dimensión VD normal';}}
+  if(dimRes&&pared&&pared>5){dimRes.textContent+=' · ⚠️ Pared libre engrosada (>5mm — HVD)';}
+  const tapseRes=document.getElementById('eb-tapse-res');
+  if(tapseRes&&tapse){if(tapse<17){tapseRes.style.color='var(--red)';tapseRes.textContent='❌ TAPSE reducido (<17mm) — disfunción sistólica VD';}else if(tapse<20){tapseRes.style.color='var(--amber)';tapseRes.textContent='⚠️ TAPSE borderline (17–20mm)';}else{tapseRes.style.color='var(--green)';tapseRes.textContent='✅ TAPSE normal (≥20mm)';}}
+  const stricRes=document.getElementById('eb-stric-res');
+  if(stricRes&&stric){if(stric<9.5){stricRes.style.color='var(--red)';stricRes.textContent="❌ S' reducida (<9.5 cm/s) — disfunción VD";}else{stricRes.style.color='var(--green)';stricRes.textContent="✅ S' normal (≥9.5 cm/s)";}}
+}
+
+function ebCalcFAC_VD(){
+  const ad=+document.getElementById('eb-vd-ad')?.value||0;
+  const areaS=+document.getElementById('eb-vd-as')?.value||0;
+  if(!ad||!areaS)return;
+  const fac=+((ad-areaS)/ad*100).toFixed(1);
+  const facEl=document.getElementById('eb-fac-vd');if(facEl)facEl.value=fac;
+  const res=document.getElementById('eb-fac-vd-res');
+  if(res){if(fac<35){res.style.color='var(--red)';res.textContent='❌ FAC reducida (<35%) — disfunción VD';}else{res.style.color='var(--green)';res.textContent='✅ FAC normal (≥35%)';}}
+}
+
+function ebEvalAI(){
+  const diam=+document.getElementById('eb-ai-diam')?.value||0;
+  const v4c=+document.getElementById('eb-ai-vol4c')?.value||0;
+  const v2c=+document.getElementById('eb-ai-vol2c')?.value||0;
+  const sc=+document.getElementById('eb-sc')?.value||0;
+  const diamRes=document.getElementById('eb-ai-diam-res');
+  if(diamRes&&diam){if(diam>40){diamRes.style.color='var(--amber)';diamRes.textContent='⚠️ AI dilatada (>40mm)';}else{diamRes.style.color='var(--green)';diamRes.textContent='✅ Diámetro AI normal';}}
+  if(v4c&&v2c){
+    const vol=+((v4c+v2c)/2).toFixed(1);
+    const volEl=document.getElementById('eb-ai-vol');if(volEl)volEl.value=vol;
+    if(sc){const vi=+(vol/sc).toFixed(1);const viEl=document.getElementById('eb-ai-vol-i');if(viEl)viEl.value=vi;
+      const res=document.getElementById('eb-ai-res');
+      if(res){if(vi<=34){res.style.color='var(--green)';res.textContent='✅ Vol. AI normal (≤34 mL/m²)';}
+      else if(vi<=41){res.style.color='var(--amber)';res.textContent='⚠️ AI levemente dilatada (35–41 mL/m²)';}
+      else if(vi<=48){res.style.color='var(--amber)';res.textContent='⚠️ AI moderadamente dilatada (42–48 mL/m²)';}
+      else{res.style.color='var(--red)';res.textContent='❌ AI severamente dilatada (>48 mL/m²)';}}
+    }
+  }
+}
+
+function ebEvalAD(){
+  const area=+document.getElementById('eb-ad-area')?.value||0;
+  const res=document.getElementById('eb-ad-res');if(!res)return;
+  if(!area){res.textContent='';return;}
+  if(area>18){res.style.color='var(--amber)';res.textContent='⚠️ AD dilatada (>18 cm²)';}
+  else{res.style.color='var(--green)';res.textContent='✅ Área AD normal (≤18 cm²)';}
+}
+
+function ebCalcPAD(){
+  const vci=+document.getElementById('eb-vci')?.value||0;
+  const col=document.getElementById('eb-vci-colapso')?.value||'';
+  const padEl=document.getElementById('eb-pad');
+  const res=document.getElementById('eb-pad-res');
+  let pad=null;
+  if(vci&&col){
+    if(vci<21&&col==='>50'){pad=3;}
+    else if(vci>21&&col==='<50'){pad=15;}
+    else{pad=8;}
+    if(padEl)padEl.value=pad;
+    if(res){if(pad<=5){res.style.color='var(--green)';res.textContent='PAD normal ('+pad+' mmHg)';}else if(pad<=10){res.style.color='var(--amber)';res.textContent='PAD moderadamente elevada ('+pad+' mmHg)';}else{res.style.color='var(--red)';res.textContent='PAD elevada ('+pad+' mmHg)';}}
+    // Recalculate PSAP if IT available
+    ebCalcPSAP();
+  }
+}
+
+function ebCalcPSAP(){
+  const vmax=+document.getElementById('eb-it-vmax')?.value||0;
+  const pad=+document.getElementById('eb-pad')?.value||0;
+  const gradEl=document.getElementById('eb-it-grad');
+  const psapEl=document.getElementById('eb-psap');
+  const res=document.getElementById('eb-psap-res');
+  if(vmax){
+    const grad=+(4*vmax*vmax).toFixed(1);
+    if(gradEl)gradEl.value=grad;
+    const padUse=pad||5;
+    const psap=+(grad+padUse).toFixed(1);
+    if(psapEl)psapEl.value=psap;
+    if(res){if(psap<=35){res.style.color='var(--green)';res.textContent='✅ PSAP normal (≤35 mmHg)';}
+    else if(psap<=50){res.style.color='var(--amber)';res.textContent='⚠️ HTP leve (36–50 mmHg)';}
+    else if(psap<=70){res.style.color='var(--amber)';res.textContent='⚠️ HTP moderada (51–70 mmHg)';}
+    else{res.style.color='var(--red)';res.textContent='❌ HTP severa (>70 mmHg)';}}
+    // Sync to Protocolo PSAP basal
+    const psapBas=document.getElementById('p-psap-bas');
+    if(psapBas&&!psapBas.value)psapBas.value=psap;
+  }
+}
+
+function ebEvalAorta(){
+  const senos=+document.getElementById('eb-ao-senos')?.value||0;
+  const asc=+document.getElementById('eb-ao-asc')?.value||0;
+  const res=document.getElementById('eb-ao-res');if(!res)return;
+  const msgs=[];
+  if(senos>40)msgs.push('⚠️ Senos de Valsalva dilatados (>40mm)');
+  if(asc>38)msgs.push('⚠️ Aorta ascendente dilatada (>38mm)');
+  if(asc>45)msgs.push('❌ Aorta ascendente severamente dilatada (>45mm) — evaluar cirugía');
+  if(msgs.length){res.innerHTML=msgs.join('<br>');res.style.color='var(--amber)';}
+  else{res.textContent='✅ Dimensiones aórticas normales';res.style.color='var(--green)';}
+}
+
+function ebEvalVM(){
+  const tp=+document.getElementById('eb-vm-tp')?.value||0;
+  const areaEl=document.getElementById('eb-vm-area-pht');
+  const res=document.getElementById('eb-vm-res');if(!res)return;
+  if(tp){const area=+(220/tp).toFixed(1);if(areaEl)areaEl.value=area;
+    if(area<1){res.style.color='var(--red)';res.textContent='❌ Estenosis severa (AVMi <1 cm²)';}
+    else if(area<1.5){res.style.color='var(--amber)';res.textContent='⚠️ Estenosis moderada (1–1.5 cm²)';}
+    else if(area<2){res.style.color='var(--amber)';res.textContent='⚠️ Estenosis leve (1.5–2 cm²)';}
+    else{res.style.color='var(--green)';res.textContent='✅ Área mitral normal (>2 cm²)';}
+  }
+}
+
+function ebEvalVA(){
+  const vmax=+document.getElementById('eb-va-vmax')?.value||0;
+  const gm=+document.getElementById('eb-va-gm')?.value||0;
+  const res=document.getElementById('eb-va-res');if(!res)return;
+  const msgs=[];
+  if(vmax>=4){msgs.push('❌ Estenosis aórtica severa (Vmax ≥4 m/s)');}
+  else if(vmax>=3){msgs.push('⚠️ Estenosis aórtica moderada (Vmax 3–4 m/s)');}
+  else if(vmax>=2.5){msgs.push('⚠️ Estenosis aórtica leve (Vmax 2.5–3 m/s)');}
+  if(gm>=40){msgs.push('❌ GM medio ≥40 mmHg — estenosis severa');}
+  else if(gm>=20){msgs.push('⚠️ GM medio 20–39 mmHg — estenosis moderada');}
+  if(msgs.length){res.innerHTML=msgs.join('<br>');res.style.color='var(--red)';}
+  else if(vmax>0){res.textContent='✅ Sin estenosis aórtica significativa';res.style.color='var(--green)';}
+}
+
+function ebCalcAVA(){
+  const dtsvi=+document.getElementById('eb-va-dtsvi')?.value||0;
+  const itvtsvi=+document.getElementById('eb-va-itvtsvi')?.value||0;
+  const itvao=+document.getElementById('eb-va-itv')?.value||0;
+  if(dtsvi&&itvtsvi&&itvao){
+    const area=+(Math.PI*(dtsvi/2/10)*(dtsvi/2/10)*itvtsvi/itvao).toFixed(2);
+    const el=document.getElementById('eb-va-ava');if(el)el.value=area;
+    const res=document.getElementById('eb-va-res');
+    if(res){if(area<1){res.style.color='var(--red)';res.textContent='❌ AVA <1 cm² — estenosis severa';}
+    else if(area<1.5){res.style.color='var(--amber)';res.textContent='⚠️ AVA 1.0–1.5 cm² — estenosis moderada';}
+    else{res.style.color='var(--green)';res.textContent='✅ AVA ≥1.5 cm² — sin estenosis significativa';}}
+  }
+}
+
+function ebEvalVP(){
+  const g=+document.getElementById('eb-vp-grad')?.value||0;
+  const res=document.getElementById('eb-vp-res');if(!res)return;
+  if(!g){res.textContent='';return;}
+  if(g>64){res.style.color='var(--red)';res.textContent='❌ Estenosis pulmonar severa (>64mmHg)';}
+  else if(g>36){res.style.color='var(--amber)';res.textContent='⚠️ Estenosis pulmonar moderada (36–64mmHg)';}
+  else if(g>20){res.style.color='var(--amber)';res.textContent='⚠️ Estenosis pulmonar leve (20–36mmHg)';}
+  else{res.style.color='var(--green)';res.textContent='✅ Gradiente pulmonar normal';}
+}
+
+// Generar texto eco basal para informe
+function ebTextoInforme(){
+  const gv=id=>document.getElementById(id)?.value||'';
+  const gst=id=>{const el=document.getElementById(id);return el&&el.value?el.options[el.selectedIndex].text:'';};
+  const lines=[];
+
+  // VI sistólica
+  const divi=gv('eb-divi'),dsvi=gv('eb-dsvi'),sivd=gv('eb-sivd'),ppvid=gv('eb-ppvid');
+  const fevi=gv('eb-fevi')||gv('eb-fevi-simpson');
+  const feviMet=gst('eb-fevi-metodo');
+  const fac=gv('eb-fac'),masa=gv('eb-masa-i'),rwt=gv('eb-rwt'),geom=document.getElementById('eb-geom-vi')?.textContent||'';
+  if(divi) lines.push(`VI: DIVI ${divi}mm, DSVI ${dsvi||'—'}mm, SIVd ${sivd||'—'}mm, PPVId ${ppvid||'—'}mm. FA ${fac||'—'}%.`+(masa?` Masa VI indexada ${masa} g/m² (${geom}).`:''));
+  if(fevi) lines.push(`FEVI ${fevi}% (${feviMet}).`);
+  const gls=gv('eb-gls');if(gls) lines.push(`GLS basal: ${gls}%.`);
+
+  // Diastólica
+  const e=gv('eb-e'),a=gv('eb-a'),ea=gv('eb-ea'),td=gv('eb-td'),eprom=gv('eb-e-prom'),eeprom=gv('eb-eeprom');
+  if(e&&a) lines.push(`Función diastólica: E ${e} cm/s, A ${a} cm/s, E/A ${ea}, TD ${td||'—'} ms. E/e promedio ${eeprom||'—'} (e' ${eprom||'—'} cm/s).`);
+
+  // VD
+  const tapse=gv('eb-tapse'),stric=gv('eb-s-tric'),facvd=gv('eb-fac-vd'),vdbas=gv('eb-vd-bas');
+  if(tapse||vdbas) lines.push(`VD: diámetro basal ${vdbas||'—'} mm. TAPSE ${tapse||'—'} mm. S' ${stric||'—'} cm/s. FAC ${facvd||'—'}%.`);
+
+  // AI/AD
+  const aiDiam=gv('eb-ai-diam'),aiVoli=gv('eb-ai-vol-i');
+  const psap=gv('eb-psap'),psapRes=document.getElementById('eb-psap-res')?.textContent||'';
+  if(aiDiam||aiVoli) lines.push(`AI: diámetro ${aiDiam||'—'} mm, volumen indexado ${aiVoli||'—'} mL/m².`);
+  if(psap) lines.push(`PSAP estimada ${psap} mmHg. ${psapRes}`);
+
+  // Aorta
+  const aoSenos=gv('eb-ao-senos'),aoAsc=gv('eb-ao-asc');
+  if(aoSenos||aoAsc) lines.push(`Aorta: senos de Valsalva ${aoSenos||'—'} mm, ascendente ${aoAsc||'—'} mm.`);
+
+  // Válvulas
+  const vmMorf=gst('eb-vm-morf'),imGrado=gst('eb-im-grado');
+  const vaMorf=gst('eb-va-morf'),iaoGrado=gst('eb-iao-grado'),vaVmax=gv('eb-va-vmax'),ava=gv('eb-va-ava');
+  const itGrado=gst('eb-it-grado');
+  if(vmMorf) lines.push(`VM: ${vmMorf}. IM ${imGrado||'no valorada'}.`);
+  if(vaMorf) lines.push(`VA: ${vaMorf}. Vmax ${vaVmax||'—'} m/s.${ava?' AVA '+ava+' cm² (ecuación de continuidad).':''} IAo ${iaoGrado||'no valorada'}.`);
+  if(itGrado&&itGrado!=='Sin IT / mínima (fisiológica)') lines.push(`IT ${itGrado}.`);
+
+  // Pericardio
+  const periDer=gst('eb-peri-derrame');
+  if(periDer&&periDer!=='Sin derrame') lines.push(`Pericardio: ${periDer}.`);
+  else if(periDer) lines.push('Pericardio sin derrame.');
+
+  return lines;
+}
+</script>
+<!-- ═══ Panel datos del médico ═══ -->
+<div class="ee-modal" id="ee-med-modal" onclick="if(event.target===this)medClose()">
+  <div class="ee-modal-box">
+    <h3>👤 Datos del médico <button class="x" onclick="medClose()">✕</button></h3>
+    <label>Nombre</label><input id="pm-nombre" placeholder="Dr. ...">
+    <label>Matrícula</label><input id="pm-mat" placeholder="CJPP ...">
+    <label>Institución</label><input id="pm-inst" placeholder="GREMEDA">
+    <label>Ciudad / Departamento</label><input id="pm-ciudad" placeholder="Artigas, Uruguay">
+    <label>Firma (pie del informe)</label><input id="pm-firma" placeholder="Firma / aclaración">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+      <button class="btn btn-ghost" onclick="medClose()">Cerrar</button>
+      <button class="btn btn-primary" onclick="medSave()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Botones fijos derecha ═══ -->
+<div class="ee-float">
+  <button class="ee-float-btn" onclick="eeGenerar()">📄 Generar informe</button>
+  <button class="ee-float-btn" onclick="eeGuardados()">🗂 Guardados</button>
+  <button class="ee-float-btn ee-float-lab" onclick="eeLab()">🔬 Laboratorio</button>
+</div>
+
+<script>
+/* ═══ Header CeiboMed: tema, logo, datos del médico, botones fijos ═══ */
+(function(){
+  function val(id){ var e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+  function setVal(id,v){ var e=document.getElementById(id); if(e)e.value=v; }
+  function lsGet(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
+  function lsSet(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+  function lsDel(k){ try{localStorage.removeItem(k);}catch(e){} }
+
+  /* Tema día/noche */
+  window.eeToggleTheme=function(){
+    var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
+    var next=cur==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme',next);
+    lsSet('ecoestres_theme',next);
+    var b=document.getElementById('ee-theme-btn'); if(b)b.textContent=next==='light'?'☀️':'🌙';
+  };
+  function loadTheme(){
+    var t=lsGet('ecoestres_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    var b=document.getElementById('ee-theme-btn'); if(b)b.textContent=t==='light'?'☀️':'🌙';
+  }
+
+  /* Logo editable */
+  window.eeLogoClick=function(e){ if(e&&e.target&&e.target.classList.contains('hdr-logo-del'))return; var f=document.getElementById('ee-logo-file'); if(f)f.click(); };
+  window.eeLogoUpload=function(e){
+    var f=e.target.files&&e.target.files[0]; if(!f)return;
+    var r=new FileReader(); r.onload=function(ev){ lsSet('ecoestres_logo',ev.target.result); showLogo(ev.target.result); }; r.readAsDataURL(f);
+    e.target.value='';
+  };
+  window.eeLogoDel=function(e){ if(e){e.stopPropagation();} lsDel('ecoestres_logo'); showLogo(null); };
+  function showLogo(src){
+    var img=document.getElementById('ee-logo-img'), ph=document.getElementById('ee-logo-ph'), del=document.getElementById('ee-logo-del');
+    if(src){ if(img){img.src=src;img.style.display='block';} if(ph)ph.style.display='none'; if(del)del.style.display='block'; }
+    else{ if(img){img.style.display='none';img.removeAttribute('src');} if(ph)ph.style.display='flex'; if(del)del.style.display='none'; }
+  }
+  function loadLogo(){ var s=lsGet('ecoestres_logo'); showLogo(s||null); }
+
+  /* Datos del médico — fuente de verdad: campos cfg-* (persistidos por guardar()) */
+  window.medOpen=function(){
+    setVal('pm-nombre',val('cfg-medico')); setVal('pm-mat',val('cfg-matricula'));
+    setVal('pm-inst',val('cfg-inst')); setVal('pm-ciudad',val('cfg-ciudad')); setVal('pm-firma',val('cfg-firma'));
+    var m=document.getElementById('ee-med-modal'); if(m)m.classList.add('open');
+  };
+  window.medClose=function(){ var m=document.getElementById('ee-med-modal'); if(m)m.classList.remove('open'); };
+  window.medSave=function(){
+    setVal('cfg-medico',val('pm-nombre')); setVal('cfg-matricula',val('pm-mat'));
+    setVal('cfg-inst',val('pm-inst')); setVal('cfg-ciudad',val('pm-ciudad')); setVal('cfg-firma',val('pm-firma'));
+    if(typeof guardarConfig==='function') guardarConfig(); else if(typeof guardar==='function') guardar();
+    medRefreshHeader(); medClose();
+  };
+  window.medRefreshHeader=function(){
+    var nom=val('cfg-medico'), mat=val('cfg-matricula');
+    var hm=document.getElementById('hdr-med'); if(hm)hm.textContent=[nom,mat].filter(Boolean).join(' · ');
+    var inst=val('cfg-inst'), ciu=val('cfg-ciudad'); var hi=document.getElementById('hdr-inst');
+    if(hi){ var t=[inst,ciu].filter(Boolean).join(' · '); if(t)hi.textContent=t; }
+  };
+
+  /* Toast liviano */
+  window.eeToast=function(msg){
+    var t=document.createElement('div'); t.className='ee-toast'; t.textContent=msg; document.body.appendChild(t);
+    requestAnimationFrame(function(){t.style.opacity='1';});
+    setTimeout(function(){t.style.opacity='0'; setTimeout(function(){t.remove();},300);},2600);
+  };
+
+  /* Botones fijos */
+  window.eeGenerar=function(){ if(typeof generarInforme==='function'){ try{generarInforme();}catch(e){} } if(typeof goTo==='function') goTo('informe'); };
+  window.eeGuardados=function(){ eeToast('🗂 Guardados — módulo en preparación'); };
+  window.eeLab=function(){ eeToast('🔬 Laboratorio — módulo en preparación'); };
+
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-med-modal'); if(m&&m.classList.contains('open'))medClose(); } });
+  document.addEventListener('DOMContentLoaded',function(){ loadTheme(); loadLogo(); medRefreshHeader(); });
+})();
+</script>
+</body>
+</html>
