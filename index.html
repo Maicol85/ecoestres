@@ -1363,7 +1363,14 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="card" id="strain-bull-card">
     <div class="card-head">🎯 Bull's Eye Strain — comparativo</div>
     <div class="card-body">
-      <div class="note-box" style="margin-bottom:14px">ℹ️ Tocá cada segmento para ciclar el strain: <b style="color:#DC2626">rojo = mejor strain</b> → <b style="color:#22C55E">verde = peor strain</b>. 17 segmentos AHA, sin números. Nombres editables según el protocolo.</div>
+      <div class="note-box" style="margin-bottom:12px">ℹ️ Tocá cada segmento para ciclar su estado. 17 segmentos AHA, sin números. Escala de colores estilo General Electric. Nombres editables según el protocolo.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;margin-bottom:14px;font-size:12px;color:var(--text)">
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#DC2626;display:inline-block"></span>Normal</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#F87171;display:inline-block"></span>Hipoquinesia leve</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#FECACA;display:inline-block;border:1px solid #ccc"></span>Hipoquinesia</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#93C5FD;display:inline-block"></span>Acinesia</span>
+        <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:#1D4ED8;display:inline-block"></span>Discinesia / aneurisma</span>
+      </div>
       <div class="grid2">
         <div style="text-align:center">
           <input id="strain-name-basal" class="strain-name" value="Strain Basal" title="Nombre editable">
@@ -1913,11 +1920,12 @@ function renderBull(phase,svgId,interactive){
   const id=svgId||'bull-svg-'+phase;const svg=document.getElementById(id);if(!svg)return;
   const cx=170,cy=170,state=bull[phase];
   const OFFSET=-60;
-  const rings=[{r1:130,r2:92,segs:[0,1,2,3,4,5],step:60},{r1:92,r2:54,segs:[6,7,8,9,10,11],step:60},{r1:54,r2:24,segs:[12,13,14,15],step:90}];
+  // Segmentación idéntica a EcoSmart: anillo apical (13-16) rotado a -45° para alinear 13=arriba,14=izq,15=abajo,16=der
+  const rings=[{r1:130,r2:92,segs:[0,1,2,3,4,5],step:60,off:-60},{r1:92,r2:54,segs:[6,7,8,9,10,11],step:60,off:-60},{r1:54,r2:24,segs:[12,13,14,15],step:90,off:-45}];
   let html='';
   rings.forEach(ring=>ring.segs.forEach((segIdx,s)=>{
     const seg=SEGS[segIdx];
-    const startDeg=OFFSET-(s*ring.step),endDeg=startDeg-ring.step,midDeg=startDeg-ring.step/2,midR=(ring.r1+ring.r2)/2;
+    const startDeg=ring.off-(s*ring.step),endDeg=startDeg-ring.step,midDeg=startDeg-ring.step/2,midR=(ring.r1+ring.r2)/2;
     const lx=cx+midR*Math.cos(midDeg*Math.PI/180),ly=cy+midR*Math.sin(midDeg*Math.PI/180);
     const fill=SEG_COLORS[state[segIdx]||0];
     const iact=interactive!==false;
@@ -1951,19 +1959,21 @@ function resetBull(phase){bull[phase]=Array(17).fill(1);renderBull(phase);evalCr
 function setAllBull(phase,st){bull[phase]=Array(17).fill(st);renderBull(phase);evalCriterios();updateWMSIresumen();updateTerritorio();}
 function copyBull(from,to){bull[to]=[...bull[from]];renderBull(to);evalCriterios();updateWMSIresumen();updateTerritorio();}
 /* ═══ Bull's Eye Strain comparativo (CAMBIO 5) — porta lógica de EcoSmart ═══
-   Escala EcoEstrés: rojo = mejor strain … verde = peor strain. Sin números. */
-const STRAIN_COLORS=['#DC2626','#F97316','#F59E0B','#EAB308','#84CC16','#22C55E'];
+   Escala de colores estilo General Electric (idéntica a EcoSmart), sin números:
+   #DC2626 normal · #F87171 hipoquinesia leve · #FECACA hipoquinesia · #93C5FD acinesia · #1D4ED8 discinesia/aneurisma */
+const STRAIN_COLORS=['#DC2626','#F87171','#FECACA','#93C5FD','#1D4ED8'];
 let strainBull={basal:Array(17).fill(0),pico:Array(17).fill(0)};
 let strainBullInited=false;
 function renderStrainBull(which,svgId,interactive){
   const id=svgId||'strain-svg-'+which;const svg=document.getElementById(id);if(!svg)return;
   const cx=170,cy=170;const state=strainBull[which]||Array(17).fill(0);
   const OFFSET=-60;
-  const rings=[{r1:130,r2:92,segs:[0,1,2,3,4,5],step:60},{r1:92,r2:54,segs:[6,7,8,9,10,11],step:60},{r1:54,r2:24,segs:[12,13,14,15],step:90}];
+  // Segmentación idéntica a EcoSmart: anillo apical (13-16) rotado a -45° para alinear 13=arriba,14=izq,15=abajo,16=der
+  const rings=[{r1:130,r2:92,segs:[0,1,2,3,4,5],step:60,off:-60},{r1:92,r2:54,segs:[6,7,8,9,10,11],step:60,off:-60},{r1:54,r2:24,segs:[12,13,14,15],step:90,off:-45}];
   let html='';
   rings.forEach(ring=>ring.segs.forEach((segIdx,s)=>{
     const seg=SEGS[segIdx];
-    const startDeg=OFFSET-(s*ring.step),endDeg=startDeg-ring.step;
+    const startDeg=ring.off-(s*ring.step),endDeg=startDeg-ring.step;
     const fill=STRAIN_COLORS[state[segIdx]||0];
     const iact=interactive!==false;
     const evts=iact?`onclick="cycleStrainBull('${which}',${segIdx})" style="cursor:pointer"`:'style="cursor:default"';
