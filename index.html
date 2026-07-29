@@ -4592,37 +4592,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var ebLines=(typeof ebTextoInforme==='function')?ebTextoInforme():[];
     if(ebLines.length){ drawBar('ECOCARDIOGRAMA BASAL — DESCRIPCIÓN'); drawBullet(ebLines); }
 
-    // 9 · Resultado eco estrés (ABCD-FLPR)
-    drawBar('RESULTADO DEL ECO ESTRÉS (ABCD-FLPR)');
-    var wmsiB=(typeof getWMSI==='function')?getWMSI('basal'):null, wmsiP=(typeof getWMSI==='function')?getWMSI('pico'):null, wmsiR=(typeof getWMSI==='function')?getWMSI('recup'):null;
-    var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]};
-    var abcd=[];
-    function nar(id){ var t=V(id); return t?(' — '+t):''; }
-    abcd.push('A — Adecuación: '+(V('a-sufic')||(fcpct!=null?(fcpct+'% FC máx. teórica'):'—'))+(V('a-fcmax')?(', FC máx '+V('a-fcmax')+' lpm'):'')+(V('a-motivo')?(', motivo: '+V('a-motivo')):'')+'.'+nar('a-narr'));
-    abcd.push('B — ECG: '+(T('b-ecg-estres')||'sin cambios significativos')+'.'+nar('b-ecg-desc'));
-    var cTxt='C — Contractilidad y reserva contráctil: WMSI basal '+(wmsiB!=null?wmsiB:'—')+', pico '+(wmsiP!=null?wmsiP:'—')+(wmsiR!=null?(', recuperación '+wmsiR):'')+'.';
-    if(an.segs&&an.segs.length){ var det=an.segs.map(function(s){return (SEG_LABELS[s.st]||'').toLowerCase()+' seg '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')'+(s.nuevo?' [nuevo]':'');}).join('; '); cTxt+=' Alteraciones en pico: '+det+'.'; }
-    else cTxt+=' Sin nuevas alteraciones segmentarias en el pico.';
-    if(V('c-fevi-bas')||V('c-fevi-pic'))cTxt+=' FEVI '+(V('c-fevi-bas')||'—')+'% -> '+(V('c-fevi-pic')||'—')+'%'+(V('c-dfevi')?(' (Delta FEVI '+V('c-dfevi')+')'):'')+'.';
-    if(V('c-dsgl'))cTxt+=' Delta SGL '+V('c-dsgl')+'.';
-    if(V('c-dvti'))cTxt+=' Delta VTI '+V('c-dvti')+'.';
-    if(V('c-ea'))cTxt+=' Ea (elastancia) '+V('c-ea')+'.';
-    cTxt+=nar('c-narr'); abcd.push(cTxt);
-    abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'+nar('d-narr'));
-    var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
-    abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.'+nar('f-narr'));
-    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(V('l-irc')?(', IRC '+V('l-irc')):'')+'; líneas B '+(T('l-post')||'—')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
-    abcd.push('P — Presiones/pulmonar: PSAP '+(V('p-psap-bas')||'—')+' -> '+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?('; TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?('; RVP '+V('p-rvp')):'')+'; patrón diastólico basal '+(T('p-diast')||'—')+'.'+nar('p-narr'));
-    abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
-    drawBullet(abcd);
-    var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
-    var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
-    var conclTxt=V('abcd-concl');
-    if(conclTxt){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl0=doc.splitTextToSize('CONCLUSIÓN: '+conclTxt,pgW-4); cl0.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
-    else if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
-    if(V('res-comment'))drawText(V('res-comment'));
-
-    // 9b · Tabla Eco por Etapas (CAMBIO 3) — tras conclusión ergométrica, antes de imágenes de contractilidad
+    // 8b · Tabla Eco por Etapas (CAMBIO 2) — después de Ecocardiograma Basal, antes del Resultado ABCD-FLPR
     (function(){
       var data=(typeof etePDFData==='function')?etePDFData():null; if(!data)return;
       var heads=(typeof eteHeaderLabels==='function')?eteHeaderLabels():['Reposo','Baja','Alta','Pico','Recup.'];
@@ -4653,6 +4623,36 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       for(var cc=1;cc<5;cc++)doc.line(x0+labW+cc*cW,y0,x0+labW+cc*cW,y0+tot);
       y=y0+tot+3;
     })();
+
+    // 9 · Resultado eco estrés (ABCD-FLPR)
+    drawBar('RESULTADO DEL ECO ESTRÉS (ABCD-FLPR)');
+    var wmsiB=(typeof getWMSI==='function')?getWMSI('basal'):null, wmsiP=(typeof getWMSI==='function')?getWMSI('pico'):null, wmsiR=(typeof getWMSI==='function')?getWMSI('recup'):null;
+    var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]};
+    var abcd=[];
+    function nar(id){ var t=V(id); return t?(' — '+t):''; }
+    abcd.push('A — Adecuación: '+(V('a-sufic')||(fcpct!=null?(fcpct+'% FC máx. teórica'):'—'))+(V('a-fcmax')?(', FC máx '+V('a-fcmax')+' lpm'):'')+(V('a-motivo')?(', motivo: '+V('a-motivo')):'')+'.'+nar('a-narr'));
+    abcd.push('B — ECG: '+(T('b-ecg-estres')||'sin cambios significativos')+'.'+nar('b-ecg-desc'));
+    var cTxt='C — Contractilidad y reserva contráctil: WMSI basal '+(wmsiB!=null?wmsiB:'—')+', pico '+(wmsiP!=null?wmsiP:'—')+(wmsiR!=null?(', recuperación '+wmsiR):'')+'.';
+    if(an.segs&&an.segs.length){ var det=an.segs.map(function(s){return (SEG_LABELS[s.st]||'').toLowerCase()+' seg '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')'+(s.nuevo?' [nuevo]':'');}).join('; '); cTxt+=' Alteraciones en pico: '+det+'.'; }
+    else cTxt+=' Sin nuevas alteraciones segmentarias en el pico.';
+    if(V('c-fevi-bas')||V('c-fevi-pic'))cTxt+=' FEVI '+(V('c-fevi-bas')||'—')+'% -> '+(V('c-fevi-pic')||'—')+'%'+(V('c-dfevi')?(' (Delta FEVI '+V('c-dfevi')+')'):'')+'.';
+    if(V('c-dsgl'))cTxt+=' Delta SGL '+V('c-dsgl')+'.';
+    if(V('c-dvti'))cTxt+=' Delta VTI '+V('c-dvti')+'.';
+    if(V('c-ea'))cTxt+=' Ea (elastancia) '+V('c-ea')+'.';
+    cTxt+=nar('c-narr'); abcd.push(cTxt);
+    abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'+nar('d-narr'));
+    var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
+    abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.'+nar('f-narr'));
+    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(V('l-irc')?(', IRC '+V('l-irc')):'')+'; líneas B '+(T('l-post')||'—')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
+    abcd.push('P — Presiones/pulmonar: PSAP '+(V('p-psap-bas')||'—')+' -> '+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?('; TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?('; RVP '+V('p-rvp')):'')+'; patrón diastólico basal '+(T('p-diast')||'—')+'.'+nar('p-narr'));
+    abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
+    drawBullet(abcd);
+    var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
+    var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
+    var conclTxt=V('abcd-concl');
+    if(conclTxt){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl0=doc.splitTextToSize('CONCLUSIÓN: '+conclTxt,pgW-4); cl0.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
+    else if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
+    if(V('res-comment'))drawText(V('res-comment'));
 
     // 10 · Imágenes Bull's Eye
     if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA", 60); imgBlock(assets.bullImgs); }
