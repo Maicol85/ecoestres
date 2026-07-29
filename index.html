@@ -343,6 +343,38 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 </nav>
 <main>
 
+<!-- ═══ SEGUNDA FILA DE TABS (siempre visible) ═══ -->
+<style>
+.subtabs{position:sticky;top:0;z-index:40;display:flex;gap:6px;flex-wrap:wrap;background:var(--bg2,var(--bg3));border:1px solid var(--border);border-radius:10px;padding:6px;margin-bottom:16px}
+.subtab{flex:1 1 auto;min-width:130px;padding:9px 12px;border:none;border-radius:8px;background:transparent;color:var(--text2);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.subtab:hover{background:var(--bg3);color:var(--text)}
+.subtab.active{background:var(--accent2);color:#fff}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.calc-card{background:var(--bg2,var(--bg3));border:1px solid var(--border);border-radius:11px;padding:14px 15px}
+.calc-card h4{font-size:13.5px;font-weight:800;color:var(--text);margin:0 0 3px}
+.calc-card .calc-formula{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.4}
+.calc-card .calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.calc-card .fg{display:flex;flex-direction:column;gap:3px;margin:0}
+.calc-card .fg>label{font-size:10.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.3px}
+.calc-res{margin-top:11px;border-radius:9px;padding:10px 12px;border:1.5px solid var(--border);background:var(--bg3);font-size:12.5px;line-height:1.5}
+.calc-res .cr-val{font-size:18px;font-weight:800;line-height:1.1}
+.calc-res .cr-int{font-size:11.5px;font-weight:600;margin-top:3px}
+.calc-res.cr-ok{border-color:#16a34a;background:rgba(22,163,74,.10)} .calc-res.cr-ok .cr-val,.calc-res.cr-ok .cr-int{color:#16a34a}
+.calc-res.cr-warn{border-color:#F59E0B;background:rgba(245,158,11,.10)} .calc-res.cr-warn .cr-val,.calc-res.cr-warn .cr-int{color:#B45309}
+.calc-res.cr-bad{border-color:#DC2626;background:rgba(220,38,38,.10)} .calc-res.cr-bad .cr-val,.calc-res.cr-bad .cr-int{color:#DC2626}
+.ref-body,.tri-body{font-size:12.5px;line-height:1.65;color:var(--text)}
+.ref-body b{color:var(--accent2)}
+.tri-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:4px}
+.tri-table th,.tri-table td{border:1px solid var(--border);padding:6px 8px;text-align:left;vertical-align:top}
+.tri-table th{background:var(--bg3);color:var(--text2);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.3px}
+.tri-table td:first-child{font-weight:700;color:var(--text)}
+</style>
+<div class="subtabs">
+  <button class="subtab" onclick="goTo('calc')">🧮 Calculadoras</button>
+  <button class="subtab" onclick="goTo('ref')">📚 Referencias</button>
+  <button class="subtab" onclick="goTo('trials')">🧪 Trials</button>
+</div>
+
 <!-- ═══ ECO BASAL ═══ -->
 <div class="page active" id="page-ecobasal">
   <div class="page-title">🫀 Ecocardiograma Basal</div>
@@ -1569,6 +1601,267 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div>
 </div>
 
+<!-- ═══════════════════ CALCULADORAS ═══════════════════ -->
+<div class="page" id="page-calc">
+  <div class="page-title">🧮 Calculadoras</div>
+  <div class="page-sub">Herramientas de cálculo con resultado automático e interpretación clínica.</div>
+  <div class="calc-grid">
+
+    <div class="calc-card">
+      <h4>1 · Doble producto</h4>
+      <div class="calc-formula">FC × PAS sistólica — consumo miocárdico de O₂.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>FC (lpm)</label><input type="number" id="calc-dp-fc" oninput="calcDP()"></div>
+        <div class="fg"><label>PAS (mmHg)</label><input type="number" id="calc-dp-pas" oninput="calcDP()"></div>
+      </div>
+      <div class="calc-res" id="calc-dp-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>2 · % FCM alcanzada</h4>
+      <div class="calc-formula">(FC máx alcanzada / FCM teórica) × 100. FCM teórica = 220 − edad.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>FC máx alcanzada</label><input type="number" id="calc-fcm-max" oninput="calcFCM()"></div>
+        <div class="fg"><label>FCM teórica</label><input type="number" id="calc-fcm-teo" oninput="calcFCM()"></div>
+      </div>
+      <div class="calc-res" id="calc-fcm-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>3 · TAPSE / PSAP</h4>
+      <div class="calc-formula">Acoplamiento VD–arteria pulmonar (mm/mmHg). Normal ≥0.55.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>TAPSE (mm)</label><input type="number" id="calc-tps-tapse" step="0.1" oninput="calcTPS()"></div>
+        <div class="fg"><label>PSAP (mmHg)</label><input type="number" id="calc-tps-psap" oninput="calcTPS()"></div>
+      </div>
+      <div class="calc-res" id="calc-tps-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>4 · RVP (resistencia vascular pulmonar)</h4>
+      <div class="calc-formula">Vmax IT (m/s) / VTI TSVD (cm) × 10 — normal &lt;2 UW.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>Vmax IT (m/s)</label><input type="number" id="calc-rvp-it" step="0.1" oninput="calcRVP()"></div>
+        <div class="fg"><label>VTI TSVD (cm)</label><input type="number" id="calc-rvp-vti" step="0.1" oninput="calcRVP()"></div>
+      </div>
+      <div class="calc-res" id="calc-rvp-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>5 · Elastancia arterial (reserva contráctil)</h4>
+      <div class="calc-formula">(PAS pico / VSF pico) / (PAS reposo / VSF reposo). Normal &gt;1.1 · límite 0.9–1.1 · reducida &lt;0.9.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>PAS pico (mmHg)</label><input type="number" id="calc-ea-paspic" oninput="calcEA()"></div>
+        <div class="fg"><label>VSF pico (mL)</label><input type="number" id="calc-ea-vsfpic" step="0.1" oninput="calcEA()"></div>
+        <div class="fg"><label>PAS reposo (mmHg)</label><input type="number" id="calc-ea-pasrep" oninput="calcEA()"></div>
+        <div class="fg"><label>VSF reposo (mL)</label><input type="number" id="calc-ea-vsfrep" step="0.1" oninput="calcEA()"></div>
+      </div>
+      <div class="calc-res" id="calc-ea-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>6 · Índice cronotrópico</h4>
+      <div class="calc-formula">(FC pico − FC basal) / (FC teórica − FC basal). Normal ≥0.80.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>FC pico</label><input type="number" id="calc-ci-fcpic" oninput="calcCI()"></div>
+        <div class="fg"><label>FC basal</label><input type="number" id="calc-ci-fcbas" oninput="calcCI()"></div>
+        <div class="fg"><label>FC teórica</label><input type="number" id="calc-ci-fcteo" oninput="calcCI()"></div>
+      </div>
+      <div class="calc-res" id="calc-ci-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>7 · Duke Treadmill Score</h4>
+      <div class="calc-formula">(METs × 5) − (4 × mm ST) − (4 × índice angina). ≥5 bajo riesgo · −10 a 4 intermedio · &lt;−10 alto riesgo.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>METs alcanzados</label><input type="number" id="calc-duke-mets" step="0.1" oninput="calcDuke()"></div>
+        <div class="fg"><label>Desnivel ST (mm)</label><input type="number" id="calc-duke-st" step="0.5" oninput="calcDuke()"></div>
+        <div class="fg" style="grid-column:1/-1"><label>Angina de esfuerzo</label>
+          <select id="calc-duke-ang" onchange="calcDuke()"><option value="0">0 — Sin angina</option><option value="1">1 — Angina no limitante</option><option value="2">2 — Angina que limita / motivo de suspensión</option></select></div>
+      </div>
+      <div class="calc-res" id="calc-duke-res">Ingresá los valores.</div>
+    </div>
+
+    <div class="calc-card">
+      <h4>8 · Probabilidad pre-test (ESC 2019)</h4>
+      <div class="calc-formula">Modelo edad · sexo · tipo de dolor. Misma tabla que en Paciente.</div>
+      <div class="calc-inputs">
+        <div class="fg"><label>Edad (años)</label><input type="number" id="calc-ptp-edad" oninput="calcPTP()"></div>
+        <div class="fg"><label>Sexo</label><select id="calc-ptp-sexo" onchange="calcPTP()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+        <div class="fg" style="grid-column:1/-1"><label>Síntomas</label><select id="calc-ptp-sint" onchange="calcPTP()"><option value="">—</option><option value="tip">Dolor típico</option><option value="atip">Dolor atípico</option><option value="asint">Asintomático / disnea</option></select></div>
+      </div>
+      <div class="calc-res" id="calc-ptp-res">Completá edad, sexo y síntomas.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════ REFERENCIAS ═══════════════════ -->
+<div class="page" id="page-ref">
+  <div class="page-title">📚 Referencias</div>
+  <div class="page-sub">Fundamentos, valores de referencia y evidencia. Hacé click para expandir.</div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>📋 Protocolo ABCD-FLPR</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      <b>A — Adecuación:</b> % FCM alcanzada (≥85% = adecuada). Prueba submáxima (&lt;85%) limita el valor de un resultado negativo.<br>
+      <b>B — ECG/isquemia eléctrica:</b> infradesnivel ST horizontal/descendente ≥1 mm a 80 ms del punto J; no localiza territorio.<br>
+      <b>C — Contractilidad y reserva contráctil:</b> criterio central. Nueva alteración segmentaria ≥2 segmentos adyacentes = isquemia. Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y elastancia (Ea) &gt;1.1.<br>
+      <b>D — Dilatación/otros:</b> dilatación transitoria del VI (isquemia multivaso), IM inducida, respuesta presora anómala (hipotensión = signo ominoso).<br>
+      <b>F — Flujo coronario (CFVR):</b> reserva de flujo en DA distal. Normal ≥2.5; reducida &lt;2.0.<br>
+      <b>L — Llenado/reserva diastólica:</b> E/e' pico ≥15, líneas B ≥3/campo, PSAP elevada → eco estrés diastólico positivo (ICFEp inducible). IRC = e' reposo × (e' pico − e' reposo).<br>
+      <b>P — Presiones/pulmonar:</b> PSAP pico &gt;60 mmHg o Δ&gt;20 mmHg = HTP inducida; TAPSE/PSAP &lt;0.55 = desacople VD-AP.<br>
+      <b>R — Recuperación y VD:</b> normalización de la motilidad (&gt;3 min = isquemia severa); HRR y reserva cronotrópica; función del VD.
+    </div></div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>⚡ Criterios de positividad</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      <b>Isquemia inducible:</b> nueva alteración de la motilidad o empeoramiento en ≥2 segmentos adyacentes en el pico. <i>(Sicari R, EAE consensus, Eur J Echocardiogr 2008; ASE/EACVI 2020.)</i><br>
+      <b>Falta de reserva contráctil:</b> ausencia de ↑FEVI/SGL/VTI con el estrés — marcador de disfunción o isquemia extensa.<br>
+      <b>Dilatación transitoria del VI (TID):</b> isquemia multivaso / de tronco.<br>
+      <b>Respuesta presora hipotensiva:</b> caída de PAS &gt;10-20 mmHg — suspender; signo de alto riesgo.<br>
+      <b>WMSI:</b> ≤1.0 normal; 1.1–1.5 disfunción leve; 1.6–2.0 moderada; &gt;2.0 severa.<br>
+      <i>Ref.: Pellikka PA et al. ASE Guidelines for Stress Echocardiography. J Am Soc Echocardiogr 2020;33:1-41.</i>
+    </div></div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🏃 Protocolos de estrés</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      <b>Åstrand (bicicleta):</b> carga inicial 25–50 W, incrementos de 25 W cada 2–3 min hasta agotamiento o FC objetivo.<br>
+      <b>Bruce (cinta):</b> etapas de 3 min con incremento de velocidad e inclinación (2.7 km/h·10% → …). Bruce modificado para baja capacidad.<br>
+      <b>Dobutamina:</b> 5 → 10 → 20 → 30 → 40 mcg/kg/min, etapas de 3 min. Atropina 0.25–1 mg si no alcanza FC objetivo. Protocolo bifásico para viabilidad (dosis bajas → altas).<br>
+      <b>Dipiridamol:</b> 0.56 mg/kg en 4 min → esperar 4 min → 0.28 mg/kg adicional (total 0.84 mg/kg en 10 min). Antídoto: aminofilina. Vasodilatador (evalúa reserva de flujo).
+    </div></div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🩸 CFVR — Reserva de flujo coronario</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      CFVR = velocidad diastólica pico (hiperemia) / velocidad diastólica en reposo, en DA distal con Doppler pulsado.<br>
+      <b>Normal ≥2.5</b> · <b>zona gris 2.0–2.5</b> · <b>reducida &lt;2.0</b> (enfermedad epicárdica significativa o disfunción microvascular).<br>
+      Agrega valor pronóstico independiente a la motilidad. Útil en estenosis borderline y sospecha de enfermedad microvascular (INOCA).
+    </div></div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>💪 Reserva contráctil y elastancia</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      <b>Reserva contráctil:</b> ↑FEVI ≥5%, mejoría de SGL (más negativo) y del VTI del TSVI con el estrés.<br>
+      <b>Elastancia telesistólica (Force / Ea):</b> Ea = (PAS pico/VSF pico) / (PAS reposo/VSF reposo). <b>Normal &gt;1.1 · límite 0.9–1.1 · reducida &lt;0.9.</b> Refleja la reserva contráctil hemodinámica (pendiente presión-volumen).
+    </div></div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🌊 Reserva diastólica</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      <b>E/e' pico ≥15</b> = presión de llenado elevada (eco estrés diastólico positivo).<br>
+      <b>Líneas B ≥3/campo</b> post-estrés = congestión venocapilar inducida.<br>
+      <b>PSAP pico &gt;60 mmHg o Δ&gt;20 mmHg</b> = HTP inducida.<br>
+      <b>IRC</b> = e' reposo × (e' pico − e' reposo) — reserva de relajación.<br>
+      Un E/e' pico ≥15 con líneas B y PSAP elevadas define ICFEp inducible.
+    </div></div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>📐 Valores normales por edad y sexo (ASE/EACVI)</span><span class="arr">▼</span></div>
+    <div class="step-body"><div class="ref-body">
+      <table class="tri-table">
+        <tr><th>Parámetro</th><th>Mujeres</th><th>Hombres</th></tr>
+        <tr><td>FEVI (Simpson)</td><td>54–74%</td><td>52–72%</td></tr>
+        <tr><td>DDVI</td><td>38–52 mm</td><td>42–58 mm</td></tr>
+        <tr><td>Masa VI indexada</td><td>≤95 g/m²</td><td>≤115 g/m²</td></tr>
+        <tr><td>Vol. AI indexado</td><td>≤34 mL/m²</td><td>≤34 mL/m²</td></tr>
+        <tr><td>TAPSE</td><td>≥17 mm</td><td>≥17 mm</td></tr>
+        <tr><td>e' septal / lateral</td><td>≥7 / ≥10 cm/s</td><td>≥7 / ≥10 cm/s</td></tr>
+        <tr><td>GLS</td><td>≤ −20% (más negativo)</td><td>≤ −20%</td></tr>
+      </table>
+      <i>Ref.: Lang RM et al. Recommendations for Cardiac Chamber Quantification. J Am Soc Echocardiogr 2015;28:1-39. Valores de referencia; los límites cambian con la edad.</i>
+    </div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TRIALS ═══════════════════ -->
+<div class="page" id="page-trials">
+  <div class="page-title">🧪 Trials</div>
+  <div class="page-sub">Estudios clave por tema. Hacé click para expandir.</div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>📋 Protocolo ABCD-FLPR / Stress Echo 2020-2030</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>Stress Echo 2020 (SE2020)</td><td>2016–20</td><td>&gt;10.000</td><td>Red multicéntrica prospectiva</td><td>Validó el abordaje ABCDE (motilidad + reserva + líneas B + CFVR + reserva cronotrópica) con valor pronóstico aditivo.</td></tr>
+        <tr><td>Stress Echo 2030 (SE2030)</td><td>2021–…</td><td>en curso</td><td>Red prospectiva</td><td>Extiende el ABCDE a valvulopatías, MCH, disnea y poblaciones especiales.</td></tr>
+        <tr><td>Zagatina (ABCDE)</td><td>2020</td><td>3.000+</td><td>Prospectivo</td><td>Cada paso ABCDE aporta valor pronóstico independiente.</td></tr>
+      </table>
+      <div class="ref-body" style="margin-top:6px"><i>Picano E et al. Stress Echo 2020/2030 study group.</i></div>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🫀 Diagnóstico de EC estable</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>ISCHEMIA</td><td>2020</td><td>5.179</td><td>RCT invasivo vs conservador</td><td>Sin reducción de eventos duros con estrategia invasiva de rutina en isquemia moderada-severa; mejora síntomas.</td></tr>
+        <tr><td>COURAGE</td><td>2007</td><td>2.287</td><td>RCT PCI+TMO vs TMO</td><td>PCI no reduce muerte/IAM sobre tratamiento médico óptimo en EC estable.</td></tr>
+        <tr><td>PROMISE</td><td>2015</td><td>10.003</td><td>RCT anatómico (CTA) vs funcional</td><td>Sin diferencia en eventos; CTA con más cateterismos pero menos negativos.</td></tr>
+        <tr><td>SCOT-HEART</td><td>2018</td><td>4.146</td><td>RCT CTA + estándar</td><td>La CTA coronaria redujo IAM no fatal a 5 años.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>❤️ Eco estrés con dobutamina — viabilidad</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>Bax (metaanálisis viabilidad)</td><td>2001</td><td>pooled</td><td>Metaanálisis</td><td>La viabilidad predice mejoría funcional y supervivencia con revascularización.</td></tr>
+        <tr><td>STICH (sub-viabilidad)</td><td>2011</td><td>601</td><td>Sub-estudio RCT</td><td>La viabilidad se asoció a mejor pronóstico, sin interacción significativa con el beneficio de la cirugía.</td></tr>
+        <tr><td>Respuesta bifásica (Afridi)</td><td>1995</td><td>—</td><td>Observacional</td><td>Mejoría a dosis bajas + deterioro a dosis altas = mejor predictor de recuperación.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>💊 Eco estrés con dipiridamol</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>EPIC (Picano)</td><td>1994</td><td>~7.000</td><td>Multicéntrico prospectivo</td><td>Valor pronóstico del eco dipiridamol; alta especificidad y seguridad.</td></tr>
+        <tr><td>Lowenstein (Argentina)</td><td>2000s</td><td>multicéntrico</td><td>Registro prospectivo</td><td>Reserva contráctil y de flujo con dipiridamol como marcador pronóstico en la práctica latinoamericana.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🩸 CFVR y reserva microvascular</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>Cortigiani</td><td>2012</td><td>&gt;4.000</td><td>Prospectivo</td><td>CFVR en DA aporta valor pronóstico independiente de la motilidad, incluso con eco negativo por motilidad.</td></tr>
+        <tr><td>Rigo</td><td>2008</td><td>~2.000</td><td>Prospectivo</td><td>CFVR &lt;2.0 predice eventos; útil en estenosis borderline y microvascular.</td></tr>
+        <tr><td>Gaibazzi (CADENZA)</td><td>2019</td><td>—</td><td>Prospectivo</td><td>CFVR + motilidad + reserva cronotrópica mejoran la estratificación.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>📊 Strain (GLS) en eco estrés</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>Reserva de strain (varios)</td><td>2015–20</td><td>cohortes</td><td>Observacional</td><td>La falta de mejoría del GLS con el estrés detecta isquemia/disfunción subclínica y mejora la sensibilidad sobre la motilidad visual.</td></tr>
+        <tr><td>Post-sistólico / GLS regional</td><td>2018</td><td>cohortes</td><td>Observacional</td><td>El acortamiento post-sistólico y el empeoramiento regional del strain aumentan la detección de isquemia.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🌊 Eco estrés diastólico</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>E/e' con ejercicio (Ha/Burgess)</td><td>2005–06</td><td>cohortes</td><td>Observacional</td><td>E/e' pico ≥15 identifica presiones de llenado elevadas inducibles (ICFEp).</td></tr>
+        <tr><td>Líneas B con estrés (Scali/Agricola)</td><td>2017</td><td>cohortes</td><td>Prospectivo</td><td>La aparición de líneas B pulmonares con el estrés predice eventos y congestión.</td></tr>
+        <tr><td>HFpef stress (ESC)</td><td>2019</td><td>—</td><td>Consenso</td><td>Algoritmo HFA-PEFF incorpora eco estrés diastólico (E/e', PSAP) al diagnóstico de ICFEp.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>💚 Eco estrés en valvulopatías (IM y EA dinámicas)</span><span class="arr">▼</span></div>
+    <div class="step-body">
+      <table class="tri-table"><tr><th>Estudio</th><th>Año</th><th>N</th><th>Diseño</th><th>Resultado principal</th></tr>
+        <tr><td>IM dinámica (Lancellotti)</td><td>2003–10</td><td>cohortes</td><td>Prospectivo</td><td>El aumento del ORE de la IM y de la PSAP con ejercicio predice síntomas y eventos.</td></tr>
+        <tr><td>EA bajo flujo-bajo gradiente (Monin/TOPAS)</td><td>2003–09</td><td>cohortes</td><td>Prospectivo</td><td>La dobutamina a dosis bajas diferencia EA severa verdadera de pseudo-severa y evalúa la reserva de flujo.</td></tr>
+      </table>
+      <div class="ref-body" style="margin-top:6px"><i>Lancellotti P et al. EACVI recommendations for stress echocardiography in valvular heart disease.</i></div>
+    </div>
+  </div>
+</div>
+
 </main>
 
 <!-- BULL POP -->
@@ -1719,6 +2012,8 @@ function goTo(page){
   if(page==='ecoetapas')eteRefresh();
   if(page==='cfvr')initStrainBulls();
   if(page==='informe'&&typeof informeResultSync==='function')informeResultSync();
+  document.querySelectorAll('.subtab').forEach(function(t){ t.classList.toggle('active',(t.getAttribute('onclick')||'').includes("'"+page+"'")); });
+  if(page==='calc'&&typeof calcRefreshAll==='function')calcRefreshAll();
 }
 /* ═══════════ PERFIL DE ESTUDIO — módulos configurables (básico / avanzado) ═══════════ */
 var EE_ADV_KEYS=['ecoetapas','territorio','viabilidad','cfvr','reservaDiast','elastancia','strainBull','abcdFull'];
@@ -5127,6 +5422,27 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     ['b-fc-max','b-fc-teo'].forEach(function(id){ var e=E(id); if(e)e.addEventListener('input',function(){ try{protoPrecarga();}catch(err){} }); });
     var _bs=E('b-stop'); if(_bs)_bs.addEventListener('change',function(){ try{protoPrecarga();}catch(err){} });
   });
+})();
+</script>
+<script>
+/* ═══════════ Calculadoras — segunda fila de tabs ═══════════ */
+(function(){
+  function n(id){ var e=document.getElementById(id); if(!e)return null; var v=parseFloat(String(e.value||'').replace(',','.')); return isNaN(v)?null:v; }
+  function show(id,val,intp,sem){ var e=document.getElementById(id); if(!e)return; e.className='calc-res'+(sem?(' cr-'+sem):''); e.innerHTML='<div class="cr-val">'+val+'</div>'+(intp?('<div class="cr-int">'+intp+'</div>'):''); }
+  function wait(id){ var e=document.getElementById(id); if(e){ e.className='calc-res'; e.textContent='Ingresá los valores.'; } }
+  window.calcDP=function(){ var fc=n('calc-dp-fc'),pas=n('calc-dp-pas'); if(fc==null||pas==null)return wait('calc-dp-res'); var dp=fc*pas; var s=dp>=25000?'ok':dp>=20000?'warn':'bad'; show('calc-dp-res', dp.toLocaleString('es-AR')+' mmHg·lpm', s==='ok'?'Estrés miocárdico adecuado (≥25.000)':s==='warn'?'Submáximo (20.000–25.000)':'Insuficiente (<20.000)', s); };
+  window.calcFCM=function(){ var m=n('calc-fcm-max'),t=n('calc-fcm-teo'); if(m==null||!t)return wait('calc-fcm-res'); var p=Math.round(m/t*100); var s=p>=85?'ok':p>=70?'warn':'bad'; show('calc-fcm-res', p+'%', s==='ok'?'Estrés adecuado (≥85%)':s==='warn'?'Submáximo (70–84%)':'Inadecuado (<70%)', s); };
+  window.calcTPS=function(){ var ta=n('calc-tps-tapse'),ps=n('calc-tps-psap'); if(ta==null||!ps)return wait('calc-tps-res'); var r=ta/ps; var s=r>=0.55?'ok':r>=0.35?'warn':'bad'; show('calc-tps-res', r.toFixed(2)+' mm/mmHg', s==='ok'?'Acoplamiento VD-AP normal (≥0.55)':s==='warn'?'Límite (0.35–0.55)':'Desacople VD-AP (<0.35)', s); };
+  window.calcRVP=function(){ var it=n('calc-rvp-it'),vti=n('calc-rvp-vti'); if(it==null||!vti)return wait('calc-rvp-res'); var rvp=it/vti*10; var s=rvp<2?'ok':rvp<=3?'warn':'bad'; show('calc-rvp-res', rvp.toFixed(2)+' UW', s==='ok'?'Normal (<2 UW)':s==='warn'?'Levemente elevada (2–3 UW)':'Elevada (>3 UW)', s); };
+  window.calcEA=function(){ var pp=n('calc-ea-paspic'),vp=n('calc-ea-vsfpic'),pr=n('calc-ea-pasrep'),vr=n('calc-ea-vsfrep'); if(pp==null||!vp||pr==null||!vr)return wait('calc-ea-res'); var ea=(pp/vp)/(pr/vr); var s=ea>1.1?'ok':ea>=0.9?'warn':'bad'; show('calc-ea-res', ea.toFixed(2), s==='ok'?'Reserva contráctil conservada (>1.1)':s==='warn'?'Límite (0.9–1.1)':'Reserva reducida (<0.9)', s); };
+  window.calcCI=function(){ var fp=n('calc-ci-fcpic'),fb=n('calc-ci-fcbas'),ft=n('calc-ci-fcteo'); if(fp==null||fb==null||ft==null||(ft-fb)<=0)return wait('calc-ci-res'); var ci=(fp-fb)/(ft-fb); var s=ci>=0.80?'ok':ci>=0.62?'warn':'bad'; show('calc-ci-res', ci.toFixed(2), s==='ok'?'Reserva cronotrópica normal (≥0.80)':s==='warn'?'Levemente reducida (0.62–0.80)':'Incompetencia cronotrópica (<0.62)', s); };
+  window.calcDuke=function(){ var m=n('calc-duke-mets'),st=n('calc-duke-st'); var ang=parseInt((document.getElementById('calc-duke-ang')||{}).value||'0',10); if(m==null||st==null)return wait('calc-duke-res'); var dts=(m*5)-(4*st)-(4*ang); var s=dts>=5?'ok':dts>=-10?'warn':'bad'; show('calc-duke-res', 'DTS '+dts.toFixed(1), s==='ok'?'Bajo riesgo (≥5) — mortalidad anual <1%':s==='warn'?'Riesgo intermedio (−10 a 4)':'Alto riesgo (<−10) — mortalidad anual ≥5%', s); };
+  window.calcPTP=function(){ var edad=n('calc-ptp-edad'); var sexo=(document.getElementById('calc-ptp-sexo')||{}).value||''; var sint=(document.getElementById('calc-ptp-sint')||{}).value||''; if(!edad||!sexo||!sint)return wait('calc-ptp-res');
+    var TBL={tip:[[3,5],[22,10],[32,13],[44,16],[52,27]],atip:[[4,3],[10,6],[17,6],[26,11],[34,19]],asint:[[1,1],[3,2],[11,3],[22,6],[24,10]]};
+    var ai=edad<40?0:edad<50?1:edad<60?2:edad<70?3:4; var row=(TBL[sint]||TBL.asint)[ai]||[0,0]; var pct=row[sexo==='F'?1:0];
+    var s,i; if(pct<5){s='ok';i='Muy baja — no requiere test funcional (ESC 2019).';} else if(pct<=15){s='ok';i='Baja — considerar TAC coronario / calcio score.';} else if(pct<=65){s='warn';i='Intermedia — eco estrés o TAC coronario indicados.';} else {s='bad';i='Alta — test funcional/anatómico; EC probable.';}
+    show('calc-ptp-res', pct+'% de probabilidad pre-test', i, s); };
+  window.calcRefreshAll=function(){ ['calcDP','calcFCM','calcTPS','calcRVP','calcEA','calcCI','calcDuke','calcPTP'].forEach(function(f){ try{window[f]();}catch(e){} }); };
 })();
 </script>
 </body>
