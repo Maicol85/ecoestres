@@ -330,8 +330,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 <nav class="sidebar" id="sidebar">
   <div class="nav-item" onclick="goTo('paciente')"><span class="ni">👤</span> Paciente</div>
   <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
-  <div class="nav-item" onclick="goTo('ecoetapas')"><span class="ni">📑</span> Tabla Eco por Etapas</div>
   <div class="nav-item" onclick="goTo('ecg')"><span class="ni">📈</span> ECG / Arritmias</div>
+  <div class="nav-item" onclick="goTo('protoestres')"><span class="ni">🏃</span> Protocolo de Estrés</div>
   <div class="nav-item" onclick="goTo('bullo')"><span class="ni">🎯</span> Bull's Eye 17 seg</div>
   <div class="nav-item" onclick="goTo('criterios')"><span class="ni">⚡</span> Criterios de positividad</div>
   <div class="nav-item" onclick="goTo('territorio')"><span class="ni">🗺️</span> Territorio vascular</div>
@@ -811,34 +811,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 .ete-in:focus{border-color:var(--accent2);outline:none}
 .ete-in[data-auto="1"]{color:var(--accent2)}
 </style>
-<div class="page" id="page-ecoetapas">
-  <div class="page-title">📑 Tabla Eco por Etapas</div>
-  <div class="page-sub">Parámetros ecocardiográficos por etapa del estrés. Los valores cargados en otras secciones se precargan automáticamente (en color); todas las celdas son editables.</div>
-  <div class="card">
-    <div class="card-head">📊 Parámetros por etapa</div>
-    <div class="card-body" style="overflow-x:auto">
-      <table class="ete-table" id="ete-table">
-        <thead>
-          <tr>
-            <th>Parámetro</th>
-            <th><span id="ete-h-reposo">Reposo</span></th>
-            <th><span id="ete-h-baja">Baja carga</span></th>
-            <th><span id="ete-h-alta">Alta carga</span></th>
-            <th><span id="ete-h-pico">Pico</span></th>
-            <th><span id="ete-h-recup">Recuperación</span></th>
-          </tr>
-        </thead>
-        <tbody id="ete-tbody"></tbody>
-      </table>
-      <div style="margin-top:11px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-ghost" style="padding:6px 12px" onclick="eteRefresh()">🔄 Reprecargar desde secciones</button>
-        <button class="btn btn-ghost" style="padding:6px 12px" onclick="eteClear()">🧹 Vaciar tabla</button>
-      </div>
-      <div class="note-box" style="margin-top:11px">ℹ️ Precarga automática desde otras secciones: E/e', PSAP, IM, SGL (columnas Reposo y Pico) y Líneas B. Los valores que edites manualmente no se sobrescriben.</div>
-    </div>
-  </div>
-</div>
-
+<!-- Tabla Eco por Etapas: reubicada dentro de la tab "Protocolo de Estrés" -->
 
 <!-- ═══ PACIENTE ═══ -->
 <div class="page" id="page-paciente">
@@ -880,9 +853,6 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           <div class="fg"><label>Fecha de solicitud</label><input type="date" id="p-fecha-sol"></div>
           <div class="fg"><label>Médico solicitante</label><input id="p-medico" placeholder="Dr. Pérez"></div>
         </div>
-        <div class="fg"><label>Indicación clínica</label>
-          <select id="p-ind"><option value="">Seleccionar…</option><option>Diagnóstico de enfermedad coronaria</option><option>Evaluación pronóstica de EC conocida</option><option>Viabilidad miocárdica</option><option>Evaluación preoperatoria</option><option>Evaluación de valvulopatía dinámica</option><option>Eco estrés diastólico</option><option>Seguimiento post-revascularización</option><option>Otro</option></select>
-        </div>
         <div class="fg"><label>Factores de riesgo</label>
           <div style="display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px;align-items:center">
             <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-hta" style="flex:0 0 auto;width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent2)"> HTA</label>
@@ -899,8 +869,53 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         </div>
       </div>
     </div>
+    <!-- COLUMNA DERECHA -->
     <div>
       <div class="card">
+        <div class="card-head">🩺 Indicación clínica</div>
+        <div class="card-body">
+          <div class="fg"><label>Indicación clínica</label>
+            <select id="p-ind"><option value="">Seleccionar…</option><option>Diagnóstico de enfermedad coronaria</option><option>Evaluación pronóstica de EC conocida</option><option>Viabilidad miocárdica</option><option>Evaluación preoperatoria</option><option>Evaluación de valvulopatía dinámica</option><option>Eco estrés diastólico</option><option>Seguimiento post-revascularización</option><option>Otro</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⚠️ CONTRAINDICACIONES SEGÚN PROTOCOLO -->
+      <style>
+      .ci-lbl{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;cursor:pointer;color:var(--text2)}
+      .ci-lbl input{width:16px;height:16px;margin:0;padding:0;flex:0 0 auto;accent-color:var(--accent2)}
+      .ci-group{margin-top:2px}
+      </style>
+      <div class="card" id="contraindic-card" style="margin-top:14px">
+        <div class="card-head">⚠️ Contraindicaciones según protocolo</div>
+        <div class="card-body">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:9px">Contraindicaciones del agente de estrés seleccionado (<b><span id="ci-proto-name">—</span></b>). Marcá las presentes en el paciente.</div>
+          <div class="ci-group" id="ci-group-dipiridamol" style="display:none">
+            <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+              <label class="ci-lbl"><input type="checkbox" id="ci-dip-asma" onchange="updateContraindic()"> Asma / EPOC</label>
+              <label class="ci-lbl"><input type="checkbox" id="ci-dip-bav" onchange="updateContraindic()"> Bloqueo AV avanzado</label>
+              <label class="ci-lbl"><input type="checkbox" id="ci-dip-hipo" onchange="updateContraindic()"> Hipotensión severa</label>
+            </div>
+          </div>
+          <div class="ci-group" id="ci-group-dobutamina" style="display:none">
+            <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+              <label class="ci-lbl"><input type="checkbox" id="ci-dob-glauc" onchange="updateContraindic()"> Glaucoma</label>
+              <label class="ci-lbl"><input type="checkbox" id="ci-dob-hbp" onchange="updateContraindic()"> HBP / RAO</label>
+              <label class="ci-lbl"><input type="checkbox" id="ci-dob-taq" onchange="updateContraindic()"> Taquiarritmias</label>
+            </div>
+          </div>
+          <div class="ci-group" id="ci-group-ejercicio" style="display:none">
+            <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+              <label class="ci-lbl"><input type="checkbox" id="ci-ej-eao" onchange="updateContraindic()"> Estenosis aórtica severa</label>
+              <label class="ci-lbl"><input type="checkbox" id="ci-ej-hta" onchange="updateContraindic()"> HTA no controlada</label>
+              <label class="ci-lbl"><input type="checkbox" id="ci-ej-ic" onchange="updateContraindic()"> IC descompensada</label>
+            </div>
+          </div>
+          <div id="ci-alert" style="display:none;margin-top:11px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:600;line-height:1.5"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
         <div class="card-head">🎯 Probabilidad pre-test (ESC 2019)</div>
         <div class="card-body">
           <div class="grid2">
@@ -917,116 +932,121 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-head">🏃 Tipo de estrés y protocolo</div>
-        <div class="card-body">
-          <div class="fg"><label>Tipo de estrés</label>
-            <select id="p-estres" onchange="onEstresChange();peSyncFromEstres()">
-              <option value="ejercicio">Esfuerzo físico</option>
-              <option value="dobutamina">Dobutamina</option>
-              <option value="dipiridamol">Dipiridamol</option>
-            </select>
-          </div>
-          <div class="fg" id="pe-proto-row" style="margin-top:6px;display:none"><label>Protocolo (esfuerzo)</label>
-            <select id="pe-proto" onchange="peSetProto(this.value)">
-              <option value="bruce">Bruce</option>
-              <option value="bruce_mod">Bruce modificado</option>
-              <option value="naughton">Naughton</option>
-              <option value="astrand">Åstrand (bicicleta)</option>
-              <option value="ramp">RAMP</option>
-            </select>
-          </div>
-          <div style="margin-top:8px">
-            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px">Etapas — nombres editables (alimentan el Bull's Eye y la tabla ECG)</label>
-            <div id="pe-stages"></div>
-          </div>
-          <div id="dobu-wrap" style="display:none">
-            <div class="note-box">ℹ️ Dobutamina: 5→10→20→30→40 mcg/kg/min (etapas de 3 min). Atropina hasta 1mg si no alcanza FC objetivo. El peso se toma de los datos antropométricos del paciente.</div>
-          </div>
-          <div id="dipiri-wrap" style="display:none">
-            <div class="note-box">ℹ️ Dipiridamol: 0.56 mg/kg en 4min → esperar 4min → 0.28 mg/kg adicional si no hay respuesta (total 0.84 mg/kg en 10min).</div>
-          </div>
-          <div class="fg" style="margin-top:6px"><label>Contraste ecocardiográfico</label>
-            <select id="p-contraste"><option value="no">Sin contraste</option><option value="si">Con contraste (realce endocárdico)</option></select>
-          </div>
+    </div>
+  </div>
+
+  <!-- ABAJO — ancho completo: solo tipo de estrés + protocolo -->
+  <div class="card" style="margin-top:14px">
+    <div class="card-head">🏃 Tipo de estrés y protocolo</div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="fg"><label>Tipo de estrés</label>
+          <select id="p-estres" onchange="onEstresChange();peSyncFromEstres()">
+            <option value="ejercicio">Esfuerzo físico</option>
+            <option value="dobutamina">Dobutamina</option>
+            <option value="dipiridamol">Dipiridamol</option>
+          </select>
+        </div>
+        <div class="fg" id="pe-proto-row" style="display:none"><label>Protocolo (esfuerzo)</label>
+          <select id="pe-proto" onchange="peSetProto(this.value)">
+            <option value="bruce">Bruce</option>
+            <option value="bruce_mod">Bruce modificado</option>
+            <option value="naughton">Naughton</option>
+            <option value="astrand">Åstrand (bicicleta)</option>
+            <option value="ramp">RAMP</option>
+          </select>
         </div>
       </div>
-      <div class="card">
-        <div class="card-head">📊 Parámetros hemodinámicos</div>
-        <div class="card-body">
-          <div class="grid2">
-            <div class="fg"><label>FC basal (lpm)</label><input type="number" id="b-fc-bas" placeholder="70"></div>
-            <div class="fg"><label>PA basal (mmHg)</label><input id="b-pa-bas" placeholder="130/80"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROTOCOLO DE ESTRÉS (tab nueva) ═══ -->
+<div class="page" id="page-protoestres">
+  <div class="page-title">🏃 Protocolo de Estrés</div>
+  <div class="page-sub">Etapas del protocolo, parámetros hemodinámicos globales y tabla eco por etapas.</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-head">🪜 Etapas del protocolo</div>
+      <div class="card-body">
+        <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:4px">Etapas — nombres editables (alimentan el Bull's Eye y la tabla ECG)</label>
+        <div id="pe-stages"></div>
+        <div id="dobu-wrap" style="display:none">
+          <div class="note-box">ℹ️ Dobutamina: 5→10→20→30→40 mcg/kg/min (etapas de 3 min). Atropina hasta 1mg si no alcanza FC objetivo. El peso se toma de los datos antropométricos del paciente.</div>
+        </div>
+        <div id="dipiri-wrap" style="display:none">
+          <div class="note-box">ℹ️ Dipiridamol: 0.56 mg/kg en 4min → esperar 4min → 0.28 mg/kg adicional si no hay respuesta (total 0.84 mg/kg en 10min).</div>
+        </div>
+        <div class="fg" style="margin-top:8px"><label>Contraste ecocardiográfico</label>
+          <select id="p-contraste"><option value="no">Sin contraste</option><option value="si">Con contraste (realce endocárdico)</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">📊 Parámetros hemodinámicos</div>
+      <div class="card-body">
+        <div class="grid2">
+          <div class="fg"><label>FC basal (lpm)</label><input type="number" id="b-fc-bas" placeholder="70"></div>
+          <div class="fg"><label>PA basal (mmHg)</label><input id="b-pa-bas" placeholder="130/80"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>FC máxima alcanzada</label><input type="number" id="b-fc-max" placeholder="145" oninput="calcFCpct()"></div>
+          <div class="fg"><label>FC máxima teórica</label><input type="number" id="b-fc-teo" readonly placeholder="—"></div>
+        </div>
+        <div class="fg">
+          <label>% FC máx. teórica — <span id="fc-pct-txt" style="color:var(--text)"></span></label>
+          <div class="prog-wrap"><div class="prog-fill" id="fc-pct-bar" style="width:0%"></div></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>PA pico (mmHg)</label><input id="b-pa-pico" placeholder="180/90"></div>
+          <div class="fg"><label>METs alcanzados</label><input type="number" id="b-mets" step="0.5" placeholder="8.5"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Duración estrés (min)</label><input type="number" id="b-dur" placeholder="8"></div>
+          <div class="fg"><label>Motivo suspensión</label>
+            <select id="b-stop"><option value="">—</option><option>Protocolo completado</option><option>FC objetivo alcanzada</option><option>Angina</option><option>Cambios ECG</option><option>Hipotensión</option><option>Fatiga/disnea</option><option>Arritmia</option><option>Decisión médica</option></select>
           </div>
-          <div class="grid2">
-            <div class="fg"><label>FC máxima alcanzada</label><input type="number" id="b-fc-max" placeholder="145" oninput="calcFCpct()"></div>
-            <div class="fg"><label>FC máxima teórica</label><input type="number" id="b-fc-teo" readonly placeholder="—"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Síntomas durante estrés</label>
+            <select id="b-sintomas"><option value="no">Sin síntomas</option><option value="angina">Angina típica</option><option value="angina-at">Equivalente anginoso</option><option value="disnea">Disnea de esfuerzo</option><option value="palpitaciones">Palpitaciones</option><option value="mareo">Mareo/presíncope</option></select>
           </div>
-          <div class="fg">
-            <label>% FC máx. teórica — <span id="fc-pct-txt" style="color:var(--text)"></span></label>
-            <div class="prog-wrap"><div class="prog-fill" id="fc-pct-bar" style="width:0%"></div></div>
+          <div class="fg"><label>¿Estrés adecuado?</label>
+            <select id="b-adec"><option value="">—</option><option value="si">Sí ≥85% FC teórica</option><option value="no">No — subóptimo</option></select>
           </div>
-          <div class="grid2">
-            <div class="fg"><label>PA pico (mmHg)</label><input id="b-pa-pico" placeholder="180/90"></div>
-            <div class="fg"><label>METs alcanzados</label><input type="number" id="b-mets" step="0.5" placeholder="8.5"></div>
-          </div>
-          <div class="grid2">
-            <div class="fg"><label>Duración estrés (min)</label><input type="number" id="b-dur" placeholder="8"></div>
-            <div class="fg"><label>Motivo suspensión</label>
-              <select id="b-stop"><option value="">—</option><option>Protocolo completado</option><option>FC objetivo alcanzada</option><option>Angina</option><option>Cambios ECG</option><option>Hipotensión</option><option>Fatiga/disnea</option><option>Arritmia</option><option>Decisión médica</option></select>
-            </div>
-          </div>
-          <div class="grid2">
-            <div class="fg"><label>Síntomas durante estrés</label>
-              <select id="b-sintomas"><option value="no">Sin síntomas</option><option value="angina">Angina típica</option><option value="angina-at">Equivalente anginoso</option><option value="disnea">Disnea de esfuerzo</option><option value="palpitaciones">Palpitaciones</option><option value="mareo">Mareo/presíncope</option></select>
-            </div>
-            <div class="fg"><label>¿Estrés adecuado?</label>
-              <select id="b-adec"><option value="">—</option><option value="si">Sí ≥85% FC teórica</option><option value="no">No — subóptimo</option></select>
-            </div>
-          </div>
-          <div class="fg"><label>Atropina</label>
-            <div style="display:flex;gap:12px;align-items:center;margin-top:4px;flex-wrap:wrap">
-              <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" id="b-atropina-chk"> Administrada</label>
-              <input id="b-atropina-dosis" placeholder="dosis (ej. 0.5mg)" style="width:160px">
-            </div>
+        </div>
+        <div class="fg"><label>Atropina</label>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:4px;flex-wrap:wrap">
+            <label style="display:inline-flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="checkbox" id="b-atropina-chk"> Administrada</label>
+            <input id="b-atropina-dosis" placeholder="dosis (ej. 0.5mg)" style="width:160px">
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ⚠️ CONTRAINDICACIONES SEGÚN PROTOCOLO (CAMBIO 2) -->
-  <style>
-  .ci-lbl{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;cursor:pointer;color:var(--text2)}
-  .ci-lbl input{width:16px;height:16px;margin:0;padding:0;flex:0 0 auto;accent-color:var(--accent2)}
-  .ci-group{margin-top:2px}
-  </style>
-  <div class="card" id="contraindic-card" style="margin-top:14px">
-    <div class="card-head">⚠️ Contraindicaciones según protocolo</div>
-    <div class="card-body">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:9px">Contraindicaciones del agente de estrés seleccionado (<b><span id="ci-proto-name">—</span></b>). Marcá las presentes en el paciente.</div>
-      <div class="ci-group" id="ci-group-dipiridamol" style="display:none">
-        <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
-          <label class="ci-lbl"><input type="checkbox" id="ci-dip-asma" onchange="updateContraindic()"> Asma / EPOC</label>
-          <label class="ci-lbl"><input type="checkbox" id="ci-dip-bav" onchange="updateContraindic()"> Bloqueo AV avanzado</label>
-          <label class="ci-lbl"><input type="checkbox" id="ci-dip-hipo" onchange="updateContraindic()"> Hipotensión severa</label>
-        </div>
+  <div class="card" data-mod="ecoetapas" style="margin-top:14px">
+    <div class="card-head">📑 Tabla Eco por Etapas</div>
+    <div class="card-body" style="overflow-x:auto">
+      <p style="font-size:11px;color:var(--text2);margin:0 0 10px">Parámetros ecocardiográficos por etapa del estrés. Se precargan automáticamente (en color); todas las celdas son editables.</p>
+      <table class="ete-table" id="ete-table">
+        <thead>
+          <tr>
+            <th>Parámetro</th>
+            <th><span id="ete-h-reposo">Reposo</span></th>
+            <th><span id="ete-h-baja">Baja carga</span></th>
+            <th><span id="ete-h-alta">Alta carga</span></th>
+            <th><span id="ete-h-pico">Pico</span></th>
+            <th><span id="ete-h-recup">Recuperación</span></th>
+          </tr>
+        </thead>
+        <tbody id="ete-tbody"></tbody>
+      </table>
+      <div style="margin-top:11px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" style="padding:6px 12px" onclick="eteRefresh()">🔄 Reprecargar desde secciones</button>
+        <button class="btn btn-ghost" style="padding:6px 12px" onclick="eteClear()">🧹 Vaciar tabla</button>
       </div>
-      <div class="ci-group" id="ci-group-dobutamina" style="display:none">
-        <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
-          <label class="ci-lbl"><input type="checkbox" id="ci-dob-glauc" onchange="updateContraindic()"> Glaucoma</label>
-          <label class="ci-lbl"><input type="checkbox" id="ci-dob-hbp" onchange="updateContraindic()"> HBP / RAO</label>
-          <label class="ci-lbl"><input type="checkbox" id="ci-dob-taq" onchange="updateContraindic()"> Taquiarritmias</label>
-        </div>
-      </div>
-      <div class="ci-group" id="ci-group-ejercicio" style="display:none">
-        <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
-          <label class="ci-lbl"><input type="checkbox" id="ci-ej-eao" onchange="updateContraindic()"> Estenosis aórtica severa</label>
-          <label class="ci-lbl"><input type="checkbox" id="ci-ej-hta" onchange="updateContraindic()"> HTA no controlada</label>
-          <label class="ci-lbl"><input type="checkbox" id="ci-ej-ic" onchange="updateContraindic()"> IC descompensada</label>
-        </div>
-      </div>
-      <div id="ci-alert" style="display:none;margin-top:11px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:600;line-height:1.5"></div>
+      <div class="note-box" style="margin-top:11px">ℹ️ Precarga automática desde otras secciones: E/e', PSAP, IM, SGL (columnas Reposo y Pico) y Líneas B. Los valores que edites manualmente no se sobrescriben.</div>
     </div>
   </div>
 </div>
@@ -2030,7 +2050,7 @@ function goTo(page){
   if(page==='viabilidad')renderDobuTable();
   if(page==='imagenes')estImgRender();
   if(page==='ecg')ecgImgRender();
-  if(page==='ecoetapas')eteRefresh();
+  if(page==='protoestres'){ if(typeof peRender==='function')try{peRender();}catch(e){} eteRefresh(); }
   if(page==='cfvr')initStrainBulls();
   if(page==='informe'&&typeof informeResultSync==='function')informeResultSync();
   document.querySelectorAll('.subtab').forEach(function(t){ t.classList.toggle('active',(t.getAttribute('onclick')||'').includes("'"+page+"'")); });
@@ -2038,7 +2058,7 @@ function goTo(page){
 }
 /* ═══════════ PERFIL DE ESTUDIO — módulos configurables (básico / avanzado) ═══════════ */
 var EE_ADV_KEYS=['ecoetapas','territorio','viabilidad','cfvr','reservaDiast','elastancia','strainBull','abcdFull'];
-var EE_NAV_PAGES={ecoetapas:'ecoetapas',territorio:'territorio',viabilidad:'viabilidad',cfvr:'cfvr'};
+var EE_NAV_PAGES={territorio:'territorio',viabilidad:'viabilidad',cfvr:'cfvr'};   // ecoetapas ahora es sección (data-mod) dentro de Protocolo de Estrés
 var eeModulos=null;   // mapa runtime de módulos activos {key:bool}
 function eePerfilDefaults(perfil){ var m={}; EE_ADV_KEYS.forEach(function(k){ m[k]=(perfil==='avanzado'); }); return m; }
 function eeLoadPerfil(){ try{ return localStorage.getItem('ee_perfil')||'avanzado'; }catch(e){ return 'avanzado'; } }
@@ -2054,7 +2074,7 @@ function applyModules(map){
     var pg=document.getElementById('page-'+page);
     if(pg&&!on&&pg.classList.contains('active')&&typeof goTo==='function')goTo('paciente');
   });
-  ['reservaDiast','elastancia','strainBull','abcdFull'].forEach(function(k){
+  ['ecoetapas','reservaDiast','elastancia','strainBull','abcdFull'].forEach(function(k){
     var on=map[k]!==false;
     document.querySelectorAll('[data-mod="'+k+'"]').forEach(function(el){ el.style.display=on?'':'none'; });
   });
