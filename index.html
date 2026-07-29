@@ -261,6 +261,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 .ee-float-btn:hover{filter:brightness(1.1);}
 .ee-float-lab{background:var(--accent2);}
 .ee-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--accent2);color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 8px 26px rgba(0,0,0,.4);z-index:9500;opacity:0;transition:opacity .25s;}
+.ee-toast-ok{background:#16a34a;}
+.ee-toast-err{background:#dc2626;}
 @media print{ .ee-float,#ee-login,.ee-modal,.hdr-ibtn,.hdr-logo-edit,.hdr-logo-del,.ee-toast{display:none!important;} }
 </style>
 </head>
@@ -1578,11 +1580,27 @@ let ecgPasteTarget=-1, ettPasteTarget=-1;
 let dobuData={};
 const KEY='ecoestres_smart_v1';
 
+function autoGuardarDraft(){   // autosave silencioso del borrador (usado por el intervalo)
+  try{ localStorage.setItem(KEY,JSON.stringify(recolectarEstado())); }catch(e){}
+}
 function guardar(){
-  const s=recolectarEstado();
-  try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
-  const el=document.getElementById('hdr-status');
-  el.style.opacity='1'; setTimeout(()=>el.style.opacity='0',1800);
+  // 1) Validar nombre del paciente
+  var nombre=(document.getElementById('p-nombre')||{}).value||'';
+  if(!String(nombre).trim()){
+    if(typeof eeToast==='function')eeToast('❌ Error al guardar — revisá el nombre del paciente','err');
+    return;
+  }
+  // 2) Autoguardado del borrador (estado de trabajo)
+  var okDraft=true;
+  try{ localStorage.setItem(KEY,JSON.stringify(recolectarEstado())); }catch(e){ okDraft=false; }
+  // 3) Guardar/actualizar en el módulo Guardados ('ecoestres_informes')
+  var res=(typeof eeSaveCurrentStudy==='function')?eeSaveCurrentStudy():{ok:okDraft};
+  if(res&&res.ok){
+    var el=document.getElementById('hdr-status'); if(el){ el.style.opacity='1'; setTimeout(function(){el.style.opacity='0';},1800); }
+    if(typeof eeToast==='function')eeToast('✅ Estudio guardado correctamente','ok');
+  } else {
+    if(typeof eeToast==='function')eeToast('❌ Error al guardar — revisá el nombre del paciente','err');
+  }
 }
 function recolectarEstado(){
   const vals={};
@@ -2350,7 +2368,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   initBulls();ecgImgRender();estImgRender();
   cargarEstado();
   if(typeof eeInitPerfil==='function')eeInitPerfil();   // carga perfil de estudio guardado
-  setInterval(guardar,30000);
+  setInterval(autoGuardarDraft,30000);
   const listeners=[
     ['p-fnac','input',calcEdad],['p-edad','input',onEdadChange],
     ['b-fc-max','input',calcFCpct],['p-peso','input',calcDobuDosis],
@@ -2885,10 +2903,11 @@ function ebTextoInforme(){
   };
 
   /* Toast liviano */
-  window.eeToast=function(msg){
-    var t=document.createElement('div'); t.className='ee-toast'; t.textContent=msg; document.body.appendChild(t);
+  window.eeToast=function(msg,type){
+    var t=document.createElement('div'); t.className='ee-toast'+(type?(' ee-toast-'+type):''); t.textContent=msg; document.body.appendChild(t);
     requestAnimationFrame(function(){t.style.opacity='1';});
-    setTimeout(function(){t.style.opacity='0'; setTimeout(function(){t.remove();},300);},2600);
+    var dur=type?3000:2600;   // 3 s para los toasts de éxito/error
+    setTimeout(function(){t.style.opacity='0'; setTimeout(function(){t.remove();},300);},dur);
   };
 
   /* Botones fijos */
@@ -3429,6 +3448,27 @@ function ebTextoInforme(){
     if(typeof estImgRender==='function')estImgRender();
     if(typeof actualizarUI==='function')actualizarUI();
   }
+
+  /* Guarda/actualiza el estudio actual en 'ecoestres_informes' SIN abrir el modal.
+     Devuelve {ok:true,id} o {ok:false,error}. Usado por el botón header "Guardar". */
+  window.eeSaveCurrentStudy=function(){
+    try{
+      var estado=(typeof recolectarEstado==='function')?recolectarEstado():null;
+      if(!estado)return {ok:false,error:'no-estado'};
+      var arr=recs(); var rec=Object.assign({}, estado);
+      if(_editId){
+        var i=arr.findIndex(function(x){return x.id===_editId;});
+        if(i>=0){ rec.id=_editId; rec.ts=arr[i].ts; rec.updated=Date.now(); arr[i]=rec; }
+        else { rec.id=_editId; rec.ts=Date.now(); arr.push(rec); }
+      } else {
+        rec.id='rep_'+Date.now()+'_'+Math.floor(Math.random()*1000); rec.ts=Date.now(); arr.push(rec); _editId=rec.id;
+      }
+      localStorage.setItem(LSKEY, JSON.stringify(arr));   // lanza si el almacenamiento está lleno
+      var m=document.getElementById('ee-guardados');
+      if(m&&m.classList.contains('open')&&typeof eeGuardadosList==='function')eeGuardadosList();
+      return {ok:true, id:rec.id};
+    }catch(e){ return {ok:false, error:e&&e.message}; }
+  };
 
   window.eeSaveStudy=function(asNew){
     var estado=(typeof recolectarEstado==='function')?recolectarEstado():null;
