@@ -1476,8 +1476,28 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
 <div class="page" id="page-informe">
   <div class="page-title">📝 Informe narrativo</div>
   <div class="page-sub">Generación automática a partir de todos los módulos.</div>
+  <style>
+  .result-select{width:100%;box-sizing:border-box;font-size:16px;font-weight:800;padding:13px 14px;border-radius:10px;border:2px solid var(--border2);text-align:center;text-align-last:center;cursor:pointer;color:var(--text);background:var(--bg2)}
+  .result-select.rs-pos{background:#DC2626;color:#fff;border-color:#DC2626}
+  .result-select.rs-neg{background:#16A34A;color:#fff;border-color:#16A34A}
+  .result-select.rs-inc{background:#F59E0B;color:#fff;border-color:#F59E0B}
+  .result-select.rs-via,.result-select.rs-novia{background:#2563EB;color:#fff;border-color:#2563EB}
+  .result-select option{background:var(--bg2);color:var(--text);font-weight:600}
+  </style>
+  <div class="card" style="margin-bottom:14px"><div class="card-body">
+    <label style="font-weight:700;font-size:14px;color:var(--text);display:block;margin-bottom:8px">🎯 Resultado del estudio <span style="color:var(--red,#DC2626)">*</span></label>
+    <select id="informe-result" onchange="informeResultChange()" class="result-select">
+      <option value="">— Seleccioná el resultado del estudio —</option>
+      <option value="pos">POSITIVO para isquemia</option>
+      <option value="neg">NEGATIVO para isquemia</option>
+      <option value="inc">INDETERMINADO / no concluyente</option>
+      <option value="via">Viabilidad presente</option>
+      <option value="novia">Sin viabilidad</option>
+    </select>
+  </div></div>
   <div class="card" style="margin-bottom:14px"><div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn btn-teal" onclick="generarPDFCompleto()">📄 Generar PDF (vista previa)</button>
+    <button class="btn btn-ghost" onclick="generarBorradorAuto()">✨ Generar borrador automático</button>
     <button class="btn btn-ghost" onclick="generarInforme()">📝 Generar texto</button>
     <button class="btn btn-ghost" onclick="copiarInforme()">📋 Copiar texto</button>
   </div></div>
@@ -1698,6 +1718,7 @@ function goTo(page){
   if(page==='ecg')ecgImgRender();
   if(page==='ecoetapas')eteRefresh();
   if(page==='cfvr')initStrainBulls();
+  if(page==='informe'&&typeof informeResultSync==='function')informeResultSync();
 }
 /* ═══════════ PERFIL DE ESTUDIO — módulos configurables (básico / avanzado) ═══════════ */
 var EE_ADV_KEYS=['ecoetapas','territorio','viabilidad','cfvr','reservaDiast','elastancia','strainBull','abcdFull'];
@@ -2325,7 +2346,7 @@ function generarInforme(){
   const feviB=gv('c-fevi-bas'),feviP=gv('c-fevi-pic');
   const glsBas=gv('gls-bas'),glsPic=gv('gls-pic');
   const cfvrDaB=gv('cfvr-da-bas'),cfvrDaP=gv('cfvr-da-pic');
-  const cfvrDa=cfvrDaB&&cfvrDaP?(+cfvrDaP/+cfvrDaB).toFixed(2):null;
+  const cfvrDa=cfvrDaB&&cfvrDaP?(+cfvrDaP/+cfvrDaB).toFixed(2):(gv('f-cfvr-da')||null);   // fallback al campo de la sección F
   const eePic=gv('p-ee-pic'),psapPic=gv('p-psap-pic'),lPost=document.getElementById('l-post')?.value;
   const arritmias=gv('ecg-arritmias'),resComment=gv('res-comment');
   const inst=gv('cfg-inst')||'GREMEDA',ciudad=gv('cfg-ciudad'),medico=gv('cfg-medico');
@@ -2368,6 +2389,52 @@ function generarInforme(){
   const el=document.getElementById('informe-txt');if(el)el.value=p.join('\n');
 }
 function copiarInforme(){const txt=document.getElementById('informe-txt')?.value||'';navigator.clipboard.writeText(txt).then(()=>alert('✅ Copiado al portapapeles'));}
+/* ═══ Resultado del estudio (selector grande/colorido en Informe, sincronizado a res-global) ═══ */
+function informeResultColor(){
+  var s=document.getElementById('informe-result'); if(!s)return;
+  s.classList.remove('rs-pos','rs-neg','rs-inc','rs-via','rs-novia');
+  if(s.value)s.classList.add('rs-'+s.value);
+}
+function informeResultChange(){
+  var s=document.getElementById('informe-result'); if(!s)return;
+  var rg=document.getElementById('res-global'); if(rg){ rg.value=s.value; if(typeof updateResult==='function')try{updateResult();}catch(e){} }
+  informeResultColor();
+}
+function informeResultSync(){
+  var s=document.getElementById('informe-result'), rg=document.getElementById('res-global');
+  if(s&&rg){ s.value=rg.value||''; informeResultColor(); }
+}
+/* ═══ Borrador narrativo automático (no pisa texto existente sin confirmar) ═══ */
+function generarBorradorAuto(){
+  var el=document.getElementById('informe-txt'); if(!el)return;
+  if(el.value.trim() && !confirm('Ya hay texto en el informe narrativo. ¿Reemplazarlo con el borrador automático?'))return;
+  var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con viabilidad miocárdica presente',novia:'sin viabilidad miocárdica'};
+  var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
+  var wmsiB=getWMSI('basal'),wmsiP=getWMSI('pico'),wmsiR=getWMSI('recup');
+  var feviB=gv('c-fevi-bas'),feviP=gv('c-fevi-pic');
+  var ts={LAD:0,RCA:0,LCx:0}; bull.pico.forEach(function(st,i){ if(st>1)ts[SEGS[i].ter]++; });
+  var af=Object.keys(ts).filter(function(t){return ts[t]>=2;});
+  var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]}; var segs=(an&&an.segs)||[];
+  var estres=gst('p-estres');
+  var f=[];
+  f.push('Se realizó ecocardiograma de estrés'+(estres?(' con '+estres.toLowerCase()):'')+'.');
+  if(segs.length) f.push('En el pico del estrés se observó '+segs.map(function(s){return (SEG_LABELS[s.st]||'').toLowerCase()+' del segmento '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')';}).join('; ')+'.');
+  else f.push('No se observaron nuevas alteraciones de la motilidad segmentaria en el pico del estrés.');
+  if(af.length) f.push('El patrón es sugestivo de compromiso en el territorio de '+af.join(', ')+'.');
+  var w=[]; if(wmsiB!=null)w.push('basal '+wmsiB); if(wmsiP!=null)w.push('pico '+wmsiP); if(wmsiR!=null)w.push('recuperación '+wmsiR);
+  if(w.length) f.push('Índice de motilidad parietal (WMSI): '+w.join(', ')+'.');
+  if(feviB||feviP) f.push('FEVI '+(feviB?(feviB+'%'):'—')+' en reposo'+(feviP?(' y '+feviP+'% en el pico'):'')+'.');
+  var abcd=[];
+  var cf=gv('f-cfvr-da'); if(cf)abcd.push('CFVR DA '+cf);
+  var eep=gv('p-ee-pic'); if(eep)abcd.push("E/e' pico "+eep);
+  var psp=gv('p-psap-pic'); if(psp)abcd.push('PSAP pico '+psp+' mmHg');
+  var ea=gv('c-ea'); if(ea)abcd.push('elastancia '+ea);
+  var dim=gst('d-im'); if(dim&&dim!=='No')abcd.push('IM inducida '+dim.toLowerCase());
+  if(abcd.length) f.push('Hallazgos ABCD-FLPR: '+abcd.join(', ')+'.');
+  if(rg) f.push('CONCLUSIÓN: estudio '+(resMap[rg]||rg)+'.');
+  el.value=f.join(' ');
+  if(typeof eeToast==='function')eeToast('✨ Borrador generado — revisá y editá el texto','ok');
+}
 function imprimirInforme(){generarInforme();setTimeout(()=>window.print(),150);}
 
 // INIT
@@ -2818,7 +2885,7 @@ function ebTextoInforme(){
   const vmMorf=gst('eb-vm-morf'),imGrado=gst('eb-im-grado');
   const vaMorf=gst('eb-va-morf'),iaoGrado=gst('eb-iao-grado'),vaVmax=gv('eb-va-vmax'),ava=gv('eb-va-ava');
   const itGrado=gst('eb-it-grado');
-  if(vmMorf) lines.push(`VM: ${vmMorf}. IM ${imGrado||'no valorada'}.`);
+  if(vmMorf || (imGrado && imGrado!=='Sin IM')) lines.push(`${vmMorf?('VM: '+vmMorf+'. '):''}IM: ${(imGrado&&imGrado!=='')?imGrado:'no valorada'}.`);
   if(vaMorf) lines.push(`VA: ${vaMorf}. Vmax ${vaVmax||'—'} m/s.${ava?' AVA '+ava+' cm² (ecuación de continuidad).':''} IAo ${iaoGrado||'no valorada'}.`);
   if(itGrado&&itGrado!=='Sin IT / mínima (fisiológica)') lines.push(`IT ${itGrado}.`);
 
@@ -4637,7 +4704,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       var tot=doc.internal.getNumberOfPages();
       var inst=V('cfg-inst')||'CeiboMed';
       for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
-        doc.text('EcoEstrés Smart · CeiboMed · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); }
+        doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); }
     }
 
     // ─────── ENSAMBLADO ───────
@@ -4865,6 +4932,14 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
 
   // ════════════ ORQUESTACIÓN + VISTA PREVIA ════════════
   window.generarPDFCompleto=async function(){
+    // Conclusión obligatoria: no permitir generar el PDF sin resultado del estudio (CAMBIO 1)
+    var _rg=(document.getElementById('res-global')||{}).value||(document.getElementById('abcd-result')||{}).value||'';
+    if(!_rg){
+      if(typeof eeToast==='function')eeToast('⚠️ Seleccioná el resultado del estudio antes de generar el PDF','err'); else alert('⚠️ Seleccioná el resultado del estudio antes de generar el PDF');
+      if(typeof goTo==='function')goTo('informe');
+      var _s=document.getElementById('informe-result'); if(_s){ _s.focus(); }
+      return;
+    }
     if(!(window.jspdf&&window.jspdf.jsPDF)){ alert('No se pudo cargar la librería de PDF (jsPDF). Verificá la conexión a internet e intentá de nuevo.'); return; }
     var btn=document.getElementById('pdf-download-btn');
     try{
@@ -5048,6 +5123,9 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
   // Ejecutar precarga+cálculo al entrar a la página Protocolo
   document.addEventListener('DOMContentLoaded',function(){
     if(typeof goTo==='function'){ var _g=goTo; window.goTo=function(pg){ var r=_g.apply(this,arguments); if(pg==='protocolo'){ try{protoPrecarga();}catch(e){} } return r; }; }
+    // Adecuación A: precargar en vivo cuando cambian FC máx / FC teórica / motivo de suspensión (CAMBIO 7)
+    ['b-fc-max','b-fc-teo'].forEach(function(id){ var e=E(id); if(e)e.addEventListener('input',function(){ try{protoPrecarga();}catch(err){} }); });
+    var _bs=E('b-stop'); if(_bs)_bs.addEventListener('change',function(){ try{protoPrecarga();}catch(err){} });
   });
 })();
 </script>
