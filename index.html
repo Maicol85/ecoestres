@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EcoEstrés Smart — CeiboMed</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root {
   --bg:#0D1117; --bg2:#161B22; --bg3:#1C2333; --bg4:#212840;
@@ -851,6 +852,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           <div class="fg"><label>Apellido y nombre</label><input id="p-nombre" placeholder="García, Juan"></div>
           <div class="fg"><label>HC / ID</label><input id="p-hc" placeholder="123456"></div>
         </div>
+        <div style="margin:2px 0 10px"><button type="button" class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="eeImportEcoSmart()">📥 Importar eco basal desde EcoSmart</button></div>
         <div class="grid3">
           <div class="fg"><label>Fecha de nacimiento</label>
             <div style="display:flex;gap:6px">
@@ -1262,6 +1264,15 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <div id="abcd-score-box"><div style="color:var(--text2);font-size:12px">Completá los campos del ABCD-FLPR para calcular el score automáticamente.</div></div>
       <label style="display:inline-flex;align-items:center;gap:9px;margin-top:12px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="abcd-score-pdf" style="width:16px;height:16px;min-width:16px;flex:0 0 auto;padding:0;margin:0;background:none;border:none;accent-color:var(--accent2)"> 📄 Incluir score en el PDF</label>
       <div style="font-size:10.5px;color:var(--text2);margin-top:8px">Ref.: Ciampi Q et al. Eur Heart J 2021;42:3869.</div>
+    </div>
+  </div>
+
+  <!-- ═══ RADAR / GRÁFICO DE ARAÑA ABCD-FLPR ═══ -->
+  <div class="card" id="abcd-radar-card" style="margin-top:12px">
+    <div class="card-head">🕸️ Gráfico de araña — perfil de riesgo</div>
+    <div class="card-body" style="text-align:center">
+      <svg id="abcd-radar-svg" viewBox="0 0 240 240" style="width:260px;max-width:100%;height:auto"></svg>
+      <div style="text-align:left;margin-top:8px"><label style="display:inline-flex;align-items:center;gap:9px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="abcd-radar-pdf" style="width:16px;height:16px;min-width:16px;flex:0 0 auto;padding:0;margin:0;background:none;border:none;accent-color:var(--accent2)"> 📄 Incluir gráfico en el PDF</label></div>
     </div>
   </div>
 </div>
@@ -2461,8 +2472,79 @@ function abcdScoreRender(){
     +'<div style="font-size:30px;font-weight:900;color:'+col[d.riesgo]+';line-height:1">'+d.count+'<span style="font-size:16px;color:var(--text2)">/8</span></div>'
     +'<div style="flex:1;min-width:200px">'+letters+'</div></div>'
     +'<div style="margin-top:10px;font-size:13px;font-weight:700;color:'+col[d.riesgo]+'">'+rTxt[d.riesgo]+(d.altered.length?(' — letras alteradas: '+d.altered.join(' · ')):' — sin dominios alterados')+'</div>';
+  abcdRadarRender();
 }
-window.abcdScoreRender=abcdScoreRender; window.abcdScoreData=abcdScoreData;
+function abcdRadarRender(){
+  var svg=document.getElementById('abcd-radar-svg'); if(!svg)return;
+  var d=abcdScoreData(); var cx=120,cy=120,R=86, order=d.order;
+  function pt(i,r){ var a=(-90+i*45)*Math.PI/180; return [cx+r*Math.cos(a),cy+r*Math.sin(a)]; }
+  var html='';
+  [0.5,1].forEach(function(f){ var pts=order.map(function(_,i){var p=pt(i,R*f);return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' '); html+='<polygon points="'+pts+'" fill="none" stroke="#94a3b8" stroke-opacity="0.35" stroke-width="1"/>'; });
+  order.forEach(function(_,i){ var p=pt(i,R); html+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#94a3b8" stroke-opacity="0.3" stroke-width="1"/>'; });
+  var vpts=order.map(function(k,i){ var p=pt(i,R*(d.L[k]?1:0)); return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' ');
+  html+='<polygon points="'+vpts+'" fill="#DC2626" fill-opacity="0.28" stroke="#DC2626" stroke-width="2"/>';
+  order.forEach(function(k,i){ var p=pt(i,R*(d.L[k]?1:0)); html+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(d.L[k]?3:2)+'" fill="'+(d.L[k]?'#DC2626':'#94a3b8')+'"/>'; });
+  order.forEach(function(k,i){ var p=pt(i,R+17); html+='<text x="'+p[0].toFixed(1)+'" y="'+(p[1]+4).toFixed(1)+'" text-anchor="middle" font-size="14" font-weight="800" fill="'+(d.L[k]?'#DC2626':'#64748b')+'">'+k+'</text>'; });
+  svg.innerHTML=html;
+}
+window.abcdScoreRender=abcdScoreRender; window.abcdScoreData=abcdScoreData; window.abcdRadarRender=abcdRadarRender;
+/* ═══ QR para el PDF (qrcodejs, cacheado) ═══ */
+var _eeQrCache={};
+function eeQrDataURL(text){
+  if(_eeQrCache[text])return _eeQrCache[text];
+  try{
+    if(typeof QRCode==='undefined')return null;
+    var div=document.createElement('div'); div.style.cssText='position:absolute;left:-9999px;top:0'; document.body.appendChild(div);
+    new QRCode(div,{text:text,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+    var cv=div.querySelector('canvas'); var url=null;
+    if(cv&&cv.toDataURL){ url=cv.toDataURL('image/png'); } else { var img=div.querySelector('img'); if(img)url=img.src; }
+    document.body.removeChild(div);
+    if(url)_eeQrCache[text]=url;
+    return url;
+  }catch(e){ return null; }
+}
+window.eeQrDataURL=eeQrDataURL;
+/* ═══ Importar eco basal desde EcoSmart (localStorage 'ett_informes', match por CI) ═══ */
+function eeImportEcoSmart(){
+  var ci=String((document.getElementById('p-hc')||{}).value||'').trim();
+  if(!ci){ alert('Ingresá primero la HC / ID del paciente para buscar el estudio en EcoSmart.'); return; }
+  var arr; try{ arr=JSON.parse(localStorage.getItem('ett_informes')||'[]'); }catch(e){ arr=[]; }
+  if(!Array.isArray(arr))arr=[];
+  var matches=arr.filter(function(x){ return String((x&&x.ci!=null)?x.ci:'').trim()===ci; });
+  if(!matches.length){ alert('No se encontraron estudios de EcoSmart con HC/ID «'+ci+'».'); return; }
+  eeEcoSmartChooser(matches);
+}
+function eeEcoSmartChooser(matches){
+  var ov=document.createElement('div'); ov.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px';
+  var items=matches.map(function(m,i){ var fecha=m.fecha_estudio||m.fecha||''; var nombre=m.nombre||'—'; return '<button class="btn btn-ghost" data-i="'+i+'" style="justify-content:flex-start;width:100%;text-align:left">🫀 '+String(nombre).replace(/</g,'&lt;')+' · '+String(fecha||'sin fecha')+'</button>'; }).join('');
+  ov.innerHTML='<div style="background:var(--bg2,var(--bg3));border:1px solid var(--border);border-radius:12px;max-width:440px;width:100%;padding:18px;max-height:80vh;overflow:auto">'
+    +'<div style="font-size:15px;font-weight:800;color:var(--accent2);margin-bottom:4px">📥 Importar eco basal desde EcoSmart</div>'
+    +'<div style="font-size:12px;color:var(--text2);margin-bottom:12px">'+matches.length+' estudio(s) de EcoSmart para esta HC/ID. Elegí cuál importar:</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'+items+'</div>'
+    +'<div style="margin-top:14px;text-align:right"><button class="btn btn-ghost" id="ee-imp-cancel">Cancelar</button></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#ee-imp-cancel').onclick=function(){ ov.remove(); };
+  ov.addEventListener('click',function(e){ if(e.target===ov)ov.remove(); });
+  ov.querySelectorAll('button[data-i]').forEach(function(b){ b.onclick=function(){ var i=+b.getAttribute('data-i'); ov.remove(); eeApplyEcoSmartBasal(matches[i]); }; });
+}
+function eeApplyEcoSmartBasal(rec){
+  var c=(rec&&rec.campos)||{};
+  function setV(id,v){ var e=document.getElementById(id); if(e&&v!=null&&String(v)!==''){ e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); } }
+  setV('eb-divi',c.ddfvi); setV('eb-dsvi',c.dsfvi); setV('eb-sivd',c.siv); setV('eb-ppvid',c.ppvi);
+  if(c.fevi){ var m=document.getElementById('eb-fevi-metodo'); if(m){ m.value='simpson'; m.dispatchEvent(new Event('change',{bubbles:true})); } setV('eb-fevi',c.fevi); setV('eb-fevi-simpson',c.fevi); }
+  setV('eb-gls',c.sgl);
+  setV('eb-e',c.onda_e); setV('eb-a',c.onda_a); setV('eb-e-sep',c.e_sep); setV('eb-e-lat',c.e_lat);
+  setV('eb-tapse',c.tapse); setV('eb-psap',c.psap_calc);
+  setV('eb-ai-diam',c.ai_diam); setV('eb-ai-vol',c.ai_vol);
+  setV('eb-ao-senos',c.ao_sin); setV('eb-ao-ust',c.ao_tub);
+  var imMap={'0':'no','1':'leve','2':'leve-mod','3':'mod','4':'sev'}, itMap={'0':'no','1':'leve','2':'mod','3':'sev'};
+  if(c.im_grado!=null&&imMap[String(c.im_grado)])setV('eb-im-grado',imMap[String(c.im_grado)]);
+  if(c.ia_grado!=null&&imMap[String(c.ia_grado)])setV('eb-iao-grado',imMap[String(c.ia_grado)]);
+  if(c.it_grado!=null&&itMap[String(c.it_grado)])setV('eb-it-grado',itMap[String(c.it_grado)]);
+  if(typeof goTo==='function')goTo('ecobasal');
+  if(typeof eeToast==='function')eeToast('📥 Datos importados desde EcoSmart — verificar antes de guardar','ok'); else alert('Datos importados desde EcoSmart — verificar antes de guardar');
+}
+window.eeImportEcoSmart=eeImportEcoSmart;
 function updateWMSI(phase){
   const wmsi=getWMSI(phase);
   const vEl=document.getElementById('wmsi-val-'+phase),cEl=document.getElementById('wmsi-cat-'+phase);
@@ -3851,6 +3933,33 @@ function ebTextoInforme(){
     save(arr);
     if(typeof eeGuardadosList==='function')eeGuardadosList();
   };
+
+  /* Comparativo de evolución entre estudios del mismo CI (seguimiento) */
+  window.eeEvolucion=function(ci){
+    var arr=recs().filter(function(r){ return String(F(r,'p-hc')||'').trim()===String(ci).trim(); })
+      .sort(function(a,b){ return String(F(a,'p-fecha')||'').localeCompare(String(F(b,'p-fecha')||'')); });
+    if(arr.length<2){ toast('Se necesitan al menos 2 estudios del mismo paciente'); return; }
+    function wm(state){ if(!Array.isArray(state))return null; var s=0,c=0; state.forEach(function(st){ if(st>0){s+=st;c++;} }); return c?(s/c).toFixed(2):null; }
+    function scoreOf(r){ if(typeof window.computeAbcdScore!=='function')return null; var b=r.bull||{}; var wp=wm(b.pico), wr=wm(b.recup); return window.computeAbcdScore(function(id){return F(r,id);}, wp!=null?+wp:null, wr!=null?+wr:null); }
+    function cfvrOf(r){ var v=F(r,'f-cfvr-da'); if(v)return v; var cb=parseFloat(F(r,'cfvr-da-bas')),cp=parseFloat(F(r,'cfvr-da-pic')); return (cb&&cp)?(cp/cb).toFixed(2):null; }
+    var rMap={bajo:'Bajo',inter:'Interm.',alto:'Alto'};
+    var head='<tr><th>Métrica</th>'+arr.map(function(r){return '<th>'+esc(fmtFecha(F(r,'p-fecha')))+'</th>';}).join('')+'</tr>';
+    function rowM(lbl,fn){ return '<tr><td>'+lbl+'</td>'+arr.map(function(r){var v=fn(r);return '<td>'+(v==null||v===''?'—':esc(String(v)))+'</td>';}).join('')+'</tr>'; }
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
+      +'<div style="font-size:15px;font-weight:800;color:var(--text)">📈 Evolución — '+esc(F(arr[0],'p-nombre')||'(sin nombre)')+' <span style="font-size:12px;font-weight:500;color:var(--text2)">(CI '+esc(ci)+' · '+arr.length+' estudios)</span></div>'
+      +'<button class="btn btn-ghost" onclick="eeGuardadosOpen()">← Volver a la lista</button></div>'
+      +'<div style="font-size:11.5px;color:var(--text2);margin-bottom:10px">Ideal para seguimiento post-revascularización. Estudios ordenados por fecha.</div>'
+      +'<div style="overflow-x:auto"><table class="tri-table">'+head
+      +rowM('Score ABCD-FLPR',function(r){var s=scoreOf(r);return s?(s.count+'/8 · '+(rMap[s.riesgo]||'')):null;})
+      +rowM('WMSI basal',function(r){return wm((r.bull||{}).basal);})
+      +rowM('WMSI pico',function(r){return wm((r.bull||{}).pico);})
+      +rowM('FEVI basal (%)',function(r){return F(r,'c-fevi-bas')||F(r,'eb-fevi');})
+      +rowM('FEVI pico (%)',function(r){return F(r,'c-fevi-pic');})
+      +rowM('CFVR DA',function(r){return cfvrOf(r);})
+      +'</table></div>';
+    var body=document.getElementById('ee-guardados-body'); if(body)body.innerHTML=html;
+    var m=document.getElementById('ee-guardados'); if(m)m.classList.add('open');
+  };
   function F(r,id){ return (r&&r.vals&&r.vals[id]!=null)?r.vals[id]:''; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function toast(m){ if(typeof eeToast==='function')eeToast(m); }
@@ -4115,16 +4224,18 @@ function ebTextoInforme(){
       if(star && String(r.caso_interes||'')!=='1')return false;
       return true;
     });
+    var ciCount={}; R.forEach(function(rr){ var c=String(F(rr,'p-hc')||'').trim(); if(c)ciCount[c]=(ciCount[c]||0)+1; });
     if(!filt.length){ list.innerHTML='<div class="eea-note">'+(R.length?'Ningún estudio coincide con el filtro.':'Todavía no hay estudios guardados. Usá «Guardar como nuevo».')+'</div>'; }
     else {
       list.innerHTML=filt.map(function(r){
         var estr=EST[F(r,'p-estres')]||'';
         var meta=[fmtFecha(F(r,'p-fecha')), F(r,'p-hc')?('HC '+F(r,'p-hc')):'', estr].filter(Boolean).join(' · ');
+        var _ci=String(F(r,'p-hc')||'').trim(); var _evo=(_ci&&ciCount[_ci]>=2);
         return '<div class="eeg-item">'
           +'<label class="eeg-chk"><input type="checkbox" '+(_sel.indexOf(r.id)>=0?'checked':'')+' onchange="eeCompareToggle(\''+r.id+'\',this.checked)"></label>'
           +'<button class="eeg-star" title="'+((String(r.caso_interes||'')==='1')?'Quitar de casos de interés':'Marcar como caso de interés')+'" onclick="eeToggleStar(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;font-size:19px;line-height:1;padding:0 3px;flex:0 0 auto;color:'+((String(r.caso_interes||'')==='1')?'#F59E0B':'var(--text2)')+'">'+((String(r.caso_interes||'')==='1')?'⭐':'☆')+'</button>'
           +'<div class="eeg-info"><div class="eeg-name">'+esc(F(r,'p-nombre')||'(sin nombre)')+(_editId===r.id?' <span class="eeg-editing">· en edición</span>':'')+'</div><div class="eeg-meta">'+esc(meta)+'</div></div>'
-          +'<div class="eeg-acts"><button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
+          +'<div class="eeg-acts">'+(_evo?('<button class="btn btn-ghost" onclick="eeEvolucion(\''+_ci.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')" title="Comparar estudios del mismo paciente">📈 Ver evolución</button>'):'')+'<button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
           +'</div>';
       }).join('');
     }
@@ -5057,8 +5168,11 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     function footer(){
       var tot=doc.internal.getNumberOfPages();
       var inst=V('cfg-inst')||'CeiboMed';
+      var qr=(typeof eeQrDataURL==='function')?eeQrDataURL('https://ceibomed.com'):null;   // QR a ceibomed.com
       for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
-        doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); }
+        doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'});
+        if(qr){ try{ doc.addImage(qr,'PNG',210-15-4,297-15-3,15,15); }catch(e){} }
+      }
     }
 
     // ─────── ENSAMBLADO ───────
@@ -5251,13 +5365,34 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
     }
     drawBullet(abcd);
-    // Score ABCD-FLPR — antes de la conclusión narrativa, solo si el checkbox lo incluye
+    // Score ABCD-FLPR (texto) + radar (gráfico a la derecha) — antes de la conclusión, cada uno según su checkbox
     (function(){
-      var chk=document.getElementById('abcd-score-pdf'); if(!chk||!chk.checked||typeof abcdScoreData!=='function')return;
+      if(typeof abcdScoreData!=='function')return;
+      var incS=(document.getElementById('abcd-score-pdf')||{}).checked;
+      var incR=(document.getElementById('abcd-radar-pdf')||{}).checked;
+      if(!incS&&!incR)return;
       var sc=abcdScoreData(); var rMap={bajo:'BAJO',inter:'INTERMEDIO',alto:'ALTO'};
-      var txt='Score ABCD-FLPR: '+sc.count+'/8 · Letras alteradas: '+(sc.altered.length?sc.altered.join(' · '):'ninguna')+' -> Riesgo '+(rMap[sc.riesgo]||'')+' · Ref: Ciampi Q et al. Eur Heart J 2021.';
-      y+=1.5; fb(8.5); tc(TEMA[0],TEMA[1],TEMA[2]);
-      doc.splitTextToSize(txt,pgW-4).forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5; }); y+=1;
+      y+=2; checkPage(32); var y0=y; var radW=incR?34:0;
+      if(incS){
+        var txt='Score ABCD-FLPR: '+sc.count+'/8 · Letras alteradas: '+(sc.altered.length?sc.altered.join(' · '):'ninguna')+' -> Riesgo '+(rMap[sc.riesgo]||'')+' · Ref: Ciampi Q et al. Eur Heart J 2021.';
+        fb(8.5); tc(TEMA[0],TEMA[1],TEMA[2]);
+        var yy=y0; doc.splitTextToSize(txt,pgW-4-radW).forEach(function(l){ doc.text(l,mL+2,yy); yy+=5; }); y=Math.max(y,yy);
+      }
+      if(incR){
+        var order=sc.order, rcx=mR-15, rcy=y0+13, R=12;
+        var pt=function(i,r){ var a=(-90+i*45)*Math.PI/180; return [rcx+r*Math.cos(a),rcy+r*Math.sin(a)]; };
+        dc(150,160,175); doc.setLineWidth(0.2);
+        var ring=order.map(function(_,i){return pt(i,R);});
+        for(var i=0;i<ring.length;i++){ var a=ring[i],b=ring[(i+1)%ring.length]; doc.line(a[0],a[1],b[0],b[1]); }
+        order.forEach(function(_,i){ var p=pt(i,R); doc.line(rcx,rcy,p[0],p[1]); });
+        var vp=order.map(function(k,i){ return pt(i, sc.L[k]?R:0.6); });
+        fc(250,205,205); dc(220,38,38); doc.setLineWidth(0.5);
+        var rel=[]; for(var j=1;j<vp.length;j++){ rel.push([vp[j][0]-vp[j-1][0], vp[j][1]-vp[j-1][1]]); }
+        try{ doc.lines(rel, vp[0][0], vp[0][1], [1,1], 'FD', true); }catch(e){}
+        fb(6); order.forEach(function(k,i){ var p=pt(i,R+3); if(sc.L[k])tc(200,40,40); else tc(120,120,120); doc.text(k,p[0],p[1]+1,{align:'center'}); });
+        y=Math.max(y, rcy+R+4);
+      }
+      y+=2;
     })();
     var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
     var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
