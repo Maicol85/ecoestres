@@ -1472,45 +1472,14 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="page-title">📈 ECG y arritmias</div>
   <div class="page-sub">Registro electrocardiográfico por etapa e imágenes del ECG (pegar con Ctrl+V).</div>
   <div class="card"><div class="card-head">📋 Registro ECG por etapa</div><div class="card-body">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-ghost" style="padding:6px 12px" onclick="ecgRowsRegen()">🔄 Regenerar desde protocolo</button>
+      <span style="font-size:10px;color:var(--text3)">Basal y Recuperación son fijas · las etapas intermedias se agregan/quitan · los nombres siguen el protocolo hasta que los edites</span>
+    </div>
     <div style="overflow-x:auto">
       <table>
-        <tr><th>Etapa</th><th>FC (lpm)</th><th>PA (mmHg)</th><th>Doble producto</th><th>Ritmo</th><th>ST</th><th>Síntomas</th><th>Comentario</th></tr>
-        <tr><td style="font-weight:600">Basal</td>
-          <td><input type="number" id="ecg-fc-bas" placeholder="70" class="mini" oninput="ecgCalcDP('bas')"></td>
-          <td><input id="ecg-pa-bas" placeholder="130/80" class="mini" oninput="ecgCalcDP('bas')"></td>
-          <td><input id="ecg-dp-bas" readonly class="mini" placeholder="—" title="FC × PAS"></td>
-          <td><select id="ecg-rit-bas" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>Flutter</option><option>MP</option><option>Otro</option></select></td>
-          <td><select id="ecg-st-bas" class="mini" style="width:auto"><option>Normal</option><option>Depresión</option><option>Elevación</option><option>Inespecífico</option></select></td>
-          <td><select id="ecg-sint-bas" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
-          <td><input id="ecg-com-bas" placeholder="…" class="mini"></td>
-        </tr>
-        <tr><td style="font-weight:600;color:var(--amber)">Estrés bajo</td>
-          <td><input type="number" id="ecg-fc-low" placeholder="100" class="mini" oninput="ecgCalcDP('low')"></td>
-          <td><input id="ecg-pa-low" placeholder="150/85" class="mini" oninput="ecgCalcDP('low')"></td>
-          <td><input id="ecg-dp-low" readonly class="mini" placeholder="—" title="FC × PAS"></td>
-          <td><select id="ecg-rit-low" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>TVNS</option><option>Otro</option></select></td>
-          <td><select id="ecg-st-low" class="mini" style="width:auto"><option>Normal</option><option>Depresión</option><option>Elevación</option><option>Inespecífico</option></select></td>
-          <td><select id="ecg-sint-low" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
-          <td><input id="ecg-com-low" placeholder="…" class="mini"></td>
-        </tr>
-        <tr><td style="font-weight:600;color:var(--accent)">Pico</td>
-          <td><input type="number" id="ecg-fc-pic" placeholder="145" class="mini" oninput="ecgCalcDP('pic')"></td>
-          <td><input id="ecg-pa-pic" placeholder="185/90" class="mini" oninput="ecgCalcDP('pic')"></td>
-          <td><input id="ecg-dp-pic" readonly class="mini" placeholder="—" title="FC × PAS"></td>
-          <td><select id="ecg-rit-pic" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>TVNS</option><option>TV</option><option>Otro</option></select></td>
-          <td><select id="ecg-st-pic" class="mini" style="width:auto"><option>Normal</option><option>Depresión ≥1mm</option><option>Depresión ≥2mm</option><option>Elevación ≥1mm</option><option>Inespecífico</option></select></td>
-          <td><select id="ecg-sint-pic" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
-          <td><input id="ecg-com-pic" placeholder="…" class="mini"></td>
-        </tr>
-        <tr><td style="font-weight:600;color:var(--accent2)">Recuperación</td>
-          <td><input type="number" id="ecg-fc-rec" placeholder="85" class="mini" oninput="ecgCalcDP('rec')"></td>
-          <td><input id="ecg-pa-rec" placeholder="140/80" class="mini" oninput="ecgCalcDP('rec')"></td>
-          <td><input id="ecg-dp-rec" readonly class="mini" placeholder="—" title="FC × PAS"></td>
-          <td><select id="ecg-rit-rec" class="mini" style="width:auto"><option>Sinusal</option><option>FA</option><option>Otro</option></select></td>
-          <td><select id="ecg-st-rec" class="mini" style="width:auto"><option>Normal</option><option>Depresión persiste</option><option>Normaliza</option><option>Elevación persiste</option></select></td>
-          <td><select id="ecg-sint-rec" class="mini" style="width:auto"><option value="ninguno">Ninguno</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="mareos">Mareos</option><option value="otro">Otro</option></select></td>
-          <td><input id="ecg-com-rec" placeholder="…" class="mini"></td>
-        </tr>
+        <thead><tr><th>Etapa</th><th>FC (lpm)</th><th>PA (mmHg)</th><th>Doble producto</th><th>Ritmo</th><th>ST</th><th>Síntomas</th><th>Comentario</th></tr></thead>
+        <tbody id="ecg-tbody"></tbody>
       </table>
     </div>
     <div id="ecg-dp-res" style="font-size:11px;font-weight:600;margin-top:8px"></div>
@@ -1934,6 +1903,8 @@ let bullExtra={active:false,name:'Etapa opcional'};
 let popPhase=null,popIdx=-1;
 let ecgSlots=[];          // [{name, img}] — imágenes ECG por fase
 let ecgSlotsAuto=true;    // nombres auto-sincronizados con el protocolo hasta que el médico edite/cargue
+let ecgRows=[];           // [{key,name,auto}] — filas de la tabla ECG por etapa (bas primero, rec último)
+let ecgRowsAuto=true;     // el conjunto de filas sigue al protocolo mientras sea true
 let ettSlots=[];          // [{img, txt}] — imágenes ETT con mediciones
 let ettPerPage=4;         // 4 (2×2) o 6 (3×2) en el PDF
 let ecgPasteTarget=-1, ettPasteTarget=-1;
@@ -1967,13 +1938,16 @@ function recolectarEstado(){
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
   var _ci=document.getElementById('inf-caso-interes');
-  return{vals,bull,strainBull,ecgSlots,ecgSlotsAuto,ettSlots,ettPerPage,dobuData,caso_interes:((_ci&&_ci.checked)?'1':''),peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
+  return{vals,bull,strainBull,ecgSlots,ecgSlotsAuto,ecgRows,ecgRowsAuto,ettSlots,ettPerPage,dobuData,caso_interes:((_ci&&_ci.checked)?'1':''),peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
 }
 function cargarEstado(){
   let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
   if(!raw)return;
   try{
     const s=JSON.parse(raw);
+    if(s.peState&&typeof peState!=='undefined')peState=s.peState;                       // protocolo primero (para nombres de etapa)
+    if(Array.isArray(s.ecgRows)){ecgRows=s.ecgRows.map(function(r){return{key:r.key,name:r.name,auto:(r.auto!==false)};});ecgRowsAuto=(typeof s.ecgRowsAuto==='boolean')?s.ecgRowsAuto:true;}else{ecgRows=[];ecgRowsAuto=true;}
+    if(typeof ecgTableRender==='function')ecgTableRender();                              // reconstruir filas antes de aplicar valores
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
     var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull)bull=s.bull;
@@ -2005,7 +1979,7 @@ function nuevoEstudio(){
   bvInclude={}; bullExtra={active:false,name:'Etapa opcional'};
   strainBull={basal:Array(17).fill(0),pico:Array(17).fill(0)};   // reset Bull's Eye strain (CAMBIO 5)
   if(typeof bvBuild==='function')bvBuild();
-  ecgSlots=[];ecgSlotsAuto=true;ettSlots=[];ettPerPage=4;dobuData={};
+  ecgSlots=[];ecgSlotsAuto=true;ecgRows=[];ecgRowsAuto=true;ettSlots=[];ettPerPage=4;dobuData={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.readOnly)return;if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>el.checked=false);
   const fd=document.getElementById('p-fecha');if(fd)fd.value=new Date().toISOString().slice(0,10);
@@ -2026,6 +2000,9 @@ function importarDatos(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{try{const s=JSON.parse(ev.target.result);
+    if(s.peState&&typeof peState!=='undefined')peState=s.peState;
+    if(Array.isArray(s.ecgRows)){ecgRows=s.ecgRows.map(function(x){return{key:x.key,name:x.name,auto:(x.auto!==false)};});ecgRowsAuto=(typeof s.ecgRowsAuto==='boolean')?s.ecgRowsAuto:true;}else{ecgRows=[];ecgRowsAuto=true;}
+    if(typeof ecgTableRender==='function')ecgTableRender();
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
     var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull)bull=s.bull;
@@ -2120,7 +2097,8 @@ function actualizarUI(){
   calcEdad();calcFCpct();onEstresChange();ptpCad();
   ['basal','pico','recup'].forEach(p=>{if(bullInited[p])renderBull(p);});
   ecgImgRender();estImgRender();renderDobuTable();
-  if(typeof ecgCalcDP==='function')['bas','low','pic','rec'].forEach(k=>ecgCalcDP(k));
+  if(typeof ecgTableRender==='function')ecgTableRender();
+  if(typeof ecgCalcDP==='function')ecgRows.forEach(function(r){ecgCalcDP(r.key);});
   if(typeof ebSyncDerived==='function')ebSyncDerived();
   const inst=document.getElementById('cfg-inst')?.value||'GREMEDA';
   const ciudad=document.getElementById('cfg-ciudad')?.value||'';
@@ -2726,6 +2704,108 @@ function ecgImgRender(){
     d.addEventListener('drop',function(e){e.preventDefault();d.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f&&f.type.indexOf('image')===0){var i=+d.getAttribute('data-ecgidx');compress(f,function(dt){if(ecgSlots[i])ecgSlots[i].img=dt;ecgImgRender();});}});
   });
 }
+/* ═══ Tabla ECG por etapa — filas dinámicas (Basal fija · intermedias +/- · Recuperación fija) ═══ */
+var ecgRowSeq=0;
+function ecgEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// Construye el juego de filas a partir del protocolo (peState). bas primero, rec último; intermedias mapean a low/pic/ei*.
+function ecgRowsFromProto(){
+  var kn=(typeof peKeyNames==='function')?peKeyNames():{basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación'};
+  var st=(typeof peState!=='undefined'&&peState.stages)?peState.stages.slice():[];
+  var inter=st.filter(function(s){return s.tipo!=='basal'&&s.tipo!=='rec'&&s.tipo!=='recup';});
+  var rows=[{key:'bas',name:kn.basal,auto:true}];
+  var n=inter.length;
+  inter.forEach(function(s,i){
+    var key = (i===n-1)?'pic' : (i===0?'low':('ei'+i));
+    rows.push({key:key,name:(s.n||(i===n-1?kn.pico:kn.low)),auto:true});
+  });
+  rows.push({key:'rec',name:kn.recup,auto:true});
+  return rows;
+}
+function ecgRowsEnsure(){ if(!ecgRows.length){ ecgRows=ecgRowsFromProto(); ecgRowsAuto=true; } }
+// Clave de la etapa "pico" (mayor doble producto): 'pic' si existe, si no la intermedia con mayor DP, si no la última intermedia.
+function ecgPeakKey(){
+  ecgRowsEnsure();
+  for(var j=0;j<ecgRows.length;j++)if(ecgRows[j].key==='pic')return 'pic';
+  var best=null,bestDp=-1;
+  for(var i=1;i<ecgRows.length-1;i++){
+    var k=ecgRows[i].key;
+    var fc=+((document.getElementById('ecg-fc-'+k)||{}).value)||0;
+    var pa=(document.getElementById('ecg-pa-'+k)||{}).value||'';
+    var pas=parseInt((pa.split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;
+    var dp=fc*pas; if(dp>bestDp){bestDp=dp;best=k;}
+  }
+  if(best)return best;
+  return ecgRows.length>2?ecgRows[ecgRows.length-2].key:'bas';
+}
+var ECG_RIT_OPTS=['Sinusal','FA','Flutter','TVNS','TV','MP','Otro'];
+var ECG_ST_OPTS=['Normal','Inespecífico','Depresión','Depresión ≥1mm','Depresión ≥2mm','Elevación','Elevación ≥1mm','Normaliza','Depresión persiste','Elevación persiste'];
+var ECG_SINT_OPTS=[['ninguno','Ninguno'],['angina','Angina'],['disnea','Disnea'],['mareos','Mareos'],['otro','Otro']];
+function ecgTableRender(){
+  ecgRowsEnsure();
+  var tb=document.getElementById('ecg-tbody'); if(!tb)return;
+  // snapshot de valores actuales para no perderlos al reconstruir
+  var snap={}; tb.querySelectorAll('input,select').forEach(function(e){ if(e.id)snap[e.id]=e.value; });
+  var n=ecgRows.length;
+  var opt=function(list,ismini){ return list.map(function(o){ if(Array.isArray(o))return '<option value="'+o[0]+'">'+o[1]+'</option>'; return '<option>'+ecgEsc(o)+'</option>'; }).join(''); };
+  var html='';
+  ecgRows.forEach(function(r,i){
+    var isBas=(i===0), isRec=(i===n-1), isInter=!isBas&&!isRec;
+    if(isRec){ html+=ecgAddRowHtml(); }   // el botón "+ Agregar etapa" queda entre las intermedias y Recuperación
+    var col=isBas?'':(isRec?'var(--accent2)':'var(--amber)');
+    var k=r.key;
+    var del=isInter?'<button class="btn btn-ghost" style="padding:1px 7px;line-height:1;font-size:11px" title="Quitar etapa" onclick="ecgRowDel(\''+k+'\')">✕</button>':'';
+    html+='<tr>'
+      +'<td><div style="display:flex;align-items:center;gap:4px">'
+        +'<input class="mini" style="font-weight:600;min-width:78px'+(col?';color:'+col:'')+'" value="'+ecgEsc(r.name)+'" title="Nombre de etapa (editable)" onchange="ecgRowName(\''+k+'\',this.value)">'
+        +del+'</div></td>'
+      +'<td><input type="number" id="ecg-fc-'+k+'" class="mini" oninput="ecgCalcDP(\''+k+'\')"></td>'
+      +'<td><input id="ecg-pa-'+k+'" placeholder="—/—" class="mini" oninput="ecgCalcDP(\''+k+'\')"></td>'
+      +'<td><input id="ecg-dp-'+k+'" readonly class="mini" placeholder="—" title="FC × PAS"></td>'
+      +'<td><select id="ecg-rit-'+k+'" class="mini" style="width:auto">'+opt(ECG_RIT_OPTS)+'</select></td>'
+      +'<td><select id="ecg-st-'+k+'" class="mini" style="width:auto">'+opt(ECG_ST_OPTS)+'</select></td>'
+      +'<td><select id="ecg-sint-'+k+'" class="mini" style="width:auto">'+opt(ECG_SINT_OPTS)+'</select></td>'
+      +'<td><input id="ecg-com-'+k+'" placeholder="…" class="mini"></td>'
+      +'</tr>';
+  });
+  tb.innerHTML=html;
+  // restaurar valores
+  Object.keys(snap).forEach(function(id){ var e=document.getElementById(id); if(e)e.value=snap[id]; });
+  // recalcular doble producto de cada fila
+  ecgRows.forEach(function(r){ if(typeof ecgCalcDP==='function')ecgCalcDP(r.key); });
+}
+function ecgAddRowHtml(){
+  return '<tr><td colspan="8" style="text-align:center;padding:4px 0">'
+    +'<button class="btn btn-ghost" style="padding:3px 12px;font-size:12px" onclick="ecgRowAdd()">＋ Agregar etapa</button></td></tr>';
+}
+function ecgRowAdd(){
+  ecgRowsEnsure();
+  var last=ecgRows.length-1;
+  ecgRows.splice(last,0,{key:'ex'+(++ecgRowSeq),name:'Etapa '+last,auto:true});
+  ecgRowsAuto=false; ecgTableRender();
+}
+function ecgRowDel(key){
+  var i=-1; for(var j=0;j<ecgRows.length;j++)if(ecgRows[j].key===key){i=j;break;}
+  if(i<=0||i>=ecgRows.length-1)return;   // no se puede quitar Basal ni Recuperación
+  ecgRows.splice(i,1); ecgRowsAuto=false; ecgTableRender();
+}
+function ecgRowName(key,v){ for(var j=0;j<ecgRows.length;j++)if(ecgRows[j].key===key){ ecgRows[j].name=v; ecgRows[j].auto=false; return; } }
+function ecgRowsRegen(){ ecgRows=ecgRowsFromProto(); ecgRowsAuto=true; ecgTableRender(); }
+// Sincroniza nombres (y, en modo auto, el conjunto) con el protocolo. Llamado desde peApplyLabels.
+function ecgSyncNames(){
+  ecgRowsEnsure();
+  var proto=ecgRowsFromProto();
+  if(ecgRowsAuto){
+    if(proto.length!==ecgRows.length){ ecgRows=proto; }
+    else { for(var i=0;i<proto.length;i++)ecgRows[i].name=proto[i].name; }
+    ecgTableRender(); return;
+  }
+  var last=ecgRows.length-1, pl=proto.length-1;
+  if(ecgRows[0]&&ecgRows[0].auto&&proto[0])ecgRows[0].name=proto[0].name;
+  if(ecgRows[last]&&ecgRows[last].auto&&proto[pl])ecgRows[last].name=proto[pl].name;
+  var pInter=proto.slice(1,pl);
+  for(var i=1;i<last;i++){ if(ecgRows[i].auto&&pInter[i-1])ecgRows[i].name=pInter[i-1].name; }
+  ecgTableRender();
+}
 /* ═══ Imágenes ETT (imagen + texto de mediciones) ═══ */
 function ettSlotsEnsure(){ if(!ettSlots.length){ ettSlots=[{img:null,txt:''},{img:null,txt:''}]; } }
 function ettSlotAdd(){ ettSlots.push({img:null,txt:''}); estImgRender(); }
@@ -2807,10 +2887,12 @@ function generarInforme(){
   if(stop)prot+=' Suspensión: '+stop+'.';if(sint&&sint!=='Sin síntomas')prot+=' Síntomas: '+sint+'.';
   p.push(prot);
   if(ecgBas||ecgEst){let el='ECG: '+(ecgBas&&ecgBas!=='Normal'?'Basal: '+ecgBas+'. ':'Basal normal. ')+(ecgEst&&ecgEst!=='Sin cambios significativos'?'Estrés: '+ecgEst+'. ':'Sin cambios ECG. ');if(arritmias)el+=arritmias+'.';p.push(el);}
-  const dpPic=(()=>{const fc=+gv('ecg-fc-pic')||0;const pas=parseInt(((gv('ecg-pa-pic')||'').split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;return fc&&pas?fc*pas:0;})();
+  const _pk=(typeof ecgPeakKey==='function')?ecgPeakKey():'pic';
+  const dpPic=(()=>{const fc=+gv('ecg-fc-'+_pk)||0;const pas=parseInt(((gv('ecg-pa-'+_pk)||'').split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;return fc&&pas?fc*pas:0;})();
   if(dpPic)p.push('Doble producto pico: '+dpPic.toLocaleString('es-AR')+' mmHg·lpm ('+(dpPic>=25000?'estrés miocárdico adecuado':dpPic>=20000?'estrés submáximo':'estrés insuficiente')+').');
   {const sintLbl={bas:'basal',low:'estrés bajo',pic:'pico',rec:'recuperación'};
-   const sintList=['bas','low','pic','rec'].map(k=>{const v=gv('ecg-sint-'+k);return v&&v!=='ninguno'?sintLbl[k]+': '+v:null;}).filter(Boolean);
+   const _ecgRows=(typeof ecgRows!=='undefined'&&ecgRows.length)?ecgRows:[{key:'bas',name:sintLbl.bas},{key:'low',name:sintLbl.low},{key:'pic',name:sintLbl.pic},{key:'rec',name:sintLbl.rec}];
+   const sintList=_ecgRows.map(r=>{const v=gv('ecg-sint-'+r.key);return v&&v!=='ninguno'?((r.name||sintLbl[r.key]||r.key)+': '+v):null;}).filter(Boolean);
    if(sintList.length)p.push('Síntomas por etapa — '+sintList.join('; ')+'.');}
   p.push('');p.push('MOTILIDAD PARIETAL:');
   if(wmsiB!==null)p.push('— Basal: WMSI '+wmsiB+(feviB?' (FEVI '+feviB+'%)':'')+'.') ;
@@ -3217,8 +3299,9 @@ function ecgCalcDP(k){
 }
 function ecgEvalDP(){
   var el=document.getElementById('ecg-dp-res'); if(!el)return;
-  var fcp=+((document.getElementById('ecg-fc-pic')||{}).value)||0;
-  var pap=(document.getElementById('ecg-pa-pic')||{}).value||'';
+  var _pk=(typeof ecgPeakKey==='function')?ecgPeakKey():'pic';
+  var fcp=+((document.getElementById('ecg-fc-'+_pk)||{}).value)||0;
+  var pap=(document.getElementById('ecg-pa-'+_pk)||{}).value||'';
   var pasp=parseInt((pap.split('/')[0]||'').replace(/[^0-9]/g,''),10)||0;
   var dpPic=fcp*pasp;
   if(!dpPic){el.textContent='';return;}
@@ -3999,6 +4082,9 @@ function ebTextoInforme(){
   // Carga un estado guardado en el formulario (para editar)
   function applyEstado(s){
     if(!s)return;
+    if(s.peState&&typeof peState!=='undefined'){ Object.keys(peState).forEach(function(k){delete peState[k];}); Object.assign(peState,s.peState); }   // protocolo primero
+    if(Array.isArray(s.ecgRows)){ ecgRows=s.ecgRows.map(function(x){return {key:x.key,name:x.name,auto:(x.auto!==false)};}); ecgRowsAuto=(typeof s.ecgRowsAuto==='boolean')?s.ecgRowsAuto:true; } else { ecgRows=[]; ecgRowsAuto=true; }
+    if(typeof ecgTableRender==='function')ecgTableRender();   // reconstruir filas antes de aplicar valores
     if(s.vals)Object.keys(s.vals).forEach(function(id){ var el=document.getElementById(id); if(!el)return; var v=s.vals[id]; if(el.type==='checkbox')el.checked=!!v; else el.value=v; });
     var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull){ ['basal','low','pico','recup','extra'].forEach(function(k){ bull[k]=Array.isArray(s.bull[k])?s.bull[k].slice():Array(17).fill(1); }); }
@@ -4382,9 +4468,8 @@ function peApplyLabels(){
   setBtn('basal',k.basal); setBtn('pico',k.pico); setBtn('recup',k.recup);
   var setW=function(id,t){ var w=document.querySelector('#bull-tab-'+id+' .wmsi-lbl'); if(w)w.textContent='WMSI '+t; };
   setW('basal',k.basal); setW('pico',k.pico); setW('recup',k.recup);
-  // Tabla ECG: primer td de cada fila (hallada por su input de FC)
-  var setEcg=function(fcId,t){ var i=document.getElementById(fcId); if(i){ var tr=i.closest('tr'); if(tr&&tr.cells[0])tr.cells[0].textContent=t; } };
-  setEcg('ecg-fc-bas',k.basal); setEcg('ecg-fc-low',k.low); setEcg('ecg-fc-pic',k.pico); setEcg('ecg-fc-rec',k.recup);
+  // Tabla ECG: filas dinámicas — sincronizar nombres (auto) con el protocolo
+  if(typeof ecgSyncNames==='function')ecgSyncNames();
 }
 function peRender(){
   var wrap=document.getElementById('pe-stages'); if(!wrap)return;
@@ -4857,16 +4942,25 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
 
   // Nombre de etapa (protocolo) por clave ecg
   function stageName(k){
+    if(typeof ecgRows!=='undefined'&&ecgRows.length){ for(var i=0;i<ecgRows.length;i++)if(ecgRows[i].key===k)return ecgRows[i].name||k; }
     var m={bas:'basal',low:'low',pic:'pico',rec:'recup'};
     var kn=(typeof peKeyNames==='function')?peKeyNames():{basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación'};
     return kn[m[k]]||k;
   }
   // METs/dosis por etapa según protocolo
   function stageMetric(k){
-    if(k==='bas'||k==='rec')return '—';
     var st=(typeof peState!=='undefined'&&peState.stages)?peState.stages:[];
+    var inter=st.filter(function(s){return s.tipo!=='basal'&&s.tipo!=='rec'&&s.tipo!=='recup';});
+    // Filas dinámicas: mapear por posición (índice entre las intermedias)
+    if(typeof ecgRows!=='undefined'&&ecgRows.length){
+      var idx=-1; for(var i=0;i<ecgRows.length;i++)if(ecgRows[i].key===k){idx=i;break;}
+      if(idx<=0||idx>=ecgRows.length-1)return '—';
+      var o=inter[idx-1]; if(!o)return '—';
+      if(peState.tipo==='esfuerzo')return o.mets!=null?(o.mets+' METs'):'—';
+      return o.d||'—';
+    }
+    if(k==='bas'||k==='rec')return '—';
     var byTipo=function(t){for(var i=0;i<st.length;i++)if(st[i].tipo===t)return st[i];return null;};
-    var inter=st.filter(function(s){return s.tipo==='inter';});
     var obj = k==='low' ? (byTipo('low')||inter[0]) : (byTipo('pico')||(inter.length?inter[inter.length-1]:null));
     if(!obj)return '—';
     if(peState.tipo==='esfuerzo')return obj.mets!=null?(obj.mets+' METs'):'—';
@@ -5081,7 +5175,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
 
     // Tabla de etapas
     function stageTable(){
-      var keys=['bas','low','pic','rec'];
+      var keys=(typeof ecgRows!=='undefined'&&ecgRows.length)?ecgRows.map(function(r){return r.key;}):['bas','low','pic','rec'];
       var heads=['Etapa','FC (lpm)','PAS/PAD','Doble prod.','METs / Dosis','Síntomas'];
       var colW=[42,20,26,28,36,30];
       var hH=7.5, rH=6, x0=mL, y0=y;
@@ -5260,7 +5354,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     nb.push(ecgL);
     if(V('ecg-arritmias'))nb.push('Arritmias: '+V('ecg-arritmias')+'.');
     if(T('b-sintomas'))nb.push('Síntomas durante el estrés: '+T('b-sintomas')+'.');
-    var sintEt=[]; ['bas','low','pic','rec'].forEach(function(k){ var s=T('ecg-sint-'+k); if(s&&s.toLowerCase()!=='ninguno')sintEt.push(stageName(k)+': '+s); });
+    var sintEt=[]; var _sk=(typeof ecgRows!=='undefined'&&ecgRows.length)?ecgRows.map(function(r){return r.key;}):['bas','low','pic','rec']; _sk.forEach(function(k){ var s=T('ecg-sint-'+k); if(s&&s.toLowerCase()!=='ninguno')sintEt.push(stageName(k)+': '+s); });
     if(sintEt.length)nb.push('Síntomas por etapa — '+sintEt.join('; ')+'.');
     if(T('b-stop'))nb.push('Motivo de finalización: '+T('b-stop')+'.');
     if(adecTxt)nb.push('Adecuación del estrés: '+adecTxt+'.');
