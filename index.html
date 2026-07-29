@@ -919,110 +919,227 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 </div>
 
 <!-- ═══ PROTOCOLO ABCD-FLPR ═══ -->
+<style>
+.proto-desc{font-size:11px;color:var(--text2);background:var(--bg3);border-left:3px solid var(--accent2);border-radius:6px;padding:8px 11px;margin-bottom:12px;line-height:1.55}
+.proto-res{font-size:11.5px;font-weight:700;margin:5px 0;line-height:1.5}
+.proto-narr{margin-top:10px}
+.proto-narr>label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px}
+.proto-narr textarea{width:100%;box-sizing:border-box}
+.proto-suggest-btn{margin-top:5px;padding:5px 12px;font-size:12px}
+input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow:0 0 0 1.5px rgba(225,29,72,.35) inset;background:rgba(225,29,72,.06)}
+</style>
 <div class="page" id="page-protocolo">
   <div class="page-title">📋 Protocolo ABCD-FLPR</div>
   <div class="page-sub">Evaluación sistemática AHA/ESC. Hacer click en cada letra para expandir.</div>
 
+  <!-- ══════════ A — ADECUACIÓN ══════════ -->
   <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅐 Adecuación del estrés</span><span class="arr">▼</span></div>
   <div class="step-body">
-    <div class="grid2">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> si el nivel de estrés fue suficiente para descartar isquemia. Una prueba <em>submáxima</em> (&lt;85% FCM) puede dar falsos negativos y limita el valor diagnóstico.</div>
+    <div class="grid3">
+      <div class="fg"><label>FC máxima alcanzada (lpm)</label><input id="a-fcmax" readonly placeholder="— (desde tabla de etapas)"></div>
+      <div class="fg"><label>% FCM alcanzado</label><input id="a-fcpct" readonly placeholder="—"></div>
       <div class="fg"><label>FC objetivo (85% FCmax teórica)</label><input id="a-fc-obj" readonly placeholder="—"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>Suficiencia de la prueba</label><input id="a-sufic" readonly placeholder="Automático según % FCM"></div>
       <div class="fg"><label>Dosis dobutamina máxima</label><input id="a-dosis-dobu" placeholder="40 mcg/kg/min"></div>
     </div>
-    <div style="margin:6px 0 4px;font-size:11px;font-weight:700;color:var(--accent2)">Criterios:</div>
-    <div><span class="pill">FC ≥85% máx. teórica</span><span class="pill">Dobu ≥40 mcg/kg/min</span><span class="pill">Dipiri 0.84 mg/kg/10min</span><span class="pill">Adenosina 140 mcg/kg/min</span></div>
+    <div class="fg"><label>Motivo de suspensión</label><input id="a-motivo" readonly placeholder="— (desde tabla de etapas)"></div>
+    <div class="proto-res" id="a-res"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="a-narr" rows="2" placeholder="Ej.: Prueba máxima (89% FCM), finalizada por agotamiento. Estrés adecuado para valoración de isquemia."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('a')">💡 Sugerir texto</button></div>
     <div class="note-box" style="margin-top:8px">ℹ️ FCmax teórica = 220 − edad. Con dobutamina, agregar atropina hasta 1mg si no alcanza FC objetivo.</div>
   </div></div>
 
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅑 ECG basal y durante el estrés</span><span class="arr">▼</span></div>
+  <!-- ══════════ B — ECG / ISQUEMIA ELÉCTRICA ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅑 ECG / Isquemia eléctrica</span><span class="arr">▼</span></div>
   <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> cambios eléctricos de isquemia (infra/supradesnivel ST, inversión de T, arritmias). Complementa la motilidad; el infra ST no localiza el territorio.</div>
     <div class="grid2">
       <div class="fg"><label>ECG basal</label><select id="b-ecg-bas"><option value="normal">Normal</option><option value="bri">BRI</option><option value="brd">BRD</option><option value="hvi">HVI con strain</option><option value="st">Cambios ST basales</option><option value="wcpw">WPW</option><option value="otro">Otro</option></select></div>
-      <div class="fg"><label>Cambios ECG durante estrés</label><select id="b-ecg-estres"><option value="no">Sin cambios significativos</option><option value="st-dep">Depresión ST ≥1mm horiz./desc.</option><option value="st-ele">Elevación ST ≥1mm</option><option value="arritmia">Arritmia significativa</option><option value="bri-func">BRI funcional (FC-dependiente)</option></select></div>
+      <div class="fg"><label>Resultado ECG durante estrés</label><select id="b-ecg-estres" onchange="protoCalc()"><option value="no">Normal / sin cambios significativos</option><option value="st-dep">Alteraciones ST — depresión ≥1mm</option><option value="st-ele">Alteraciones ST — elevación ≥1mm</option><option value="t-inv">Inversión de onda T</option><option value="arritmia">Arritmias significativas</option><option value="bri-func">BRI funcional (FC-dependiente)</option></select></div>
     </div>
-    <div class="fg"><label>Descripción ECG detallada</label><textarea id="b-ecg-desc" placeholder="ST infradesnivelado 1.5mm en V4-V6 en pico de estrés, normaliza en recuperación…" rows="2"></textarea></div>
+    <div class="proto-narr"><label>📝 Descripción / interpretación (editable)</label><textarea id="b-ecg-desc" rows="2" placeholder="Ej.: ST infradesnivelado 1.5mm horizontal en V4-V6 en pico de estrés, normaliza en recuperación."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('b')">💡 Sugerir texto</button></div>
     <div class="warn-box">⚠️ BRI durante estrés a FC &lt;125 lpm → origen isquémico (DA). BRI a FC &gt;125 lpm → funcional.</div>
   </div></div>
 
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅒 Contractilidad (motilidad parietal)</span><span class="arr">▼</span></div>
+  <!-- ══════════ C — CONTRACTILIDAD Y RESERVA CONTRÁCTIL ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅒 Contractilidad y reserva contráctil</span><span class="arr">▼</span></div>
   <div class="step-body">
-    <div class="note-box">ℹ️ Ver bull's eye en módulo "Bull's Eye 17 seg". Aquí se registra la evaluación global.</div>
-    <div style="overflow-x:auto;margin-top:10px">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> el criterio central del eco estrés. La <em>reserva contráctil</em> (mejoría de FEVI/SGL/VTI y elastancia con el estrés) indica miocardio viable/sano; su ausencia o el empeoramiento sugiere isquemia o disfunción.</div>
+    <div style="overflow-x:auto">
       <table>
         <tr><th>Parámetro</th><th>Basal</th><th>Pico estrés</th><th>Recuperación</th></tr>
+        <tr><td>WMSI (Bull's Eye)</td>
+          <td><input id="c-wmsi-bas" readonly class="mini" placeholder="—"></td>
+          <td><input id="c-wmsi-pic" readonly class="mini" placeholder="—"></td>
+          <td><input id="c-wmsi-rec" readonly class="mini" placeholder="—"></td>
+        </tr>
         <tr><td>Motilidad global</td>
           <td><select id="c-mot-bas" class="mini" style="width:auto"><option value="normal">Normal</option><option value="hipog">Hipokinesia global</option><option value="seg">Alteración segmentaria</option></select></td>
           <td><select id="c-mot-pic" class="mini" style="width:auto"><option value="normal">Normal</option><option value="nueva">Nueva alteración segmentaria</option><option value="empeora">Empeoramiento</option><option value="mejora">Mejoría (viabilidad)</option></select></td>
           <td><select id="c-mot-rec" class="mini" style="width:auto"><option value="normaliza">Normaliza</option><option value="persiste">Persiste alterada</option></select></td>
         </tr>
         <tr><td>FEVI estimada (%)</td>
-          <td><input type="number" id="c-fevi-bas" placeholder="60" class="mini" oninput="onFeviChange()"></td>
-          <td><input type="number" id="c-fevi-pic" placeholder="65" class="mini" oninput="onFeviChange()"></td>
+          <td><input type="number" id="c-fevi-bas" placeholder="60" class="mini" oninput="onFeviChange();protoCalc()"></td>
+          <td><input type="number" id="c-fevi-pic" placeholder="65" class="mini" oninput="onFeviChange();protoCalc()"></td>
           <td><input type="number" id="c-fevi-rec" placeholder="58" class="mini"></td>
+        </tr>
+        <tr><td>SGL / strain global (%)</td>
+          <td><input type="number" id="c-sgl-bas" step="0.1" placeholder="-20 basal" class="mini" oninput="protoCalc()"></td>
+          <td><input type="number" id="c-sgl-pic" step="0.1" placeholder="-24 pico" class="mini" oninput="protoCalc()"></td>
+          <td><input readonly class="mini"></td>
+        </tr>
+        <tr><td>VTI TSVI (cm)</td>
+          <td><input type="number" id="c-vti-bas" step="0.1" placeholder="18 basal" class="mini" oninput="protoCalc()"></td>
+          <td><input type="number" id="c-vti-pic" step="0.1" placeholder="24 pico" class="mini" oninput="protoCalc()"></td>
+          <td><input readonly class="mini"></td>
         </tr>
       </table>
     </div>
-    <div class="note-box" style="margin-top:10px">ℹ️ Isquemia: nueva alteración en ≥2 segmentos adyacentes o empeoramiento de alteración previa. Viabilidad: mejoría con dosis bajas de dobutamina (5–10 mcg/kg/min).</div>
+    <div class="grid3" style="margin-top:8px">
+      <div class="fg"><label>Δ FEVI (pico − basal)</label><input id="c-dfevi" readonly placeholder="—"></div>
+      <div class="fg"><label>Δ SGL (pico − basal)</label><input id="c-dsgl" readonly placeholder="—"></div>
+      <div class="fg"><label>Δ VTI (pico − basal)</label><input id="c-dvti" readonly placeholder="—"></div>
+    </div>
+    <div class="fg"><label>Alteraciones de motilidad nuevas y territorio (Bull's Eye)</label><input id="c-alt-nuevas" readonly placeholder="— (desde Bull's Eye del pico)"></div>
+    <div style="margin:10px 0 4px;font-size:11px;font-weight:700;color:var(--accent2)">Elastancia telesistólica (reserva contráctil hemodinámica)</div>
+    <div class="grid2">
+      <div class="fg"><label>VSF basal (mL) — vol. sistólico final</label><input type="number" id="c-vsf-bas" step="0.1" placeholder="45 (o VTSVI eco basal)" oninput="protoCalc()"></div>
+      <div class="fg"><label>VSF pico (mL)</label><input type="number" id="c-vsf-pic" step="0.1" placeholder="30" oninput="protoCalc()"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>PAS reposo (mmHg)</label><input id="c-pas-rep" readonly placeholder="— (desde tabla etapas)"></div>
+      <div class="fg"><label>PAS pico (mmHg)</label><input id="c-pas-pic" readonly placeholder="— (desde tabla etapas)"></div>
+    </div>
+    <div class="fg"><label>Ea = (PAS pico/VSFp) / (PAS reposo/VSFr)</label><input id="c-ea" readonly placeholder="—"></div>
+    <div class="proto-res" id="c-ea-res"></div>
+    <div class="proto-res" id="c-res"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="c-narr" rows="3" placeholder="Ej.: FEVI 60%→68% (ΔFEVI +8), SGL -20%→-24%, sin nuevas alteraciones segmentarias. Reserva contráctil conservada."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('c')">💡 Sugerir texto</button></div>
+    <div class="note-box" style="margin-top:8px">ℹ️ Isquemia: nueva alteración en ≥2 segmentos adyacentes o empeoramiento. Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y Ea &gt;1.1.</div>
   </div></div>
 
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅓 Dilatación del VI y otros signos</span><span class="arr">▼</span></div>
+  <!-- ══════════ D — DILATACIÓN Y OTROS ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅓 Dilatación y otros signos</span><span class="arr">▼</span></div>
   <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> signos indirectos de isquemia extensa/severa: dilatación transitoria del VI (isquemia multivaso), insuficiencia mitral inducida y respuesta anómala de la PA (la hipotensión con estrés es un signo ominoso).</div>
     <div class="grid2">
-      <div class="fg"><label>Dilatación transitoria VI</label><select id="d-dilat" onchange="evalCriterios()"><option value="no">No presente</option><option value="si">Presente — isquemia multivaso</option></select></div>
-      <div class="fg"><label>IM inducida</label><select id="d-im" onchange="evalCriterios()"><option value="no">No</option><option value="leve">Leve</option><option value="mod">Moderada</option><option value="sev">Severa</option></select></div>
+      <div class="fg"><label>IM inducida (grado)</label><select id="d-im" onchange="evalCriterios();protoCalc()"><option value="no">No</option><option value="leve">Leve</option><option value="mod">Moderada</option><option value="sev">Severa</option></select></div>
+      <div class="fg"><label>Dilatación VI con estrés</label><select id="d-dilat" onchange="evalCriterios();protoCalc()"><option value="no">No presente</option><option value="si">Presente — isquemia multivaso</option></select></div>
     </div>
-    <div class="fg"><label>Respuesta de PA al estrés</label><select id="d-pa" onchange="evalCriterios()"><option value="normal">Normal (↑ PAS &gt;10mmHg)</option><option value="hipo">Hipotensión (↓ PAS &gt;10mmHg) — signo ominoso</option><option value="insuf">Respuesta insuficiente</option><option value="hiper">Hipertensiva excesiva</option></select></div>
+    <div class="fg"><label>Respuesta presora al estrés</label><select id="d-pa" onchange="evalCriterios();protoCalc()"><option value="normal">Normal (↑ PAS &gt;10mmHg)</option><option value="hipo">Hipotensiva (↓ PAS &gt;10mmHg) — signo ominoso</option><option value="insuf">Respuesta insuficiente</option><option value="hiper">Hipertensiva excesiva</option></select></div>
+    <div class="proto-res" id="d-res"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="d-narr" rows="2" placeholder="Ej.: Sin dilatación transitoria ni IM inducida. Respuesta presora normal."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('d')">💡 Sugerir texto</button></div>
     <div class="warn-box">⚠️ Hipotensión con estrés = caída &gt;10mmHg PAS basal → suspender inmediatamente. Marcador de disfunción grave.</div>
   </div></div>
 
+  <!-- ══════════ F — FLUJO CORONARIO (CFVR) ══════════ -->
   <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅕 Flujo coronario (CFVR)</span><span class="arr">▼</span></div>
   <div class="step-body">
-    <div class="grid2">
-      <div class="fg"><label>CFVR DA (resumen)</label><input type="number" id="f-cfvr-da" step="0.1" placeholder="2.5" oninput="evalCFVRprot()"></div>
-      <div id="f-cfvr-da-res" style="font-size:11px;font-weight:600;align-self:flex-end;padding-bottom:11px"></div>
-    </div>
-    <div class="note-box">ℹ️ Ver módulo CFVR/Strain para evaluación completa de las 3 arterias.</div>
-  </div></div>
-
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅛 Lung B-lines (líneas B pulmonares)</span><span class="arr">▼</span></div>
-  <div class="step-body">
-    <div class="grid2">
-      <div class="fg"><label>Líneas B basales</label><select id="l-bas"><option value="0">0 — Normal</option><option value="1">1-2/campo — Borderline</option><option value="2">≥3/campo — Congestión</option></select></div>
-      <div class="fg"><label>Líneas B post-estrés</label><select id="l-post" onchange="evalCriterios()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
-    </div>
-    <div class="fg"><label>Zonas evaluadas</label><input id="l-zonas" placeholder="Ej. 4 zonas anteriores bilaterales"></div>
-    <div class="note-box">ℹ️ Líneas B post-estrés ≥3/campo → congestión venocapilar inducida → disfunción diastólica con estrés o isquemia con falla VI.</div>
-  </div></div>
-
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅟 Presión (estimación hemodinámica)</span><span class="arr">▼</span></div>
-  <div class="step-body">
-    <div class="grid2">
-      <div>
-        <div class="grid2">
-          <div class="fg"><label>PSAP basal (mmHg)</label><input type="number" id="p-psap-bas" placeholder="28"></div>
-          <div class="fg"><label>PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP()"></div>
-        </div>
-        <div id="p-psap-res" style="font-size:11px;font-weight:600;margin-bottom:8px"></div>
-        <div class="fg"><label>E/e' basal</label><input type="number" id="p-ee-bas" step="0.1" placeholder="8.5" oninput="evalEE()"></div>
-        <div id="p-ee-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
-      </div>
-      <div>
-        <div class="fg"><label>E/e' en pico de estrés</label><input type="number" id="p-ee-pic" step="0.1" placeholder="13" oninput="evalEEpico()"></div>
-        <div id="p-ee-pic-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
-        <div class="fg"><label>Patrón diastólico basal</label><select id="p-diast"><option value="normal">Normal</option><option value="gr1">Grado I — Relajación alterada</option><option value="gr2">Grado II — Pseudonormal</option><option value="gr3">Grado III — Restrictivo</option></select></div>
-      </div>
-    </div>
-    <div class="note-box">ℹ️ PSAP pico &gt;60mmHg o aumento &gt;20mmHg = HTP inducida. E/e' pico ≥15 = PCP elevada (eco estrés diastólico positivo).</div>
-  </div></div>
-
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅡 Recuperación</span><span class="arr">▼</span></div>
-  <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la reserva de flujo coronario (velocidad diastólica pico/reposo en DA). Una CFVR reducida (&lt;2.0) indica enfermedad epicárdica significativa o disfunción microvascular, y agrega valor pronóstico.</div>
     <div class="grid3">
-      <div class="fg"><label>Tiempo recup. motilidad (min)</label><input type="number" id="r-trecup" step="0.5" placeholder="3"></div>
-      <div class="fg"><label>FC a 3 min recuperación</label><input type="number" id="r-fc3" placeholder="90"></div>
-      <div class="fg"><label>Síntomas en recuperación</label><select id="r-sint"><option value="no">Sin síntomas</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="arritmia">Arritmia</option></select></div>
+      <div class="fg"><label>VDP — vel. diastólica pico (cm/s)</label><input type="number" id="f-cfvr-vdp" step="0.1" placeholder="70" oninput="protoCalc()"></div>
+      <div class="fg"><label>VDR — vel. diastólica reposo (cm/s)</label><input type="number" id="f-cfvr-vdr" step="0.1" placeholder="28" oninput="protoCalc()"></div>
+      <div class="fg"><label>CFVR DA = VDP / VDR</label><input type="number" id="f-cfvr-da" step="0.1" placeholder="2.5" oninput="evalCFVRprot();protoCalc()"></div>
     </div>
-    <div class="note-box">ℹ️ Recuperación tardía (&gt;3 min) de la motilidad → isquemia severa. Persistencia en reposo → necrosis o aturdimiento miocárdico.</div>
+    <div id="f-cfvr-da-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="f-narr" rows="2" placeholder="Ej.: CFVR DA 2.6 (VDP 70 / VDR 27) — reserva de flujo conservada."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('f')">💡 Sugerir texto</button></div>
+    <div class="note-box">ℹ️ Interpretación: &gt;2.0 normal · 1.5–2.0 límite · &lt;1.5 reducida. Ver módulo CFVR/Strain para las 3 arterias.</div>
+  </div></div>
+
+  <!-- ══════════ L — LLENADO / RESERVA DIASTÓLICA ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅛 Llenado / reserva diastólica</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la respuesta diastólica al estrés (presiones de llenado, líneas B, PSAP, aurícula izquierda). Un E/e' pico ≥15 con líneas B y PSAP elevadas define un <em>eco estrés diastólico positivo</em> (ICFEp inducible).</div>
+    <div class="grid2">
+      <div class="fg"><label>E/e' pico</label><input type="number" id="p-ee-pic" step="0.1" placeholder="13" oninput="evalEEpico();protoCalc()"></div>
+      <div class="fg"><label>e' pico (cm/s)</label><input type="number" id="l-eprima-pic" step="0.1" placeholder="12" oninput="protoCalc()"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>e' reposo (cm/s)</label><input id="l-eprima-rep" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label>IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"></div>
+    </div>
+    <div id="p-ee-pic-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
+    <div class="grid2">
+      <div class="fg"><label>Score líneas B post-estrés</label><select id="l-post" onchange="evalCriterios();protoCalc()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
+      <div class="fg"><label>PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP();protoCalc()"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>Volumen AI (mL)</label><input id="l-vol-ai" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label>Strain AI (%) — si disponible</label><input type="number" id="l-strain-ai" step="0.1" placeholder="Ej. 28"></div>
+    </div>
+    <div class="fg"><label>Patrón diastólico con estrés</label><select id="l-diast-estres" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterado">Alterado (presiones de llenado elevadas)</option></select></div>
+    <div class="fg" style="margin-top:6px"><label>Líneas B basales · Zonas evaluadas</label>
+      <div style="display:flex;gap:8px"><select id="l-bas" style="flex:1"><option value="0">0 — Normal</option><option value="1">1-2/campo — Borderline</option><option value="2">≥3/campo — Congestión</option></select><input id="l-zonas" placeholder="Ej. 4 zonas anteriores bilaterales" style="flex:2"></div></div>
+    <div class="proto-res" id="l-res"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="l-narr" rows="2" placeholder="Ej.: E/e' pico 11, sin líneas B, PSAP pico 34 mmHg. Sin disfunción diastólica inducible."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('l')">💡 Sugerir texto</button></div>
+    <div class="note-box">ℹ️ E/e' pico ≥15 = PCP elevada. Líneas B ≥3/campo = congestión venocapilar inducida. E/e' basal en sección P.</div>
+  </div></div>
+
+  <!-- ══════════ P — PRESIONES / PULMONAR ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅟 Presiones / pulmonar</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la hemodinamia pulmonar y el acoplamiento VD-arteria pulmonar con el estrés. La HTP inducida (PSAP pico &gt;60 o Δ&gt;20 mmHg), la RVP elevada y una relación TAPSE/PSAP baja indican desacople VD-AP y peor pronóstico.</div>
+    <div class="grid2">
+      <div class="fg"><label>PSAP basal (mmHg)</label><input type="number" id="p-psap-bas" placeholder="28" oninput="protoCalc()"></div>
+      <div class="fg"><label>PSAP pico (mmHg)</label><input id="p-psap-pic-disp" readonly placeholder="— (ver sección L)"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>TAPSE (mm)</label><input id="p-tapse" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label>Relación TAPSE/PSAP (mm/mmHg)</label><input id="p-tapse-psap" readonly placeholder="—"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>Vel. máx IT (m/s)</label><input id="p-maxit" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label>VTI TSVD (cm)</label><input type="number" id="p-vti-tsvd" step="0.1" placeholder="18" oninput="protoCalc()"></div>
+    </div>
+    <div class="fg"><label>RVP = Vel. máx IT / VTI TSVD</label><input id="p-rvp" readonly placeholder="—"></div>
+    <div class="fg"><label>E/e' basal</label><input type="number" id="p-ee-bas" step="0.1" placeholder="8.5" oninput="evalEE();protoCalc()"></div>
+    <div id="p-ee-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+    <div class="fg" style="margin-top:6px"><label>Patrón diastólico basal</label><select id="p-diast"><option value="normal">Normal</option><option value="gr1">Grado I — Relajación alterada</option><option value="gr2">Grado II — Pseudonormal</option><option value="gr3">Grado III — Restrictivo</option></select></div>
+    <div class="proto-res" id="p-psap-res"></div>
+    <div class="proto-res" id="p-vdap-res"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="p-narr" rows="2" placeholder="Ej.: PSAP 28→34 mmHg, TAPSE/PSAP 0.65 mm/mmHg. Acoplamiento VD-AP conservado, sin HTP inducida."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('p')">💡 Sugerir texto</button></div>
+    <div class="note-box">ℹ️ PSAP pico &gt;60mmHg o aumento &gt;20mmHg = HTP inducida. TAPSE/PSAP &lt;0.55 = desacople VD-AP.</div>
+  </div></div>
+
+  <!-- ══════════ R — RECUPERACIÓN Y VD ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅡 Recuperación y VD</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la cinética de recuperación (normalización de la motilidad, reserva cronotrópica/HRR) y la función del VD. Una recuperación lenta de la motilidad indica isquemia severa; una HRR reducida es marcador pronóstico independiente.</div>
+    <div class="grid2">
+      <div class="fg"><label>Tiempo normalización motilidad (min)</label><input type="number" id="r-trecup" step="0.5" placeholder="3" oninput="protoCalc()"></div>
+      <div class="fg"><label>FC a 3 min recuperación (lpm)</label><input type="number" id="r-fc3" placeholder="90" oninput="protoCalc()"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>FC máxima alcanzada (lpm)</label><input id="r-fcmax" readonly placeholder="— (desde tabla etapas)"></div>
+      <div class="fg"><label>HRR = FC máx − FC 3 min recup.</label><input id="r-hrr" readonly placeholder="—"></div>
+    </div>
+    <div class="grid2">
+      <div class="fg"><label>TAPSE (mm)</label><input id="r-tapse" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label>Motilidad VD</label><select id="r-mot-vd" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterada">Alterada</option></select></div>
+    </div>
+    <div class="fg"><label>Síntomas en recuperación</label><select id="r-sint"><option value="no">Sin síntomas</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="arritmia">Arritmia</option></select></div>
+    <div class="proto-res" id="r-crono-res"></div>
+    <div class="proto-res" id="r-res"></div>
+    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="r-narr" rows="2" placeholder="Ej.: Motilidad normaliza a los 2 min. HRR 42 lpm (reserva cronotrópica normal). VD normal."></textarea>
+      <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('r')">💡 Sugerir texto</button></div>
+    <div class="note-box">ℹ️ Recuperación tardía (&gt;3 min) → isquemia severa. HRR &lt;12 lpm (o &lt;18 sin frenar) = reserva cronotrópica reducida (marcador pronóstico).</div>
+  </div></div>
+
+  <!-- ══════════ CONCLUSIÓN FINAL ══════════ -->
+  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🧾 Conclusión final (integración ABCD-FLPR)</span><span class="arr">▼</span></div>
+  <div class="step-body">
+    <div class="proto-desc">🎓 <strong>Integración:</strong> combina todos los dominios A-B-C-D-F-L-P-R en un resultado global y un párrafo de conclusión. El botón redacta un borrador integrando los parámetros cargados; editalo libremente.</div>
+    <div class="fg"><label>Resultado final para isquemia</label><select id="abcd-result" onchange="protoSyncResult()"><option value="">Seleccionar…</option><option value="neg">NEGATIVO para isquemia</option><option value="pos">POSITIVO para isquemia</option><option value="inc">INDETERMINADO / no concluyente</option></select></div>
+    <div style="text-align:center;margin:10px 0"><button type="button" class="btn btn-primary" onclick="protoConclusion()">✨ Generar conclusión automática</button></div>
+    <div class="fg"><label>Conclusión (texto libre editable)</label><textarea id="abcd-concl" rows="5" placeholder="Presioná «Generar conclusión automática» para redactar un borrador integrando A-B-C-D-F-L-P-R, o escribí directamente."></textarea></div>
   </div></div>
 </div>
 
@@ -4082,23 +4199,29 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var wmsiB=(typeof getWMSI==='function')?getWMSI('basal'):null, wmsiP=(typeof getWMSI==='function')?getWMSI('pico'):null, wmsiR=(typeof getWMSI==='function')?getWMSI('recup'):null;
     var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]};
     var abcd=[];
-    abcd.push('A — Adecuación: '+(adecTxt||(fcpct!=null?(fcpct+'% FC máx. teórica'):'—'))+'.');
-    abcd.push('B — ECG: '+(T('b-ecg-estres')||'sin cambios significativos')+'.');
-    var cTxt='C — Contractilidad: WMSI basal '+(wmsiB!=null?wmsiB:'—')+', pico '+(wmsiP!=null?wmsiP:'—')+(wmsiR!=null?(', recuperación '+wmsiR):'')+'.';
+    function nar(id){ var t=V(id); return t?(' — '+t):''; }
+    abcd.push('A — Adecuación: '+(V('a-sufic')||(fcpct!=null?(fcpct+'% FC máx. teórica'):'—'))+(V('a-fcmax')?(', FC máx '+V('a-fcmax')+' lpm'):'')+(V('a-motivo')?(', motivo: '+V('a-motivo')):'')+'.'+nar('a-narr'));
+    abcd.push('B — ECG: '+(T('b-ecg-estres')||'sin cambios significativos')+'.'+nar('b-ecg-desc'));
+    var cTxt='C — Contractilidad y reserva contráctil: WMSI basal '+(wmsiB!=null?wmsiB:'—')+', pico '+(wmsiP!=null?wmsiP:'—')+(wmsiR!=null?(', recuperación '+wmsiR):'')+'.';
     if(an.segs&&an.segs.length){ var det=an.segs.map(function(s){return (SEG_LABELS[s.st]||'').toLowerCase()+' seg '+s.seg.id+' ('+s.seg.name+', '+s.seg.ter+')'+(s.nuevo?' [nuevo]':'');}).join('; '); cTxt+=' Alteraciones en pico: '+det+'.'; }
     else cTxt+=' Sin nuevas alteraciones segmentarias en el pico.';
-    if(V('c-fevi-bas')||V('c-fevi-pic'))cTxt+=' FEVI '+(V('c-fevi-bas')||'—')+'%→'+(V('c-fevi-pic')||'—')+'%.';
-    abcd.push(cTxt);
-    abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta PA: '+(T('d-pa')||'—')+'.');
+    if(V('c-fevi-bas')||V('c-fevi-pic'))cTxt+=' FEVI '+(V('c-fevi-bas')||'—')+'% -> '+(V('c-fevi-pic')||'—')+'%'+(V('c-dfevi')?(' (Delta FEVI '+V('c-dfevi')+')'):'')+'.';
+    if(V('c-dsgl'))cTxt+=' Delta SGL '+V('c-dsgl')+'.';
+    if(V('c-dvti'))cTxt+=' Delta VTI '+V('c-dvti')+'.';
+    if(V('c-ea'))cTxt+=' Ea (elastancia) '+V('c-ea')+'.';
+    cTxt+=nar('c-narr'); abcd.push(cTxt);
+    abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'+nar('d-narr'));
     var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
-    abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.');
-    abcd.push('L — Líneas B pulmonares post-estrés: '+(T('l-post')||'—')+'.');
-    abcd.push('P — Presiones: PSAP pico '+(V('p-psap-pic')||'—')+' mmHg; E/e\' pico '+(V('p-ee-pic')||'—')+'; patrón diastólico '+(T('p-diast')||'—')+'.');
-    abcd.push('R — Recuperación: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):''));
+    abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.'+nar('f-narr'));
+    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(V('l-irc')?(', IRC '+V('l-irc')):'')+'; líneas B '+(T('l-post')||'—')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
+    abcd.push('P — Presiones/pulmonar: PSAP '+(V('p-psap-bas')||'—')+' -> '+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?('; TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?('; RVP '+V('p-rvp')):'')+'; patrón diastólico basal '+(T('p-diast')||'—')+'.'+nar('p-narr'));
+    abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
     drawBullet(abcd);
     var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
     var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
-    if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
+    var conclTxt=V('abcd-concl');
+    if(conclTxt){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl0=doc.splitTextToSize('CONCLUSIÓN: '+conclTxt,pgW-4); cl0.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
+    else if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
     if(V('res-comment'))drawText(V('res-comment'));
 
     // 10 · Imágenes Bull's Eye
@@ -4156,6 +4279,152 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     }catch(err){ alert('No se pudo generar el PDF: '+err.message); }
   };
   window.pdfPreviewClose=function(){ var m=document.getElementById('pdf-preview-modal'); if(m)m.classList.remove('open'); var f=document.getElementById('pdf-preview-frame'); if(f)f.src='about:blank'; };
+})();
+</script>
+
+<script>
+/* ═══════════ Protocolo ABCD-FLPR — precarga, cálculos, sugerencias, conclusión ═══════════ */
+(function(){
+  function E(id){ return document.getElementById(id); }
+  function V(id){ var e=E(id); return e?String(e.value||'').trim():''; }
+  function N(id){ var e=E(id); if(!e)return null; var v=parseFloat(String(e.value||'').replace(',','.')); return isNaN(v)?null:v; }
+  function T(id){ var e=E(id); return (e&&e.value)?e.options[e.selectedIndex].text:''; }
+  function setV(id,v){ var e=E(id); if(e)e.value=(v==null||v==='')?'':v; }
+  function setIfEmpty(id,v){ var e=E(id); if(e&&!e.value&&v!=null&&String(v)!=='')e.value=v; }
+  function out(id,bad){ var e=E(id); if(e)e.classList.toggle('proto-out',!!bad); }
+  function res(id,txt,color){ var e=E(id); if(e){ e.textContent=txt||''; e.style.color=color||'var(--text2)'; } }
+  function pas(v){ var m=String(v||'').match(/\d+/); return m?parseInt(m[0],10):null; }
+  function wmsi(ph){ return (typeof getWMSI==='function')?getWMSI(ph):null; }
+
+  window.protoPrecarga=function(){
+    // A / R — FC máx y motivo (desde tabla de etapas / Paciente)
+    var fcmax=N('b-fc-max');
+    setV('a-fcmax', fcmax!=null?fcmax:''); setV('r-fcmax', fcmax!=null?fcmax:'');
+    setV('a-motivo', T('b-stop'));
+    // C — WMSI (Bull's Eye)
+    var wb=wmsi('basal'), wp=wmsi('pico'), wr=wmsi('recup');
+    setV('c-wmsi-bas', wb!=null?wb:''); setV('c-wmsi-pic', wp!=null?wp:''); setV('c-wmsi-rec', wr!=null?wr:'');
+    // C — SGL basal y VSF basal (precarga si vacíos)
+    setIfEmpty('c-sgl-bas', V('eb-gls'));
+    setIfEmpty('c-vsf-bas', V('eb-vts'));
+    // C — PAS reposo / pico (desde etapas)
+    var pr=pas(V('b-pa-bas'))||pas(V('ecg-pa-bas'));
+    var pp=pas(V('b-pa-pico'))||pas(V('ecg-pa-pic'));
+    setV('c-pas-rep', pr!=null?pr:''); setV('c-pas-pic', pp!=null?pp:'');
+    // C — alteraciones nuevas y territorio (Bull's Eye)
+    if(typeof getAnormPico==='function'){
+      try{ var an=getAnormPico(); if(an&&an.segs){ var nuevos=an.segs.filter(function(s){return s.nuevo;});
+        if(nuevos.length){ var terr={}; nuevos.forEach(function(s){terr[s.seg.ter]=(terr[s.seg.ter]||0)+1;}); setV('c-alt-nuevas', nuevos.length+' seg. nuevo(s) — '+Object.keys(terr).map(function(k){return k+' ('+terr[k]+')';}).join(', ')); }
+        else if(an.segs.length){ setV('c-alt-nuevas','Alteraciones presentes, sin nuevas en el pico'); }
+        else { setV('c-alt-nuevas','Sin alteraciones segmentarias en el pico'); } } }catch(e){}
+    }
+    // L — e' reposo, volumen AI
+    setV('l-eprima-rep', V('eb-e-prom'));
+    setV('l-vol-ai', V('eb-ai-vol'));
+    // P — PSAP pico display, TAPSE, Max IT
+    setV('p-psap-pic-disp', V('p-psap-pic'));
+    setV('p-tapse', V('eb-tapse')); setV('r-tapse', V('eb-tapse'));
+    setV('p-maxit', V('eb-it-vmax'));
+    // Resultado desde res-global si existe
+    var rg=V('res-global'); if(rg && (rg==='pos'||rg==='neg'||rg==='inc')){ var ar=E('abcd-result'); if(ar&&!ar.value)ar.value=rg; }
+    protoCalc();
+  };
+
+  window.protoCalc=function(){
+    // A — %FCM y suficiencia
+    var fcmax=N('a-fcmax')||N('b-fc-max'), fcteo=N('b-fc-teo');
+    var fcpct=(fcmax&&fcteo)?Math.round(fcmax/fcteo*100):null;
+    setV('a-fcpct', fcpct!=null?fcpct+'%':'');
+    var suf=''; if(fcpct!=null){ suf=fcpct>=85?'Máxima (adecuada)':fcpct>=70?'Submáxima':'Inadecuada'; }
+    setV('a-sufic', suf); out('a-fcpct', fcpct!=null&&fcpct<85);
+    res('a-res', fcpct==null?'':(fcpct>=85?('✅ Estrés adecuado ('+fcpct+'% FCM)'):('⚠️ Estrés '+suf.toLowerCase()+' ('+fcpct+'% FCM) — posible falso negativo')), fcpct==null?'':(fcpct>=85?'var(--green)':'var(--amber)'));
+    // C — deltas
+    var fb=N('c-fevi-bas'), fp=N('c-fevi-pic');
+    var dfevi=(fb!=null&&fp!=null)?+(fp-fb).toFixed(1):null; setV('c-dfevi', dfevi!=null?((dfevi>0?'+':'')+dfevi+'%'):'');
+    var sb=N('c-sgl-bas'), sp=N('c-sgl-pic');
+    var dsgl=(sb!=null&&sp!=null)?+(sp-sb).toFixed(1):null; setV('c-dsgl', dsgl!=null?((dsgl>0?'+':'')+dsgl+'%'):'');
+    var vb=N('c-vti-bas'), vp=N('c-vti-pic');
+    var dvti=(vb!=null&&vp!=null)?+(vp-vb).toFixed(1):null; setV('c-dvti', dvti!=null?((dvti>0?'+':'')+dvti+' cm'):'');
+    // C — elastancia Ea
+    var pr=N('c-pas-rep'), pp=N('c-pas-pic'), vsfR=N('c-vsf-bas'), vsfP=N('c-vsf-pic');
+    var ea=(pr&&pp&&vsfR&&vsfP)?+(((pp/vsfP)/(pr/vsfR))).toFixed(2):null;
+    setV('c-ea', ea!=null?ea:'');
+    if(ea!=null){ var et,ec; if(ea>1.1){et='✅ Reserva contráctil normal (Ea >1.1)';ec='var(--green)';} else if(ea>=0.9){et='⚠️ Reserva contráctil límite (Ea 0.9–1.1)';ec='var(--amber)';} else {et='❌ Reserva contráctil reducida (Ea <0.9)';ec='var(--red)';} res('c-ea-res',et,ec); out('c-ea',ea<0.9); } else res('c-ea-res','','');
+    // C — resumen contractilidad
+    var motPic=T('c-mot-pic'), cbad=/nueva|empeora/i.test(V('c-mot-pic'))||(dfevi!=null&&dfevi<0);
+    res('c-res', (fp!=null||dfevi!=null)?(cbad?'❌ Sin reserva contráctil / deterioro con el estrés (sugiere isquemia)':'✅ Reserva contráctil conservada'):'', cbad?'var(--red)':'var(--green)');
+    // F — CFVR (auto desde VDP/VDR)
+    var vdp=N('f-cfvr-vdp'), vdr=N('f-cfvr-vdr');
+    if(vdp&&vdr){ var cfv=+(vdp/vdr).toFixed(2); var fe=E('f-cfvr-da'); if(fe && String(fe.value)!==String(cfv)){ fe.value=cfv; if(typeof evalCFVRprot==='function')evalCFVRprot(); } }
+    var cfvr=N('f-cfvr-da'); out('f-cfvr-da', cfvr!=null&&cfvr<2.0);
+    // L — IRC
+    var eR=N('l-eprima-rep'), eP=N('l-eprima-pic');
+    var irc=(eR!=null&&eP!=null)?+(eR*(eP-eR)).toFixed(1):null; setV('l-irc', irc!=null?irc:'');
+    var eepic=N('p-ee-pic'); out('p-ee-pic', eepic!=null&&eepic>=15);
+    var lb=parseInt(V('l-post'),10)||0, psapPic=N('p-psap-pic');
+    var ldpos = (eepic!=null&&eepic>=15) || lb>=2 || (psapPic!=null&&psapPic>60) || V('l-diast-estres')==='alterado';
+    res('l-res', (eepic!=null||lb||psapPic!=null)?(ldpos?'⚠️ Disfunción diastólica inducible / eco estrés diastólico positivo':'✅ Sin disfunción diastólica inducible'):'', ldpos?'var(--amber)':'var(--green)');
+    // P — PSAP display, TAPSE/PSAP, RVP, VD-AP
+    setV('p-psap-pic-disp', psapPic!=null?psapPic:'');
+    var tapse=N('p-tapse');
+    var tp=(tapse&&psapPic)?+(tapse/psapPic).toFixed(2):null; setV('p-tapse-psap', tp!=null?tp:''); out('p-tapse-psap', tp!=null&&tp<0.55);
+    var maxit=N('p-maxit'), vtiT=N('p-vti-tsvd');
+    var rvp=(maxit&&vtiT)?+(maxit/vtiT).toFixed(2):null; setV('p-rvp', rvp!=null?rvp:'');
+    var psapBas=N('p-psap-bas');
+    var htp=(psapPic!=null&&(psapPic>60||(psapBas!=null&&(psapPic-psapBas)>20)));
+    res('p-psap-res', psapPic==null?'':(psapPic>60?'❌ HTP inducida (PSAP pico >60mmHg)':(psapBas!=null&&(psapPic-psapBas)>20)?'⚠️ Aumento significativo de PSAP (>20mmHg)':'✅ PSAP pico normal'), psapPic==null?'':(htp?'var(--red)':'var(--green)'));
+    res('p-vdap-res', tp==null?'':(tp<0.55?'⚠️ Desacople VD-AP (TAPSE/PSAP <0.55)':'✅ Acoplamiento VD-AP conservado'), tp==null?'':(tp<0.55?'var(--amber)':'var(--green)'));
+    // R — HRR y recuperación
+    var fc3=N('r-fc3'), rfc=N('r-fcmax')||fcmax;
+    var hrr=(rfc!=null&&fc3!=null)?Math.round(rfc-fc3):null; setV('r-hrr', hrr!=null?(hrr+' lpm'):'');
+    if(hrr!=null){ var ht,hc; if(hrr>=22){ht='✅ Reserva cronotrópica normal (HRR '+hrr+')';hc='var(--green)';} else if(hrr>=12){ht='⚠️ Reserva cronotrópica límite (HRR '+hrr+')';hc='var(--amber)';} else {ht='❌ Reserva cronotrópica reducida (HRR '+hrr+') — marcador pronóstico';hc='var(--red)';} res('r-crono-res',ht,hc); out('r-hrr',hrr<12); } else res('r-crono-res','','');
+    var trec=N('r-trecup'); out('r-trecup', trec!=null&&trec>3);
+    res('r-res', trec==null?'':(trec>3?'⚠️ Recuperación tardía de la motilidad (>3 min) — isquemia severa':'✅ Recuperación de la motilidad normal'), trec==null?'':(trec>3?'var(--amber)':'var(--green)'));
+  };
+
+  window.protoSuggest=function(sec){
+    var s='';
+    if(sec==='a'){ var p=N('a-fcpct'), suf=V('a-sufic'), mot=V('a-motivo'), fcm=V('a-fcmax');
+      s='Prueba '+(suf?suf.toLowerCase():'realizada')+(fcm?(', FC máxima '+fcm+' lpm'):'')+(p!=null?(' ('+p+'% de la FC máx. teórica)'):'')+(mot?(', finalizada por '+mot.toLowerCase()):'')+'. '+((p!=null&&p>=85)?'Estrés adecuado para la valoración de isquemia.':'Estrés no máximo: interpretar los resultados con cautela.'); }
+    else if(sec==='b'){ var eb=T('b-ecg-estres'); s=(eb&&!/normal|sin cambios/i.test(eb))?('ECG durante el estrés: '+eb.toLowerCase()+'. Correlacionar con la motilidad y la clínica.'):'ECG sin cambios isquémicos significativos durante el estrés.'; }
+    else if(sec==='c'){ var df=V('c-dfevi'),ds=V('c-dsgl'),ea=V('c-ea'),alt=V('c-alt-nuevas');
+      s='WMSI basal '+(V('c-wmsi-bas')||'—')+' → pico '+(V('c-wmsi-pic')||'—')+'. '+(df?('ΔFEVI '+df):'')+(ds?(', ΔSGL '+ds):'')+(ea?(', Ea '+ea):'')+'. '+(alt?(alt+'. '):'')+(/nuevo|empeora/i.test(alt+V('c-mot-pic'))?'Sugiere isquemia inducible.':'Reserva contráctil conservada, sin nuevas alteraciones.'); }
+    else if(sec==='d'){ s='IM inducida: '+(T('d-im')||'no').toLowerCase()+'. Dilatación transitoria del VI: '+(V('d-dilat')==='si'?'presente':'ausente')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'; }
+    else if(sec==='f'){ var cf=V('f-cfvr-da'); s='CFVR DA '+(cf||'—')+(V('f-cfvr-vdp')&&V('f-cfvr-vdr')?(' (VDP '+V('f-cfvr-vdp')+' / VDR '+V('f-cfvr-vdr')+')'):'')+' — '+(cf?(parseFloat(cf)>2?'reserva de flujo conservada':parseFloat(cf)>=1.5?'reserva de flujo límite':'reserva de flujo reducida'):'no evaluada')+'.'; }
+    else if(sec==='l'){ s="E/e' pico "+(V('p-ee-pic')||'—')+', líneas B '+(T('l-post')||'—').toLowerCase()+', PSAP pico '+(V('p-psap-pic')||'—')+' mmHg. '+(V('l-diast-estres')==='alterado'||parseInt(V('l-post'),10)>=2||(N('p-ee-pic')!=null&&N('p-ee-pic')>=15)?'Disfunción diastólica inducible (eco estrés diastólico positivo).':'Sin disfunción diastólica inducible.'); }
+    else if(sec==='p'){ s='PSAP '+(V('p-psap-bas')||'—')+'→'+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?(', TAPSE/PSAP '+V('p-tapse-psap')+' mm/mmHg'):'')+(V('p-rvp')?(', RVP '+V('p-rvp')):'')+'. '+((N('p-psap-pic')!=null&&N('p-psap-pic')>60)?'HTP inducida.':'Sin HTP inducida; acoplamiento VD-AP '+((N('p-tapse-psap')!=null&&N('p-tapse-psap')<0.55)?'reducido.':'conservado.')); }
+    else if(sec==='r'){ s='Motilidad '+(N('r-trecup')!=null&&N('r-trecup')>3?'normaliza tardíamente ('+V('r-trecup')+' min)':'normaliza a los '+(V('r-trecup')||'—')+' min')+'. HRR '+(V('r-hrr')||'—')+(V('r-hrr')?(' — '+(N('r-fcmax')!=null&&N('r-fc3')!=null&&(N('r-fcmax')-N('r-fc3'))>=22?'reserva cronotrópica normal':(N('r-fcmax')-N('r-fc3'))>=12?'reserva cronotrópica límite':'reserva cronotrópica reducida')):'')+'. VD '+(V('r-mot-vd')==='alterada'?'con motilidad alterada':'normal')+'.'; }
+    var tid = sec==='b'?'b-ecg-desc':(sec+'-narr');
+    var el=E(tid); if(el){ el.value=s; el.dispatchEvent(new Event('input',{bubbles:true})); }
+  };
+
+  window.protoSyncResult=function(){
+    var v=V('abcd-result'), rg=E('res-global');
+    if(rg&&v){ rg.value=v; if(typeof updateResult==='function')try{updateResult();}catch(e){} }
+  };
+
+  window.protoConclusion=function(){
+    protoPrecarga();
+    var p=[];
+    var fcpct=V('a-fcpct'), suf=V('a-sufic');
+    p.push('Eco estrés '+(V('p-estres')?T('p-estres').toLowerCase():'')+(suf?(': prueba '+suf.toLowerCase()):'')+(fcpct?(' ('+fcpct+' FCM)'):'')+'.');
+    var eb=T('b-ecg-estres'); p.push('ECG: '+((eb&&!/normal|sin cambios/i.test(eb))?eb.toLowerCase():'sin cambios isquémicos significativos')+'.');
+    var cbad=/nueva|empeora/i.test(V('c-mot-pic'))||(N('c-dfevi')!=null&&N('c-dfevi')<0);
+    p.push('Contractilidad: WMSI '+(V('c-wmsi-bas')||'—')+'→'+(V('c-wmsi-pic')||'—')+(V('c-dfevi')?(', ΔFEVI '+V('c-dfevi')):'')+(V('c-ea')?(', Ea '+V('c-ea')):'')+' — '+(cbad?'sin reserva contráctil / isquemia inducible':'reserva contráctil conservada')+'. '+(V('c-alt-nuevas')?(V('c-alt-nuevas')+'.'):''));
+    p.push('Dilatación/otros: '+(V('d-dilat')==='si'?'dilatación transitoria presente':'sin dilatación transitoria')+', IM inducida '+(T('d-im')||'no').toLowerCase()+', respuesta presora '+(T('d-pa')||'—').toLowerCase()+'.');
+    var cf=V('f-cfvr-da'); if(cf)p.push('CFVR DA '+cf+' ('+(parseFloat(cf)>2?'normal':parseFloat(cf)>=1.5?'límite':'reducida')+').');
+    p.push('Llenado: E/e\' pico '+(V('p-ee-pic')||'—')+', líneas B '+(T('l-post')||'—').toLowerCase()+', PSAP pico '+(V('p-psap-pic')||'—')+' mmHg.');
+    if(V('p-tapse-psap')||V('p-rvp'))p.push('Pulmonar: '+(V('p-tapse-psap')?('TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?(', RVP '+V('p-rvp')):'')+'.');
+    p.push('Recuperación: '+(N('r-trecup')!=null&&N('r-trecup')>3?'motilidad tardía':'motilidad normal')+(V('r-hrr')?(', HRR '+V('r-hrr')):'')+'.');
+    var rmap={pos:'POSITIVO para isquemia inducible',neg:'NEGATIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente'};
+    var rv=V('abcd-result'); if(rv)p.push('CONCLUSIÓN: estudio '+(rmap[rv]||rv)+'.');
+    var el=E('abcd-concl'); if(el)el.value=p.join(' ');
+  };
+
+  // Ejecutar precarga+cálculo al entrar a la página Protocolo
+  document.addEventListener('DOMContentLoaded',function(){
+    if(typeof goTo==='function'){ var _g=goTo; window.goTo=function(pg){ var r=_g.apply(this,arguments); if(pg==='protocolo'){ try{protoPrecarga();}catch(e){} } return r; }; }
+  });
 })();
 </script>
 </body>
