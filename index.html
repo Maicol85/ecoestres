@@ -241,7 +241,9 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 .hdr-logo-edit img{max-width:104px;max-height:30px;object-fit:contain;display:none;}
 .hdr-logo-edit .ph{font-size:8px;color:var(--text2);display:flex;flex-direction:column;align-items:center;line-height:1.05;}
 .hdr-logo-del{position:absolute;top:-6px;right:-6px;width:15px;height:15px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:9px;line-height:1;cursor:pointer;padding:0;display:none;}
-.hdr-ibtn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:15px;padding:4px 6px;border-radius:6px;line-height:1;}
+.hdr-ibtn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:15px;padding:4px 8px;border-radius:6px;line-height:1;display:inline-flex;align-items:center;gap:4px;}
+.hdr-ibtn .lbl{font-size:11px;font-weight:600;}
+@media(max-width:640px){.hdr-ibtn .lbl{display:none;}}
 .hdr-ibtn:hover{background:var(--bg3);color:var(--text);}
 .hdr-med{font-size:11px;color:var(--text2);white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis;}
 /* ═══ Panel médico (modal) ═══ */
@@ -314,17 +316,18 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     <span id="hdr-status">✓ Guardado</span>
     <span class="hdr-med" id="hdr-med" onclick="medOpen()" title="Datos del médico (click para editar)"></span>
     <span class="hdr-inst" id="hdr-inst">GREMEDA · Artigas</span>
-    <button class="hdr-ibtn" onclick="medOpen()" title="Datos del médico">👤</button>
-    <button class="hdr-ibtn" id="ee-theme-btn" onclick="eeToggleTheme()" title="Modo día / noche">🌙</button>
-    <button class="hdr-ibtn" onclick="exportarDatos()" title="Exportar JSON">⬇️</button>
-    <label class="hdr-ibtn" title="Importar JSON" style="cursor:pointer">⬆️<input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
-    <button class="hdr-ibtn" onclick="nuevoEstudio()" title="Limpiar estudio">🗑</button>
+    <button class="hdr-ibtn" onclick="medOpen()" title="Datos del médico">👤<span class="lbl">Médico</span></button>
+    <button class="hdr-ibtn" id="ee-theme-btn" onclick="eeToggleTheme()" title="Modo día / noche">🌙<span class="lbl">Tema</span></button>
+    <button class="hdr-ibtn" onclick="exportarDatos()" title="Exportar JSON">⬇️<span class="lbl">Exportar</span></button>
+    <label class="hdr-ibtn" title="Importar JSON" style="cursor:pointer">⬆️<span class="lbl">Importar</span><input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
+    <button class="hdr-ibtn" onclick="nuevoEstudio()" title="Limpiar estudio">🗑<span class="lbl">Limpiar</span></button>
     <button class="hdr-save-btn" onclick="guardar()">💾 Guardar</button>
   </div>
 </header>
 <nav class="sidebar" id="sidebar">
   <div class="nav-item" onclick="goTo('paciente')"><span class="ni">👤</span> Paciente</div>
   <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
+  <div class="nav-item" onclick="goTo('ecoetapas')"><span class="ni">📑</span> Tabla Eco por Etapas</div>
   <div class="nav-item" onclick="goTo('ecg')"><span class="ni">📈</span> ECG / Arritmias</div>
   <div class="nav-item" onclick="goTo('bullo')"><span class="ni">🎯</span> Bull's Eye 17 seg</div>
   <div class="nav-item" onclick="goTo('criterios')"><span class="ni">⚡</span> Criterios de positividad</div>
@@ -763,6 +766,45 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 </div>
 
 
+<!-- ═══ TABLA ECO POR ETAPAS (CAMBIO 3) ═══ -->
+<style>
+.ete-table{width:100%;border-collapse:collapse;font-size:12px;min-width:660px}
+.ete-table th,.ete-table td{border:1px solid rgba(148,163,184,.28);padding:5px 6px;text-align:center}
+.ete-table th{background:var(--bg3);color:var(--text2);font-weight:700;font-size:11px;line-height:1.25}
+.ete-table td:first-child,.ete-table th:first-child{text-align:left;font-weight:600;color:var(--text);white-space:nowrap}
+.ete-in{width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid transparent;border-radius:5px;color:var(--text);font-size:12px;padding:4px 6px;text-align:center}
+.ete-in:focus{border-color:var(--accent2);outline:none}
+.ete-in[data-auto="1"]{color:var(--accent2)}
+</style>
+<div class="page" id="page-ecoetapas">
+  <div class="page-title">📑 Tabla Eco por Etapas</div>
+  <div class="page-sub">Parámetros ecocardiográficos por etapa del estrés. Los valores cargados en otras secciones se precargan automáticamente (en color); todas las celdas son editables.</div>
+  <div class="card">
+    <div class="card-head">📊 Parámetros por etapa</div>
+    <div class="card-body" style="overflow-x:auto">
+      <table class="ete-table" id="ete-table">
+        <thead>
+          <tr>
+            <th>Parámetro</th>
+            <th><span id="ete-h-reposo">Reposo</span></th>
+            <th><span id="ete-h-baja">Baja carga</span></th>
+            <th><span id="ete-h-alta">Alta carga</span></th>
+            <th><span id="ete-h-pico">Pico</span></th>
+            <th><span id="ete-h-recup">Recuperación</span></th>
+          </tr>
+        </thead>
+        <tbody id="ete-tbody"></tbody>
+      </table>
+      <div style="margin-top:11px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" style="padding:6px 12px" onclick="eteRefresh()">🔄 Reprecargar desde secciones</button>
+        <button class="btn btn-ghost" style="padding:6px 12px" onclick="eteClear()">🧹 Vaciar tabla</button>
+      </div>
+      <div class="note-box" style="margin-top:11px">ℹ️ Precarga automática desde otras secciones: E/e', PSAP, IM, SGL (columnas Reposo y Pico) y Líneas B. Los valores que edites manualmente no se sobrescriben.</div>
+    </div>
+  </div>
+</div>
+
+
 <!-- ═══ PACIENTE ═══ -->
 <div class="page" id="page-paciente">
   <div class="page-title">👤 Datos del paciente y estudio</div>
@@ -914,6 +956,41 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ⚠️ CONTRAINDICACIONES SEGÚN PROTOCOLO (CAMBIO 2) -->
+  <style>
+  .ci-lbl{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12px;cursor:pointer;color:var(--text2)}
+  .ci-lbl input{width:16px;height:16px;margin:0;padding:0;flex:0 0 auto;accent-color:var(--accent2)}
+  .ci-group{margin-top:2px}
+  </style>
+  <div class="card" id="contraindic-card" style="margin-top:14px">
+    <div class="card-head">⚠️ Contraindicaciones según protocolo</div>
+    <div class="card-body">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:9px">Contraindicaciones del agente de estrés seleccionado (<b><span id="ci-proto-name">—</span></b>). Marcá las presentes en el paciente.</div>
+      <div class="ci-group" id="ci-group-dipiridamol" style="display:none">
+        <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+          <label class="ci-lbl"><input type="checkbox" id="ci-dip-asma" onchange="updateContraindic()"> Asma / EPOC</label>
+          <label class="ci-lbl"><input type="checkbox" id="ci-dip-bav" onchange="updateContraindic()"> Bloqueo AV avanzado</label>
+          <label class="ci-lbl"><input type="checkbox" id="ci-dip-hipo" onchange="updateContraindic()"> Hipotensión severa</label>
+        </div>
+      </div>
+      <div class="ci-group" id="ci-group-dobutamina" style="display:none">
+        <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+          <label class="ci-lbl"><input type="checkbox" id="ci-dob-glauc" onchange="updateContraindic()"> Glaucoma</label>
+          <label class="ci-lbl"><input type="checkbox" id="ci-dob-hbp" onchange="updateContraindic()"> HBP / RAO</label>
+          <label class="ci-lbl"><input type="checkbox" id="ci-dob-taq" onchange="updateContraindic()"> Taquiarritmias</label>
+        </div>
+      </div>
+      <div class="ci-group" id="ci-group-ejercicio" style="display:none">
+        <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+          <label class="ci-lbl"><input type="checkbox" id="ci-ej-eao" onchange="updateContraindic()"> Estenosis aórtica severa</label>
+          <label class="ci-lbl"><input type="checkbox" id="ci-ej-hta" onchange="updateContraindic()"> HTA no controlada</label>
+          <label class="ci-lbl"><input type="checkbox" id="ci-ej-ic" onchange="updateContraindic()"> IC descompensada</label>
+        </div>
+      </div>
+      <div id="ci-alert" style="display:none;margin-top:11px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:600;line-height:1.5"></div>
     </div>
   </div>
 </div>
@@ -1277,6 +1354,33 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       </div>
     </div></div>
   </div>
+
+  <!-- ═══ BULL'S EYE STRAIN COMPARATIVO (CAMBIO 5) ═══ -->
+  <style>
+  .strain-name{background:var(--bg2);border:1px solid var(--border2,rgba(148,163,184,.32));border-radius:6px;color:var(--accent2);font-weight:700;font-size:13px;text-align:center;padding:5px 8px;margin-bottom:6px;width:80%;max-width:240px;box-sizing:border-box}
+  .strain-name:focus{outline:none;border-color:var(--accent2)}
+  </style>
+  <div class="card" id="strain-bull-card">
+    <div class="card-head">🎯 Bull's Eye Strain — comparativo</div>
+    <div class="card-body">
+      <div class="note-box" style="margin-bottom:14px">ℹ️ Tocá cada segmento para ciclar el strain: <b style="color:#DC2626">rojo = mejor strain</b> → <b style="color:#22C55E">verde = peor strain</b>. 17 segmentos AHA, sin números. Nombres editables según el protocolo.</div>
+      <div class="grid2">
+        <div style="text-align:center">
+          <input id="strain-name-basal" class="strain-name" value="Strain Basal" title="Nombre editable">
+          <div><svg viewBox="0 0 340 340" id="strain-svg-basal" style="width:100%;max-width:300px;height:auto"></svg></div>
+          <div><button class="btn btn-ghost" style="padding:6px 16px" onclick="resetStrainBull('basal')">🧹 Limpiar</button></div>
+        </div>
+        <div style="text-align:center">
+          <input id="strain-name-pico" class="strain-name" value="Strain Pico" title="Nombre editable">
+          <div><svg viewBox="0 0 340 340" id="strain-svg-pico" style="width:100%;max-width:300px;height:auto"></svg></div>
+          <div><button class="btn btn-ghost" style="padding:6px 16px" onclick="resetStrainBull('pico')">🧹 Limpiar</button></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:16px;justify-content:center">
+        <label style="display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="strain-include-pdf" style="flex:0 0 auto;width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent2)"> Incluir en PDF (debajo de los Bull's Eye de contractilidad)</label>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ ECG ═══ -->
@@ -1369,6 +1473,10 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="card"><div class="card-head">📄 Texto del informe</div><div class="card-body">
     <textarea id="informe-txt" style="min-height:340px;font-size:12px;line-height:1.7" placeholder="Presioná 'Generar informe' para autocompletar, o escribí directamente…"></textarea>
   </div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+    <button class="hdr-save-btn" onclick="guardar()">💾 Guardar</button>
+    <button class="hdr-ibtn" onclick="nuevoEstudio()" title="Limpiar estudio" style="border:1px solid var(--border2)">🗑<span class="lbl">Limpiar</span></button>
+  </div>
 </div>
 
 <!-- ═══ CONFIG ═══ -->
@@ -1440,7 +1548,7 @@ function recolectarEstado(){
   const vals={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
-  return{vals,bull,ecgSlots,ecgSlotsAuto,ettSlots,ettPerPage,dobuData,peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
+  return{vals,bull,strainBull,ecgSlots,ecgSlotsAuto,ettSlots,ettPerPage,dobuData,peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
 }
 function cargarEstado(){
   let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
@@ -1450,6 +1558,8 @@ function cargarEstado(){
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
     if(s.bull)bull=s.bull;
     ['basal','low','pico','recup','extra'].forEach(function(k){ if(!Array.isArray(bull[k]))bull[k]=Array(17).fill(1); });
+    if(s.strainBull)strainBull=s.strainBull;                      // Bull's Eye strain (CAMBIO 5)
+    ['basal','pico'].forEach(function(k){ if(!Array.isArray(strainBull[k]))strainBull[k]=Array(17).fill(0); });
     if(Array.isArray(s.ecgSlots)){ecgSlots=s.ecgSlots;ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!s.ecgSlots.some(function(x){return x&&x.img;});}
     if(Array.isArray(s.ettSlots))ettSlots=s.ettSlots;
     if(s.ettPerPage)ettPerPage=s.ettPerPage;
@@ -1473,12 +1583,17 @@ function nuevoEstudio(){
   bull={basal:Array(17).fill(1),low:Array(17).fill(1),pico:Array(17).fill(1),recup:Array(17).fill(1),extra:Array(17).fill(1)};
   bullInited={basal:false,low:false,pico:false,recup:false,extra:false};
   bvInclude={}; bullExtra={active:false,name:'Etapa opcional'};
+  strainBull={basal:Array(17).fill(0),pico:Array(17).fill(0)};   // reset Bull's Eye strain (CAMBIO 5)
   if(typeof bvBuild==='function')bvBuild();
   ecgSlots=[];ecgSlotsAuto=true;ettSlots=[];ettPerPage=4;dobuData={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.readOnly)return;if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>el.checked=false);
   const fd=document.getElementById('p-fecha');if(fd)fd.value=new Date().toISOString().slice(0,10);
   if(typeof peReset==='function')peReset();
+  // Restaurar nombres por defecto y re-renderizar Bull's Eye strain (CAMBIO 5)
+  var _snb=document.getElementById('strain-name-basal'); if(_snb)_snb.value='Strain Basal';
+  var _snp=document.getElementById('strain-name-pico'); if(_snp)_snp.value='Strain Pico';
+  if(typeof initStrainBulls==='function')initStrainBulls();
   actualizarUI();
 }
 function exportarDatos(){
@@ -1512,6 +1627,8 @@ function goTo(page){
   if(page==='viabilidad')renderDobuTable();
   if(page==='imagenes')estImgRender();
   if(page==='ecg')ecgImgRender();
+  if(page==='ecoetapas')eteRefresh();
+  if(page==='cfvr')initStrainBulls();
 }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
@@ -1566,6 +1683,119 @@ function onEstresChange(){
   const v=document.getElementById('p-estres')?.value;
   document.getElementById('dobu-wrap').style.display=v==='dobutamina'?'block':'none';
   document.getElementById('dipiri-wrap').style.display=v==='dipiridamol'?'block':'none';
+  if(typeof updateContraindic==='function')updateContraindic();
+}
+/* ═══ Contraindicaciones por protocolo (CAMBIO 2) ═══ */
+var CONTRAINDIC_GROUPS={
+  dipiridamol:{nombre:'Dipiridamol / Adenosina',nivel:'ROJA',rgb:[220,38,38],bg:'#fef2f2',border:'#fca5a5',
+    ids:{'ci-dip-asma':'Asma / EPOC','ci-dip-bav':'Bloqueo AV avanzado','ci-dip-hipo':'Hipotensión severa'}},
+  dobutamina:{nombre:'Dobutamina / Atropina',nivel:'NARANJA',rgb:[234,88,12],bg:'#fff7ed',border:'#fdba74',
+    ids:{'ci-dob-glauc':'Glaucoma','ci-dob-hbp':'HBP / RAO','ci-dob-taq':'Taquiarritmias'}},
+  ejercicio:{nombre:'Ejercicio',nivel:'AMARILLA',rgb:[202,138,4],bg:'#fefce8',border:'#fde047',
+    ids:{'ci-ej-eao':'Estenosis aórtica severa','ci-ej-hta':'HTA no controlada','ci-ej-ic':'IC descompensada'}}
+};
+function contraindicGroupKey(){
+  var v=document.getElementById('p-estres')?document.getElementById('p-estres').value:'';
+  var map={ejercicio:'ejercicio',dobutamina:'dobutamina',atropina:'dobutamina',dipiridamol:'dipiridamol',adenosina:'dipiridamol'};
+  return map[v]||'';
+}
+function updateContraindic(){
+  var g=contraindicGroupKey();
+  ['ejercicio','dobutamina','dipiridamol'].forEach(function(k){
+    var el=document.getElementById('ci-group-'+k); if(el)el.style.display=(k===g)?'block':'none';
+  });
+  var nm=document.getElementById('ci-proto-name');
+  if(nm)nm.textContent=g?CONTRAINDIC_GROUPS[g].nombre:'—';
+  var alert=document.getElementById('ci-alert'); if(!alert)return;
+  var gr=CONTRAINDIC_GROUPS[g];
+  if(!gr){alert.style.display='none';return;}
+  var marc=[]; Object.keys(gr.ids).forEach(function(id){ var c=document.getElementById(id); if(c&&c.checked)marc.push(gr.ids[id]); });
+  if(marc.length){
+    alert.style.display='block';
+    alert.style.background=gr.bg; alert.style.color='rgb('+gr.rgb.join(',')+')'; alert.style.border='1.5px solid '+gr.border;
+    alert.innerHTML='🚨 ALERTA '+gr.nivel+' — Contraindicación'+(marc.length>1?'es':'')+' para '+gr.nombre+': '+marc.join(', ')+'.';
+  } else { alert.style.display='none'; }
+}
+/* Datos de contraindicaciones para el PDF (o null si no hay ninguna marcada) */
+function contraindicPDFData(){
+  var g=contraindicGroupKey(); if(!g)return null;
+  var gr=CONTRAINDIC_GROUPS[g]; var marc=[];
+  Object.keys(gr.ids).forEach(function(id){ var c=document.getElementById(id); if(c&&c.checked)marc.push(gr.ids[id]); });
+  if(!marc.length)return null;
+  return {nivel:gr.nivel,rgb:gr.rgb,nombre:gr.nombre,items:marc};
+}
+/* ═══ Tabla Eco por Etapas (CAMBIO 3) ═══ */
+var ETE_ROWS=[
+  ['imp','IMP'],['sgl','SGL'],['ee',"E/e'"],['im','IM'],['psap','PSAP'],
+  ['vd','Función VD'],['vcf','VCF / CFVR'],['lineasb','Líneas B']
+];
+var ETE_COLS=['reposo','baja','alta','pico','recup'];
+var eteBuilt=false;
+function eteHeaderLabels(){
+  var v=document.getElementById('p-estres')?document.getElementById('p-estres').value:'';
+  var sets={
+    ejercicio:['Reposo','Baja carga','Alta carga','Pico','Recuperación'],
+    dobutamina:['Reposo','Dosis baja','Dosis alta','Pico','Recuperación'],
+    dipiridamol:['Basal','Precoz','Tardía','Pico','Recuperación']
+  };
+  return sets[v]||['Reposo','Baja carga / Precoz','Alta carga / Tardía','Pico','Recuperación'];
+}
+function eteBuild(){
+  var tb=document.getElementById('ete-tbody'); if(!tb)return;
+  tb.innerHTML=ETE_ROWS.map(function(r){
+    var tds=ETE_COLS.map(function(c){
+      return '<td><input class="ete-in" id="ete-'+r[0]+'-'+c+'" oninput="this.dataset.manual=\'1\';this.removeAttribute(\'data-auto\')"></td>';
+    }).join('');
+    return '<tr><td>'+r[1]+'</td>'+tds+'</tr>';
+  }).join('');
+  eteBuilt=true;
+}
+function eteApplyHeaders(){
+  var labels=eteHeaderLabels();
+  ['reposo','baja','alta','pico','recup'].forEach(function(k,i){
+    var el=document.getElementById('ete-h-'+k); if(el)el.textContent=labels[i];
+  });
+}
+function eteAutoSet(id,val){
+  var el=document.getElementById(id); if(!el)return;
+  if(val==null||String(val).trim()==='')return;
+  if(el.dataset.manual==='1')return;           // no pisar ediciones manuales
+  el.value=val; el.setAttribute('data-auto','1');
+}
+function etePrefill(){
+  function gv(id){ var el=document.getElementById(id); return el?el.value:''; }
+  function tv(id){ var s=document.getElementById(id); return (s&&s.value!=='')?(s.options[s.selectedIndex].text):''; }
+  // E/e'
+  eteAutoSet('ete-ee-reposo', gv('eb-eeprom')||gv('p-ee-bas'));
+  eteAutoSet('ete-ee-pico',   gv('p-ee-pic'));
+  // PSAP
+  eteAutoSet('ete-psap-reposo', gv('eb-psap')||gv('p-psap-bas'));
+  eteAutoSet('ete-psap-pico',   gv('p-psap-pic'));
+  // IM (grado basal)
+  eteAutoSet('ete-im-reposo', tv('eb-im-grado'));
+  // SGL
+  eteAutoSet('ete-sgl-reposo', gv('c-sgl-bas'));
+  eteAutoSet('ete-sgl-pico',   gv('c-sgl-pic'));
+  // Líneas B
+  eteAutoSet('ete-lineasb-reposo', tv('l-bas'));
+  eteAutoSet('ete-lineasb-pico',   tv('l-post'));
+}
+function eteRefresh(){ if(!eteBuilt)eteBuild(); eteApplyHeaders(); etePrefill(); }
+function eteClear(){
+  if(!eteBuilt)eteBuild();
+  ETE_ROWS.forEach(function(r){ ETE_COLS.forEach(function(c){
+    var el=document.getElementById('ete-'+r[0]+'-'+c); if(el){ el.value=''; delete el.dataset.manual; el.removeAttribute('data-auto'); }
+  });});
+  eteApplyHeaders();
+}
+/* Datos de la tabla para el PDF (array de filas con valores) */
+function etePDFData(){
+  var out=[]; var any=false;
+  ETE_ROWS.forEach(function(r){
+    var vals=ETE_COLS.map(function(c){ var el=document.getElementById('ete-'+r[0]+'-'+c); var v=el?String(el.value||'').trim():''; if(v)any=true; return v; });
+    out.push({lbl:r[1],vals:vals});
+  });
+  return any?out:null;
 }
 function calcDobuDosis(){
   const p=+document.getElementById('p-peso')?.value||0;
@@ -1720,6 +1950,37 @@ document.addEventListener('click',e=>{const pop=document.getElementById('bull-po
 function resetBull(phase){bull[phase]=Array(17).fill(1);renderBull(phase);evalCriterios();updateWMSIresumen();updateTerritorio();}
 function setAllBull(phase,st){bull[phase]=Array(17).fill(st);renderBull(phase);evalCriterios();updateWMSIresumen();updateTerritorio();}
 function copyBull(from,to){bull[to]=[...bull[from]];renderBull(to);evalCriterios();updateWMSIresumen();updateTerritorio();}
+/* ═══ Bull's Eye Strain comparativo (CAMBIO 5) — porta lógica de EcoSmart ═══
+   Escala EcoEstrés: rojo = mejor strain … verde = peor strain. Sin números. */
+const STRAIN_COLORS=['#DC2626','#F97316','#F59E0B','#EAB308','#84CC16','#22C55E'];
+let strainBull={basal:Array(17).fill(0),pico:Array(17).fill(0)};
+let strainBullInited=false;
+function renderStrainBull(which,svgId,interactive){
+  const id=svgId||'strain-svg-'+which;const svg=document.getElementById(id);if(!svg)return;
+  const cx=170,cy=170;const state=strainBull[which]||Array(17).fill(0);
+  const OFFSET=-60;
+  const rings=[{r1:130,r2:92,segs:[0,1,2,3,4,5],step:60},{r1:92,r2:54,segs:[6,7,8,9,10,11],step:60},{r1:54,r2:24,segs:[12,13,14,15],step:90}];
+  let html='';
+  rings.forEach(ring=>ring.segs.forEach((segIdx,s)=>{
+    const seg=SEGS[segIdx];
+    const startDeg=OFFSET-(s*ring.step),endDeg=startDeg-ring.step;
+    const fill=STRAIN_COLORS[state[segIdx]||0];
+    const iact=interactive!==false;
+    const evts=iact?`onclick="cycleStrainBull('${which}',${segIdx})" style="cursor:pointer"`:'style="cursor:default"';
+    html+=`<path d="${arcPath(cx,cy,ring.r1,ring.r2,startDeg,endDeg)}" fill="${fill}" fill-opacity="0.92" stroke="#0D1117" stroke-width="2.5" ${evts}><title>${seg.name} (${seg.ter})</title></path>`;
+  }));
+  const apexSt=state[16]||0;
+  const iactA=interactive!==false;
+  const evtsA=iactA?`onclick="cycleStrainBull('${which}',16)" style="cursor:pointer"`:'style="cursor:default"';
+  html+=`<circle cx="${cx}" cy="${cy}" r="24" fill="${STRAIN_COLORS[apexSt]}" fill-opacity="0.92" stroke="#0D1117" stroke-width="2.5" ${evtsA}><title>Apex (LAD)</title></circle>`;
+  html+=`<text x="${cx}" y="18" text-anchor="middle" font-size="9" fill="${TER_COLORS.LAD}" font-weight="800">LAD</text>`;
+  html+=`<text x="315" y="${cy}" text-anchor="end" font-size="9" fill="${TER_COLORS.LCx}" font-weight="800">LCx</text>`;
+  html+=`<text x="25" y="${cy}" text-anchor="start" font-size="9" fill="${TER_COLORS.RCA}" font-weight="800">RCA</text>`;
+  svg.innerHTML=html;
+}
+function cycleStrainBull(which,idx){ if(!strainBull[which])strainBull[which]=Array(17).fill(0); strainBull[which][idx]=(strainBull[which][idx]+1)%STRAIN_COLORS.length; renderStrainBull(which); }
+function resetStrainBull(which){ strainBull[which]=Array(17).fill(0); renderStrainBull(which); }
+function initStrainBulls(){ strainBullInited=true; renderStrainBull('basal'); renderStrainBull('pico'); }
 function getWMSI(phase){const state=bull[phase];let sum=0,count=0;state.forEach(st=>{if(st>0){sum+=st;count++;}});return count>0?+(sum/count).toFixed(2):null;}
 function updateWMSI(phase){
   const wmsi=getWMSI(phase);
@@ -2564,7 +2825,7 @@ function ebTextoInforme(){
 </style>
 <div class="ee-modal" id="ee-audit" onclick="if(event.target===this)eeAuditClose()">
   <div class="ee-modal-box">
-    <h3>🔬 Auditoría individual <span style="display:flex;gap:8px;align-items:center"><button class="btn btn-teal" onclick="eeAuditExport()" title="Exportar auditoría a PDF">⬇ Exportar</button><button class="x" onclick="eeAuditClose()">✕</button></span></h3>
+    <h3>🔬 Auditoría individual <span style="display:flex;gap:8px;align-items:center"><button class="x" onclick="eeAuditClose()">✕</button></span></h3>
     <div id="ee-audit-body"></div>
     <div class="eea-sec" style="margin-top:20px">📄 Informe de Auditoría — Export PDF</div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
@@ -3825,6 +4086,29 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
   }); }
   function loadDims(src){ return new Promise(function(res){ var im=new Image(); im.onload=function(){res({w:im.naturalWidth||im.width,h:im.naturalHeight||im.height});}; im.onerror=function(){res({w:4,h:3});}; im.src=src; }); }
 
+  // ─── Rasterizado del Bull's Eye Strain a PNG (CAMBIO 5) ───
+  function strainSvgString(which){
+    var wrap=document.createElement('div'); wrap.style.cssText='position:absolute;left:-9999px;top:0';
+    wrap.innerHTML='<svg id="__pdfstrain" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340" width="340" height="340"></svg>';
+    document.body.appendChild(wrap);
+    try{ if(typeof renderStrainBull==='function')renderStrainBull(which,'__pdfstrain',false); }catch(e){}
+    var svg=wrap.querySelector('svg');
+    var bg='<rect x="0" y="0" width="340" height="340" fill="#ffffff"/>';
+    var inner=svg?svg.innerHTML:'';
+    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 340" width="340" height="340">'+bg+inner+'</svg>';
+    document.body.removeChild(wrap);
+    return s;
+  }
+  function strainToPng(which){ return new Promise(function(res){
+    try{
+      var s=strainSvgString(which);
+      var img=new Image();
+      img.onload=function(){ var cv=document.createElement('canvas'); cv.width=360; cv.height=360; var c=cv.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,360,360); c.drawImage(img,10,10,340,340); res(cv.toDataURL('image/png')); };
+      img.onerror=function(){ res(null); };
+      img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+    }catch(e){ res(null); }
+  }); }
+
   // Bulls seleccionados (bvInclude)
   function bullStagesSel(){
     var order=['basal','low','pico','recup','extra'], out=[];
@@ -4080,6 +4364,20 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     // ─────── ENSAMBLADO ───────
     header();
 
+    // Alerta de contraindicaciones por protocolo (CAMBIO 2)
+    (function(){
+      var ci=(typeof contraindicPDFData==='function')?contraindicPDFData():null; if(!ci)return;
+      y+=1;
+      var txt='ALERTA '+ci.nivel+' - Contraindicacion(es) '+ci.nombre+': '+ci.items.join(', ')+'.';
+      fb(8.5); var lines=doc.splitTextToSize(txt,pgW-8);
+      var boxH=3.4+lines.length*4.6;
+      ensure(boxH+3);
+      fc(ci.rgb[0],ci.rgb[1],ci.rgb[2]); doc.rect(mL,y,pgW,boxH,'F');
+      tc(255,255,255); fb(8.5);
+      var yy=y+5; lines.forEach(function(l){ doc.text(l,mL+3,yy); yy+=4.6; });
+      y+=boxH+2.5;
+    })();
+
     // 2 · Datos del paciente
     drawBar('DATOS DEL PACIENTE');
     var dob=[V('p-fnac-dia'),(function(){var m=document.getElementById('p-fnac-mes');return m&&m.value?m.options[m.selectedIndex].text:'';})(),V('p-fnac-anio')].filter(Boolean).join('/');
@@ -4224,8 +4522,43 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     else if(rg){ y+=1; fi(9); tc(TEMA[0],TEMA[1],TEMA[2]); var cl=doc.splitTextToSize('CONCLUSIÓN: Estudio '+(resMap[rg]||rg)+'.',pgW-4); cl.forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5.2; }); y+=1.5; }
     if(V('res-comment'))drawText(V('res-comment'));
 
+    // 9b · Tabla Eco por Etapas (CAMBIO 3) — tras conclusión ergométrica, antes de imágenes de contractilidad
+    (function(){
+      var data=(typeof etePDFData==='function')?etePDFData():null; if(!data)return;
+      var heads=(typeof eteHeaderLabels==='function')?eteHeaderLabels():['Reposo','Baja','Alta','Pico','Recup.'];
+      drawBar('TABLA ECO POR ETAPAS', 34);
+      var labW=30, cW=(pgW-labW)/5, hH=8, rH=5.8, x0=mL;
+      checkPage(hH+data.length*rH+3);
+      var y0=y;
+      // header
+      fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(x0,y0,pgW,hH,'F');
+      fb(6.3); tc(255,255,255);
+      doc.text('Parametro',x0+2,y0+5);
+      heads.forEach(function(h,ci){ var t=doc.splitTextToSize(String(h),cW-2); doc.text(t[0]||'',x0+labW+ci*cW+1.5,y0+(t.length>1?3.4:5)); if(t[1])doc.text(t[1],x0+labW+ci*cW+1.5,y0+6.6); });
+      // filas
+      data.forEach(function(d,ri){
+        var yy=y0+hH+ri*rH;
+        if(ri%2===1){ fc(244,246,250); doc.rect(x0,yy,pgW,rH,'F'); }
+        fb(6.8); tc(30,30,30); doc.text(String(d.lbl),x0+2,yy+4);
+        fn(6.8); tc(35,35,35);
+        d.vals.forEach(function(v,ci){ if(v){ var t=doc.splitTextToSize(String(v),cW-3); doc.text(t[0]||'',x0+labW+ci*cW+1.5,yy+4); } });
+      });
+      var tot=hH+data.length*rH;
+      dc(170,175,185); doc.setLineWidth(0.3); doc.rect(x0,y0,pgW,tot);
+      doc.line(x0,y0+hH,x0+pgW,y0+hH);
+      dc(215,218,225); doc.setLineWidth(0.12);
+      for(var rr=1;rr<data.length;rr++)doc.line(x0,y0+hH+rr*rH,x0+pgW,y0+hH+rr*rH);
+      dc(200,205,214); doc.setLineWidth(0.15);
+      doc.line(x0+labW,y0,x0+labW,y0+tot);
+      for(var cc=1;cc<5;cc++)doc.line(x0+labW+cc*cW,y0,x0+labW+cc*cW,y0+tot);
+      y=y0+tot+3;
+    })();
+
     // 10 · Imágenes Bull's Eye
     if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA", 60); imgBlock(assets.bullImgs); }
+
+    // Bull's Eye Strain (CAMBIO 5) — debajo de los Bull's Eye de contractilidad
+    if(assets.strainImgs&&assets.strainImgs.length){ drawBar("BULL'S EYE STRAIN", 60); imgBlock(assets.strainImgs); }
 
     // 11 · Imágenes ETT (imagen izquierda, texto derecha)
     if(assets.ettCells&&assets.ettCells.length){ drawBar('IMÁGENES ETT', (assets.ettPerPage===6?45:65)); imgBlockETT(assets.ettCells, assets.ettPerPage); }
@@ -4253,12 +4586,20 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var btn=document.getElementById('pdf-download-btn');
     try{
       // Precarga de assets (async): bulls rasterizados, dimensiones de imágenes, logo, firma
-      var assets={logo:null,logoDims:{w:1,h:1},firmaImg:null,firmaImgDims:{w:1,h:1},bullImgs:[],ecgImgs:[],ettCells:[],ettPerPage:(ettPerPage===6?6:4)};
+      var assets={logo:null,logoDims:{w:1,h:1},firmaImg:null,firmaImgDims:{w:1,h:1},bullImgs:[],strainImgs:[],ecgImgs:[],ettCells:[],ettPerPage:(ettPerPage===6?6:4)};
       try{ var lg=localStorage.getItem('ecoestres_logo'); if(lg){ assets.logo=lg; assets.logoDims=await loadDims(lg); } }catch(e){}
       try{ var fm=localStorage.getItem('ecoestres_firma'); if(fm){ assets.firmaImg=fm; assets.firmaImgDims=await loadDims(fm); } }catch(e){}
       // Bulls
       var bs=bullStagesSel();
       for(var i=0;i<bs.length;i++){ var png=await bullToPng(bs[i].stage); if(png){ var d=await loadDims(png); assets.bullImgs.push({src:png,lbl:bs[i].label+((typeof getWMSI==='function'&&getWMSI(bs[i].stage)!=null)?('  ·  WMSI '+getWMSI(bs[i].stage)):''),dims:d}); } }
+      // Bull's Eye Strain (CAMBIO 5) — solo si "Incluir en PDF" está marcado
+      try{
+        var incStrain=document.getElementById('strain-include-pdf');
+        if(incStrain&&incStrain.checked){
+          var sList=[{which:'basal',id:'strain-name-basal',def:'Strain Basal'},{which:'pico',id:'strain-name-pico',def:'Strain Pico'}];
+          for(var si=0;si<sList.length;si++){ var spng=await strainToPng(sList[si].which); if(spng){ var sd=await loadDims(spng); var nmEl=document.getElementById(sList[si].id); var nm=(nmEl&&String(nmEl.value||'').trim())?String(nmEl.value).trim():sList[si].def; assets.strainImgs.push({src:spng,lbl:nm,dims:sd}); } }
+        }
+      }catch(e){}
       // Imágenes ECG por fase (solo slots con imagen)
       var ecgSel=(ecgSlots||[]).filter(function(s){return s&&s.img;});
       for(var a=0;a<ecgSel.length;a++){ var de=await loadDims(ecgSel[a].img); assets.ecgImgs.push({src:ecgSel[a].img,lbl:ecgSel[a].name||'',dims:de}); }
