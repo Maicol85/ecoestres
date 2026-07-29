@@ -1254,6 +1254,16 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div style="text-align:center;margin:10px 0"><button type="button" class="btn btn-primary" onclick="protoConclusion()">✨ Generar conclusión automática</button></div>
     <div class="fg"><label>Conclusión (texto libre editable)</label><textarea id="abcd-concl" rows="5" placeholder="Presioná «Generar conclusión automática» para redactar un borrador integrando A-B-C-D-F-L-P-R, o escribí directamente."></textarea></div>
   </div></div>
+
+  <!-- ═══ SCORE ABCD-FLPR ═══ -->
+  <div class="card" id="abcd-score-card" style="margin-top:12px">
+    <div class="card-head">📊 Score ABCD-FLPR — valor pronóstico</div>
+    <div class="card-body">
+      <div id="abcd-score-box"><div style="color:var(--text2);font-size:12px">Completá los campos del ABCD-FLPR para calcular el score automáticamente.</div></div>
+      <label style="display:inline-flex;align-items:center;gap:9px;margin-top:12px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="abcd-score-pdf" style="width:16px;height:16px;min-width:16px;flex:0 0 auto;padding:0;margin:0;background:none;border:none;accent-color:var(--accent2)"> 📄 Incluir score en el PDF</label>
+      <div style="font-size:10.5px;color:var(--text2);margin-top:8px">Ref.: Ciampi Q et al. Eur Heart J 2021;42:3869.</div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ BULL'S EYE ═══ -->
@@ -2419,6 +2429,40 @@ function cycleStrainBull(which,idx){ if(!strainBull[which])strainBull[which]=Arr
 function resetStrainBull(which){ strainBull[which]=Array(17).fill(0); renderStrainBull(which); }
 function initStrainBulls(){ strainBullInited=true; renderStrainBull('basal'); renderStrainBull('pico'); }
 function getWMSI(phase){const state=bull[phase];let sum=0,count=0;state.forEach(st=>{if(st>0){sum+=st;count++;}});return count>0?+(sum/count).toFixed(2):null;}
+/* ═══ Score ABCD-FLPR (Ciampi Q et al. Eur Heart J 2021;42:3869) ═══ */
+window.computeAbcdScore=function(get,wPico,wRecup){
+  function num(id){ var v=parseFloat(String(get(id)||'').replace(',','.')); return isNaN(v)?null:v; }
+  function s(id){ return String(get(id)||''); }
+  var fcm=num('b-fc-max'),fct=num('b-fc-teo'),fcb=num('b-fc-bas');
+  var fcpct=(fcm&&fct)?(fcm/fct*100):null; var stop=s('b-stop'); var L={};
+  L.A=(fcpct!=null&&fcpct<85)||stop==='Angina'||stop==='Cambios ECG';
+  var ecgE=s('b-ecg-estres'); L.B=(ecgE==='st-dep'||ecgE==='st-ele'||ecgE==='arritmia');
+  var dfevi=num('c-dfevi'); if(dfevi==null){ var fb=num('c-fevi-bas'),fp=num('c-fevi-pic'); if(fb!=null&&fp!=null)dfevi=fp-fb; }
+  var ea=num('c-ea'); L.C=(wPico!=null&&wPico>1)||(dfevi!=null&&dfevi<0)||(ea!=null&&ea<0.9);
+  var dim=s('d-im'); L.D=(dim==='mod'||dim==='sev')||s('d-dilat')==='si';
+  var cf=num('f-cfvr-da'); if(cf==null){ var cb=num('cfvr-da-bas'),cp=num('cfvr-da-pic'); if(cb&&cp)cf=cp/cb; }
+  L.F=(cf!=null&&cf<2.0);
+  var eep=num('p-ee-pic'),psp=num('p-psap-pic'); L.L=(eep!=null&&eep>14)||s('l-post')==='2'||(psp!=null&&psp>50);
+  var tp=num('p-tapse-psap'); L.P=(tp!=null&&tp<0.55);
+  var ci=(fcm!=null&&fcb!=null&&fct!=null&&(fct-fcb)>0)?((fcm-fcb)/(fct-fcb)):null;
+  L.R=(ci!=null&&ci<0.80)||(wRecup!=null&&wRecup>1);
+  var order=['A','B','C','D','F','L','P','R']; var altered=order.filter(function(k){return L[k];});
+  var count=altered.length; var riesgo=count<=1?'bajo':count<=3?'inter':'alto';
+  return {L:L,order:order,altered:altered,count:count,riesgo:riesgo};
+};
+function abcdScoreData(){ return window.computeAbcdScore(function(id){var e=document.getElementById(id);return e?e.value:'';}, getWMSI('pico'), getWMSI('recup')); }
+function abcdScoreRender(){
+  var box=document.getElementById('abcd-score-box'); if(!box)return;
+  var d=abcdScoreData();
+  var col={bajo:'#16A34A',inter:'#F59E0B',alto:'#DC2626'};
+  var rTxt={bajo:'BAJO riesgo',inter:'Riesgo INTERMEDIO',alto:'ALTO riesgo'};
+  var letters=d.order.map(function(k){ var on=d.L[k]; return '<span title="'+(on?'alterada':'normal')+'" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;font-weight:800;font-size:13px;margin:2px;'+(on?'background:#DC2626;color:#fff':'background:var(--bg3);color:var(--text2);border:1px solid var(--border)')+'">'+k+'</span>'; }).join('');
+  box.innerHTML='<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'
+    +'<div style="font-size:30px;font-weight:900;color:'+col[d.riesgo]+';line-height:1">'+d.count+'<span style="font-size:16px;color:var(--text2)">/8</span></div>'
+    +'<div style="flex:1;min-width:200px">'+letters+'</div></div>'
+    +'<div style="margin-top:10px;font-size:13px;font-weight:700;color:'+col[d.riesgo]+'">'+rTxt[d.riesgo]+(d.altered.length?(' — letras alteradas: '+d.altered.join(' · ')):' — sin dominios alterados')+'</div>';
+}
+window.abcdScoreRender=abcdScoreRender; window.abcdScoreData=abcdScoreData;
 function updateWMSI(phase){
   const wmsi=getWMSI(phase);
   const vEl=document.getElementById('wmsi-val-'+phase),cEl=document.getElementById('wmsi-cat-'+phase);
@@ -3461,6 +3505,16 @@ function ebTextoInforme(){
       if(s&&['basal','pico'].some(function(ph){return Array.isArray(s[ph])&&s[ph].some(function(x){return x&&x>0;});}))qStrain++;
     });
     A.qEa=qEa; A.qCfvr=qCfvr; A.qEte=qEte; A.qStrain=qStrain;
+    // Score ABCD-FLPR promedio + distribución de riesgo (estudios con resultado)
+    var scSum=0,scN=0,scDist={bajo:0,inter:0,alto:0};
+    R.forEach(function(r){
+      if(!F(r,'res-global'))return;
+      var wp=wmsiPico(r), b=BULL(r), wr=null;
+      if(b&&Array.isArray(b.recup)){ var ss=0,cc=0; b.recup.forEach(function(st){ if(st>0){ss+=st;cc++;} }); wr=cc?ss/cc:null; }
+      var sc=(typeof window.computeAbcdScore==='function')?window.computeAbcdScore(function(id){return F(r,id);},wp,wr):null;
+      if(sc){ scSum+=sc.count; scN++; if(scDist[sc.riesgo]!=null)scDist[sc.riesgo]++; }
+    });
+    A.abcdScoreAvg=scN?(scSum/scN):null; A.abcdScoreDist=scDist; A.abcdScoreN=scN;
     return A;
   }
 
@@ -3520,6 +3574,11 @@ function ebTextoInforme(){
         +card((A.cronoTot?pct(A.cronoRed,A.cronoTot):0)+'%','Reserva cronotrópica reducida',A.cronoRed+'/'+(A.cronoTot||0),'var(--amber)')
         +card(pct(A.vdInd,T)+'%','Compromiso VD inducible',A.vdInd+'/'+T,'var(--amber)')
         +'</div></div>';
+      // Score ABCD-FLPR promedio + distribución de riesgo (Ciampi Q et al. Eur Heart J 2021)
+      var _savg=A.abcdScoreAvg, _scol=_savg==null?'var(--text2)':(_savg<=1?'var(--green)':_savg<=3?'var(--yellow)':'var(--red)');
+      h+='<div class="eea-grid" style="margin-top:8px">'+card(_savg!=null?(_savg.toFixed(1)+'/8'):'—','Score ABCD-FLPR promedio',(A.abcdScoreN||0)+' estudio(s) con resultado',_scol)+'</div>';
+      h+='<div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin:9px 0 6px">Distribución por riesgo (score)</div>'
+        +dist([{label:'Bajo (0-1)',n:A.abcdScoreDist.bajo,color:'var(--green)'},{label:'Intermedio (2-3)',n:A.abcdScoreDist.inter,color:'var(--yellow)'},{label:'Alto (4-8)',n:A.abcdScoreDist.alto,color:'var(--red)'}]);
       // CALIDAD
       var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T);
       var wm=A.wmsi; var wmColor=wm==null?'var(--text2)':wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)';
@@ -3716,7 +3775,7 @@ function ebTextoInforme(){
     function row(label,val,sub,color){ ensure(6.2); fn(8.5); tc(30,30,30); doc.text(String(label),mL+2,y); fb(9); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text(String(val==null||val===''?'—':val),mL+92,y); if(sub){ fn(7.5); tc(110,110,110); doc.text(String(sub),mL+118,y); } var st=semTxt(color); if(st){ var col=st==='Verde'?[22,140,70]:st==='Amarillo'?[184,134,11]:[190,40,40]; fb(8); tc(col[0],col[1],col[2]); doc.text('('+st+')',mL+150,y); } y+=6; }
     function dist(title,entries){ var tot=entries.reduce(function(a,b){return a+(b.n||0);},0)||1; ensure(6); fb(7.6); tc(90,90,90); doc.text(String(title),mL+2,y); y+=5; entries.forEach(function(e){ var p=Math.round((e.n||0)/tot*100); ensure(5); fn(8); tc(40,40,40); doc.text('- '+e.label,mL+4,y); fb(8); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text((e.n||0)+' · '+p+'%',mL+92,y); y+=4.8; }); y+=1.5; }
     if(chk('ee-pdf-volumen')){ bar('Volumen'); row('Estudios totales',T); var u6=0; A.months.forEach(function(m){u6+=m.n;}); row('Últimos 6 meses',u6); dist('Estudios por mes',A.months.map(function(m){return {label:m.label,n:m.n};})); dist('Tipo de estrés',['Esfuerzo','Dobutamina','Dipiridamol','Adenosina','Sin dato'].map(function(k){return {label:k,n:A.est[k]};})); bar('Protocolo - seguridad y farmacos'); row('Contraindicaciones relativas',pct(A.ciPres,T)+'%',A.ciPres+'/'+T,semLow(pct(A.ciPres,T),10,30)); row('Atropina administrada',pct(A.atrop,T)+'%',A.atrop+'/'+T); row('Medicacion de rescate',pct(A.rescate,T)+'%',A.rescate+'/'+T,semLow(pct(A.rescate,T),10,30)); }
-    if(chk('ee-pdf-resultados')){ bar('Resultados'); row('Positivos isquemia',pct(A.res.pos,T)+'%',A.res.pos+'/'+T,'var(--red)'); row('Negativos',pct(A.res.neg,T)+'%',A.res.neg+'/'+T,'var(--green)'); row('Indeterminados',pct(A.res.inc,T)+'%',A.res.inc+'/'+T,'var(--yellow)'); row('Viabilidad presente',pct(A.res.via,T)+'%',A.res.via+'/'+T); row('Con síntomas',pct(A.sint,T)+'%',A.sint+'/'+T,'var(--amber)'); row('Lineas B >=3/campo post',pct(A.lbHi,T)+'%',A.lbHi+'/'+T,'var(--amber)'); row('IM inducible mod-sev',pct(A.imInd,T)+'%',A.imInd+'/'+T,'var(--amber)'); row('Deterioro SGL en pico',pct(A.sglDet,T)+'%',A.sglDet+'/'+T,'var(--amber)'); dist('Protocolo',[{label:'Completado',n:A.completado},{label:'Interrumpido',n:A.interrump}]); row('Motivo finalización más frecuente',A.motivoTop); bar('Reserva contractil'); row('Elastancia calculada',pct(A.eaCalc,T)+'%',A.eaCalc+'/'+T,semHigh(pct(A.eaCalc,T),70,40)); row('Reserva reducida (Ea<0.9)',pct(A.eaRed,T)+'%',A.eaRed+'/'+T,A.eaRed>0?'var(--red)':'var(--green)'); row('Delta FEVI promedio',A.dFevi!=null?((A.dFevi>0?'+':'')+A.dFevi.toFixed(1)):'—'); row('Delta SGL promedio',A.dSgl!=null?((A.dSgl>0?'+':'')+A.dSgl.toFixed(1)):'—'); bar('ABCD-FLPR'); dist('Positivos por letra',[{label:'B ECG',n:A.posLetras.B},{label:'C Contractilidad',n:A.posLetras.C},{label:'D Dilat/IM/PA',n:A.posLetras.D},{label:'F CFVR',n:A.posLetras.F},{label:'L Llenado diast.',n:A.posLetras.L},{label:'P Presiones pulm.',n:A.posLetras.P},{label:'R Recuper/VD',n:A.posLetras.R}]); row("Reserva diast. alterada (E/e' pico >14)",pct(A.diastAlt,T)+'%',A.diastAlt+'/'+T,'var(--amber)'); row('CFVR reducida (<1.5)',pct(A.cfvrRed15,T)+'%',A.cfvrRed15+'/'+T,'var(--red)'); row('Reserva cronotropica reducida',(A.cronoTot?pct(A.cronoRed,A.cronoTot):0)+'%',A.cronoRed+'/'+(A.cronoTot||0),'var(--amber)'); row('Compromiso VD inducible',pct(A.vdInd,T)+'%',A.vdInd+'/'+T,'var(--amber)'); }
+    if(chk('ee-pdf-resultados')){ bar('Resultados'); row('Positivos isquemia',pct(A.res.pos,T)+'%',A.res.pos+'/'+T,'var(--red)'); row('Negativos',pct(A.res.neg,T)+'%',A.res.neg+'/'+T,'var(--green)'); row('Indeterminados',pct(A.res.inc,T)+'%',A.res.inc+'/'+T,'var(--yellow)'); row('Viabilidad presente',pct(A.res.via,T)+'%',A.res.via+'/'+T); row('Con síntomas',pct(A.sint,T)+'%',A.sint+'/'+T,'var(--amber)'); row('Lineas B >=3/campo post',pct(A.lbHi,T)+'%',A.lbHi+'/'+T,'var(--amber)'); row('IM inducible mod-sev',pct(A.imInd,T)+'%',A.imInd+'/'+T,'var(--amber)'); row('Deterioro SGL en pico',pct(A.sglDet,T)+'%',A.sglDet+'/'+T,'var(--amber)'); dist('Protocolo',[{label:'Completado',n:A.completado},{label:'Interrumpido',n:A.interrump}]); row('Motivo finalización más frecuente',A.motivoTop); bar('Reserva contractil'); row('Elastancia calculada',pct(A.eaCalc,T)+'%',A.eaCalc+'/'+T,semHigh(pct(A.eaCalc,T),70,40)); row('Reserva reducida (Ea<0.9)',pct(A.eaRed,T)+'%',A.eaRed+'/'+T,A.eaRed>0?'var(--red)':'var(--green)'); row('Delta FEVI promedio',A.dFevi!=null?((A.dFevi>0?'+':'')+A.dFevi.toFixed(1)):'—'); row('Delta SGL promedio',A.dSgl!=null?((A.dSgl>0?'+':'')+A.dSgl.toFixed(1)):'—'); bar('ABCD-FLPR'); dist('Positivos por letra',[{label:'B ECG',n:A.posLetras.B},{label:'C Contractilidad',n:A.posLetras.C},{label:'D Dilat/IM/PA',n:A.posLetras.D},{label:'F CFVR',n:A.posLetras.F},{label:'L Llenado diast.',n:A.posLetras.L},{label:'P Presiones pulm.',n:A.posLetras.P},{label:'R Recuper/VD',n:A.posLetras.R}]); row("Reserva diast. alterada (E/e' pico >14)",pct(A.diastAlt,T)+'%',A.diastAlt+'/'+T,'var(--amber)'); row('CFVR reducida (<1.5)',pct(A.cfvrRed15,T)+'%',A.cfvrRed15+'/'+T,'var(--red)'); row('Reserva cronotropica reducida',(A.cronoTot?pct(A.cronoRed,A.cronoTot):0)+'%',A.cronoRed+'/'+(A.cronoTot||0),'var(--amber)'); row('Compromiso VD inducible',pct(A.vdInd,T)+'%',A.vdInd+'/'+T,'var(--amber)'); row('Score ABCD-FLPR promedio',A.abcdScoreAvg!=null?(A.abcdScoreAvg.toFixed(1)+'/8'):'—',(A.abcdScoreN||0)+' est.'); dist('Distribucion de riesgo (score)',[{label:'Bajo (0-1)',n:A.abcdScoreDist.bajo},{label:'Intermedio (2-3)',n:A.abcdScoreDist.inter},{label:'Alto (4-8)',n:A.abcdScoreDist.alto}]); }
     if(chk('ee-pdf-calidad')){ bar('Calidad'); var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T); row('FC objetivo (máxima)',pMax+'%',A.maxTest+'/'+T,semHigh(pMax,85,70)); row('METs promedio',A.mets!=null?A.mets.toFixed(1):'—'); row('Doble producto reg.',pDp+'%',A.dp+'/'+T,semHigh(pDp,85,60)); row('Con imágenes',pImg+'%',A.imgs+'/'+T,semHigh(pImg,85,60)); row('Con Bull’s Eye',pBull+'%',A.bulls+'/'+T,semHigh(pBull,85,60)); row('Con informe narrativo',pInf+'%',A.infs+'/'+T,semHigh(pInf,85,60)); var wm=A.wmsi,wmColor=wm==null?'':(wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)'); row('WMSI prom. pico',wm!=null?wm.toFixed(2):'—','',wmColor); var qrow=function(mk,q,lbl){ if(typeof eeModActive==='function'&&!eeModActive(mk)){ row(lbl,'N/A','desactivado'); return; } row(lbl,pct(q,T)+'%',q+'/'+T,semHigh(pct(q,T),70,40)); }; qrow('elastancia',A.qEa,'Elastancia completada'); qrow('cfvr',A.qCfvr,'CFVR completada'); qrow('ecoetapas',A.qEte,'Tabla eco por etapas'); qrow('strainBull',A.qStrain,"Bull's Eye strain"); }
     if(chk('ee-pdf-hallazgos')){ bar('Hallazgos'); dist('FEVI basal',['Normal ≥55','Leve 45-54','Reducida 35-44','Severa <35','Sin dato'].map(function(k){return {label:k,n:A.fevi[k]};})); row('Alt. motilidad pico',pct(A.altPico,T)+'%',A.altPico+'/'+T,'var(--amber)'); row('Territorio más frecuente',A.terrTop); row('PSAP basal >40',pct(A.psapHi,T)+'%',A.psapHi+'/'+T,A.psapHi>0?'var(--amber)':'var(--green)'); }
     if(chk('ee-pdf-brechas')){ bar('Brechas'); var pSinInf=pct(A.sinInf,T),pSinBull=pct(A.sinBull,T),pSinSeg=pct(A.sinSeg,A.pacTotal); row('Sin informe narrativo',A.sinInf,pSinInf+'%',semLow(pSinInf,10,30)); row('Sin Bull’s Eye',A.sinBull,pSinBull+'%',semLow(pSinBull,10,30)); row('Pacientes sin seguim. 6m',A.sinSeg,(A.pacTotal?pSinSeg+'% de '+A.pacTotal:'—'),semLow(pSinSeg,10,30)); }
@@ -5192,6 +5251,14 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
     }
     drawBullet(abcd);
+    // Score ABCD-FLPR — antes de la conclusión narrativa, solo si el checkbox lo incluye
+    (function(){
+      var chk=document.getElementById('abcd-score-pdf'); if(!chk||!chk.checked||typeof abcdScoreData!=='function')return;
+      var sc=abcdScoreData(); var rMap={bajo:'BAJO',inter:'INTERMEDIO',alto:'ALTO'};
+      var txt='Score ABCD-FLPR: '+sc.count+'/8 · Letras alteradas: '+(sc.altered.length?sc.altered.join(' · '):'ninguna')+' -> Riesgo '+(rMap[sc.riesgo]||'')+' · Ref: Ciampi Q et al. Eur Heart J 2021.';
+      y+=1.5; fb(8.5); tc(TEMA[0],TEMA[1],TEMA[2]);
+      doc.splitTextToSize(txt,pgW-4).forEach(function(l){ checkPage(6); doc.text(l,mL+2,y); y+=5; }); y+=1;
+    })();
     var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
     var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
     var conclTxt=V('abcd-concl');
@@ -5374,6 +5441,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     if(hrr!=null){ var ht,hc; if(hrr>=22){ht='✅ Reserva cronotrópica normal (HRR '+hrr+')';hc='var(--green)';} else if(hrr>=12){ht='⚠️ Reserva cronotrópica límite (HRR '+hrr+')';hc='var(--amber)';} else {ht='❌ Reserva cronotrópica reducida (HRR '+hrr+') — marcador pronóstico';hc='var(--red)';} res('r-crono-res',ht,hc); out('r-hrr',hrr<12); } else res('r-crono-res','','');
     var trec=N('r-trecup'); out('r-trecup', trec!=null&&trec>3);
     res('r-res', trec==null?'':(trec>3?'⚠️ Recuperación tardía de la motilidad (>3 min) — isquemia severa':'✅ Recuperación de la motilidad normal'), trec==null?'':(trec>3?'var(--amber)':'var(--green)'));
+    if(typeof abcdScoreRender==='function')try{abcdScoreRender();}catch(e){}   // Score ABCD-FLPR automático
   };
 
   window.protoSuggest=function(sec){
