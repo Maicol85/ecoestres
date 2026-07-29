@@ -1540,6 +1540,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="card" style="margin-bottom:14px"><div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
     <button class="btn btn-teal" onclick="generarPDFCompleto()">📄 Generar PDF (vista previa)</button>
     <button class="btn btn-ghost" onclick="generarBorradorAuto()">✨ Generar borrador automático</button>
+    <button class="btn btn-ghost" onclick="abrirPlantillas()">📋 Cargar plantilla</button>
     <button class="btn btn-ghost" onclick="generarInforme()">📝 Generar texto</button>
     <button class="btn btn-ghost" onclick="copiarInforme()">📋 Copiar texto</button>
   </div></div>
@@ -2957,6 +2958,136 @@ function generarBorradorAuto(){
   if(rg) f.push('CONCLUSIÓN: estudio '+(resMap[rg]||rg)+'.');
   el.value=f.join(' ');
   if(typeof eeToast==='function')eeToast('✨ Borrador generado — revisá y editá el texto','ok');
+}
+/* ═══════════ Plantillas de informe narrativo (grupos 1, 2 y 5) ═══════════ */
+var PLANTILLAS={
+  1:{titulo:'Negativo normal', texto:`Eco estrés con [protocolo] mediante [tipo de estrés] que alcanza esfuerzo [máximo/submáximo] con [METs] METs ([%FCM]% de la FC máxima teórica). Sin alteraciones de la motilidad regional en reposo ni en el pico del esfuerzo (WMSI [WMSI_PICO]). ECG sin cambios isquémicos significativos. Sin síntomas durante el estrés. Reserva contráctil conservada (ΔFEVI [DELTA_FEVI]%). Función diastólica sin deterioro inducible (E/e' pico [EE_PICO]). PSAP estable ([PSAP_PICO] mmHg). [Si CFVR disponible: Reserva de flujo coronario en DA conservada (CFVR [CFVR]).] Score ABCD-FLPR: [SCORE]/8 — riesgo bajo. CONCLUSIÓN: Estudio NEGATIVO para isquemia inducible. Buena capacidad funcional. Bajo riesgo cardiovascular en el seguimiento.`},
+  2:{titulo:'Negativo submáximo', texto:`Eco estrés con [protocolo] que alcanza esfuerzo submáximo ([%FCM]% de la FC máxima teórica), suspendido por [MOTIVO_SUSPENSION]. En estas condiciones el estudio tiene valor diagnóstico limitado. No se evidencian alteraciones de la motilidad regional ni cambios ECG significativos en el nivel de esfuerzo alcanzado (WMSI [WMSI_PICO]). Sin síntomas durante el estrés. CONCLUSIÓN: Estudio INDETERMINADO por esfuerzo submáximo insuficiente. No se puede descartar isquemia con el nivel de esfuerzo alcanzado. Se recomienda considerar protocolo farmacológico o evaluación con otra modalidad de imagen funcional.`},
+  3:{titulo:'Indeterminado', texto:`Eco estrés con [protocolo] no concluyente por [MOTIVO]. Motilidad regional sin alteraciones definitivas (WMSI [WMSI_PICO]). ECG con [RESULTADO_ECG]. Capacidad funcional de [METs] METs. CONCLUSIÓN: Estudio INDETERMINADO. Se recomienda correlación clínica y considerar evaluación complementaria.`},
+  4:{titulo:'Positivo territorio RCA', texto:`Eco estrés con [protocolo] que se suspende en [ETAPA_PICO] por [MOTIVO_SUSPENSION]. Se evidencian alteraciones de la motilidad regional nuevas en el pico del esfuerzo: hipokinesia de segmentos [SEGMENTOS_ALTERADOS], correspondientes al territorio de la arteria coronaria derecha (WMSI basal [WMSI_BASAL] → pico [WMSI_PICO]). [RESULTADO_ECG_TEXTO]. FEVI basal [FEVI_BASAL]% con caída a [FEVI_PICO]% en pico (ΔFEVI [DELTA_FEVI]%). [Si líneas B: Congestión pulmonar inducible con [LB_PICO] líneas B/campo en pico.] [Si PSAP: PSAP de [PSAP_PICO] mmHg en pico.] [Si elastancia alterada: Reserva contráctil comprometida, elastancia [ELASTANCIA].] Score ABCD-FLPR: [SCORE]/8 — riesgo [RIESGO]. CONCLUSIÓN: Estudio POSITIVO para isquemia inducible en territorio de arteria coronaria derecha. Riesgo [RIESGO]. Se recomienda coronariografía para evaluación anatómica.`},
+  5:{titulo:'Positivo territorio LAD', texto:`Eco estrés con [protocolo] que se suspende en [ETAPA_PICO] por [MOTIVO_SUSPENSION]. Alteraciones de la motilidad regional en pico en segmentos [SEGMENTOS_ALTERADOS], territorio de la arteria descendente anterior (WMSI basal [WMSI_BASAL] → pico [WMSI_PICO]). [RESULTADO_ECG_TEXTO]. FEVI basal [FEVI_BASAL]% con caída a [FEVI_PICO]% en pico (ΔFEVI [DELTA_FEVI]%). [Si CFVR: CFVR DA [CFVR], confirmando compromiso en este territorio.] Score ABCD-FLPR: [SCORE]/8 — riesgo [RIESGO]. CONCLUSIÓN: Estudio POSITIVO para isquemia inducible en territorio de arteria descendente anterior. Se recomienda coronariografía.`},
+  6:{titulo:'Positivo territorio LCx', texto:`Eco estrés con [protocolo] que se suspende en [ETAPA_PICO] por [MOTIVO_SUSPENSION]. Alteraciones de la motilidad regional en pico en segmentos [SEGMENTOS_ALTERADOS], territorio de la arteria circunfleja (WMSI basal [WMSI_BASAL] → pico [WMSI_PICO]). [RESULTADO_ECG_TEXTO]. FEVI basal [FEVI_BASAL]% → [FEVI_PICO]% en pico (ΔFEVI [DELTA_FEVI]%). Score ABCD-FLPR: [SCORE]/8 — riesgo [RIESGO]. CONCLUSIÓN: Estudio POSITIVO para isquemia inducible en territorio de arteria circunfleja. Se recomienda coronariografía.`},
+  7:{titulo:'Positivo multivaso', texto:`Eco estrés con [protocolo] suspendido en [ETAPA_PICO] por [MOTIVO_SUSPENSION]. Se evidencian alteraciones de la motilidad regional extensas en múltiples territorios: [SEGMENTOS_ALTERADOS] (WMSI basal [WMSI_BASAL] → pico [WMSI_PICO]). FEVI basal [FEVI_BASAL]% con caída severa a [FEVI_PICO]% (ΔFEVI [DELTA_FEVI]%). [RESULTADO_ECG_TEXTO]. [Si líneas B: Congestión pulmonar severa inducible ([LB_PICO] líneas B/campo).] Score ABCD-FLPR: [SCORE]/8 — riesgo alto. CONCLUSIÓN: Estudio POSITIVO para isquemia inducible extensa en probable enfermedad multivaso. Alto riesgo. Se recomienda coronariografía urgente y evaluación por equipo multidisciplinario.`},
+  8:{titulo:'Positivo con WMSI alto (>1.5)', texto:`Eco estrés con [protocolo] con isquemia inducible extensa (WMSI pico [WMSI_PICO]), territorio [TERRITORIO]. FEVI basal [FEVI_BASAL]% con deterioro severo a [FEVI_PICO]% en pico. [RESULTADO_ECG_TEXTO]. Score ABCD-FLPR: [SCORE]/8 — riesgo alto. CONCLUSIÓN: Estudio POSITIVO para isquemia inducible de alto riesgo. WMSI elevado con deterioro severo de la función sistólica inducible. Se recomienda coronariografía urgente.`},
+  9:{titulo:'Viabilidad presente', texto:`Eco estrés con dobutamina a dosis bajas ([DOSIS_BAJA] mcg/kg/min) que evidencia respuesta bifásica en segmentos [SEGMENTOS_VIABLES]: mejoría de la motilidad a dosis bajas con deterioro a dosis altas, patrón compatible con viabilidad miocárdica en territorio [TERRITORIO]. FEVI basal [FEVI_BASAL]% con mejoría transitoria a [FEVI_PICO]% a dosis bajas. CONCLUSIÓN: Viabilidad miocárdica presente en territorio [TERRITORIO]. El patrón bifásico sugiere miocardio hibernado con potencial recuperación funcional post-revascularización. Se recomienda discusión multidisciplinaria para evaluar indicación de revascularización.`},
+  10:{titulo:'Sin viabilidad', texto:`Eco estrés con dobutamina sin evidencia de respuesta bifásica. Los segmentos disfuncionantes en reposo ([SEGMENTOS_ALTERADOS]) no muestran mejoría a ninguna dosis de dobutamina, compatible con fibrosis miocárdica establecida. FEVI basal [FEVI_BASAL]% sin cambios significativos con el estrés. CONCLUSIÓN: Sin viabilidad miocárdica demostrable en los segmentos evaluados. Patrón compatible con necrosis establecida. Beneficio limitado esperado de la revascularización en estos segmentos.`},
+  11:{titulo:'Viabilidad parcial', texto:`Eco estrés con dobutamina que evidencia respuesta bifásica parcial: viabilidad presente en segmentos [SEGMENTOS_VIABLES] (territorio [TERRITORIO_VIABLE]) con respuesta bifásica, mientras que los segmentos [SEGMENTOS_NO_VIABLES] no muestran mejoría, compatible con fibrosis en ese territorio. FEVI basal [FEVI_BASAL]%. CONCLUSIÓN: Viabilidad miocárdica parcial. Miocardio hibernado en territorio [TERRITORIO_VIABLE] con potencial recuperación. Fibrosis establecida en [TERRITORIO_NO_VIABLE]. Se recomienda evaluación multidisciplinaria para decisión de revascularización selectiva.`}
+};
+var PLANTILLA_GRUPOS=[
+  {t:'GRUPO 1 — Por resultado principal', items:[1,2,3]},
+  {t:'GRUPO 2 — Positivo por motilidad', items:[4,5,6,7,8]},
+  {t:'GRUPO 5 — Viabilidad miocárdica', items:[9,10,11]}
+];
+// Construye el mapa de variables con los datos reales del estudio (null = dejar entre corchetes)
+function plantillaVars(){
+  var V={};
+  function set(k,v){ V[k]=(v==null||v==='')?null:String(v); }
+  var gvv=function(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';};
+  var gstt=function(id){var e=document.getElementById(id);return (e&&e.value)?e.options[e.selectedIndex].text:'';};
+  var numv=function(id){var v=parseFloat(gvv(id).replace(',','.'));return isNaN(v)?null:v;};
+  // Protocolo
+  var proto=null;
+  if(typeof peState!=='undefined'){
+    if(peState.tipo==='esfuerzo'){ var p=(typeof PE_PROTO!=='undefined')?PE_PROTO[peState.proto]:null; proto=p?p.nombre:'esfuerzo'; }
+    else if(peState.tipo)proto=peState.tipo;
+  }
+  set('protocolo', proto);
+  var estres=gstt('p-estres'); set('tipo de estrés', estres?estres.toLowerCase():null);
+  set('METs', gvv('b-mets')||null);
+  var fcm=numv('b-fc-max'), fct=numv('b-fc-teo');
+  var pct=(fcm&&fct)?Math.round(fcm/fct*100):null;
+  set('%FCM', pct!=null?String(pct):null);
+  set('máximo/submáximo', pct!=null?(pct>=85?'máximo':'submáximo'):null);
+  var wB=(typeof getWMSI==='function')?getWMSI('basal'):null, wP=(typeof getWMSI==='function')?getWMSI('pico'):null;
+  set('WMSI_BASAL', wB!=null?String(wB):null);
+  set('WMSI_PICO', wP!=null?String(wP):null);
+  var fB=numv('c-fevi-bas'), fP=numv('c-fevi-pic');
+  set('FEVI_BASAL', fB!=null?String(fB):null);
+  set('FEVI_PICO', fP!=null?String(fP):null);
+  set('DELTA_FEVI', (fB!=null&&fP!=null)?String(Math.round((fP-fB)*10)/10):null);
+  set('EE_PICO', gvv('p-ee-pic')||null);
+  set('PSAP_PICO', gvv('p-psap-pic')||null);
+  set('ELASTANCIA', gvv('c-ea')||null);
+  set('CFVR', gvv('f-cfvr-da')||null);
+  if(typeof abcdScoreData==='function'){ try{ var sc=abcdScoreData(); if(sc){ set('SCORE', String(sc.count)); set('RIESGO', {bajo:'bajo',inter:'intermedio',alto:'alto'}[sc.riesgo]||sc.riesgo); } }catch(e){} }
+  var kn=(typeof peKeyNames==='function')?peKeyNames():null;
+  set('ETAPA_PICO', kn?kn.pico:null);
+  var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]};
+  var segs=(an&&an.segs)||[];
+  if(segs.length){
+    set('SEGMENTOS_ALTERADOS', segs.map(function(s){return s.seg.id+' ('+s.seg.name+')';}).join(', '));
+    var tc={LAD:0,RCA:0,LCx:0}; segs.forEach(function(s){ if(tc[s.seg.ter]!=null)tc[s.seg.ter]++; });
+    var dom=Object.keys(tc).sort(function(a,b){return tc[b]-tc[a];})[0];
+    var terName={LAD:'arteria descendente anterior',RCA:'arteria coronaria derecha',LCx:'arteria circunfleja'};
+    if(tc[dom]>0)set('TERRITORIO', terName[dom]);
+  }
+  var lb=gvv('l-post'); set('LB_PICO', lb==='1'?'1-2':(lb==='2'?'≥3':null));
+  set('DOSIS_BAJA','5–10');
+  var stop=gstt('b-stop'); set('MOTIVO_SUSPENSION', stop||null);
+  var ecgE=gvv('b-ecg-estres'), ecgT=gstt('b-ecg-estres');
+  if(ecgE==='no'){ set('RESULTADO_ECG','sin cambios isquémicos significativos'); set('RESULTADO_ECG_TEXTO','ECG sin cambios isquémicos significativos'); }
+  else if(ecgE){ set('RESULTADO_ECG', ecgT||null); set('RESULTADO_ECG_TEXTO', ecgT?('En el ECG se observó '+ecgT.toLowerCase()):null); }
+  return V;
+}
+// Resuelve bloques condicionales [Si ...: ...] — se mantienen sólo si todas sus variables internas están disponibles
+function plantillaCondicionales(text, vars){
+  var out='', i=0;
+  while(i<text.length){
+    var idx=text.indexOf('[Si ', i);
+    if(idx<0){ out+=text.slice(i); break; }
+    out+=text.slice(i, idx);
+    var depth=0, j=idx;
+    for(; j<text.length; j++){ if(text[j]==='[')depth++; else if(text[j]===']'){ depth--; if(depth===0)break; } }
+    if(j>=text.length){ out+=text.slice(idx); break; }
+    var inner=text.slice(idx+1, j);
+    var colon=inner.indexOf(':');
+    var body=(colon>=0?inner.slice(colon+1):inner).trim();
+    var innerVars=(body.match(/\[([^\][]+)\]/g)||[]).map(function(s){return s.slice(1,-1);});
+    var keep=innerVars.every(function(v){ return vars[v]!=null && vars[v]!==''; });
+    if(keep)out+=body;
+    i=j+1;
+  }
+  return out;
+}
+function plantillaAplicar(text, vars){
+  Object.keys(vars).forEach(function(k){ if(vars[k]==null||vars[k]==='')return; text=text.split('['+k+']').join(vars[k]); });
+  return text.replace(/[ \t]+/g,' ').replace(/ +\./g,'.').replace(/ +,/g,',').trim();
+}
+function abrirPlantillas(){
+  var prev=document.getElementById('plantilla-overlay'); if(prev)prev.remove();
+  var ov=document.createElement('div');
+  ov.id='plantilla-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(3px)';
+  ov.addEventListener('click',function(e){ if(e.target===ov)ov.remove(); });
+  var groups=PLANTILLA_GRUPOS.map(function(g){
+    var btns=g.items.map(function(id){
+      var pl=PLANTILLAS[id];
+      return '<button class="btn btn-ghost" style="text-align:left;justify-content:flex-start;padding:9px 12px;font-size:13px" onclick="cargarPlantilla('+id+')">'
+        +'<span style="font-weight:700">'+id+'.</span> '+pl.titulo+'</button>';
+    }).join('');
+    return '<div style="margin-bottom:14px">'
+      +'<div style="font-size:12px;font-weight:800;letter-spacing:.03em;color:var(--accent2);text-transform:uppercase;margin-bottom:7px">'+g.t+'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px">'+btns+'</div></div>';
+  }).join('');
+  ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.4)">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2)">'
+      +'<div style="font-size:15px;font-weight:800;color:var(--text)">📋 Plantillas de informe</div>'
+      +'<button class="btn btn-ghost" style="padding:4px 11px" onclick="document.getElementById(\'plantilla-overlay\').remove()">✕</button></div>'
+    +'<div style="padding:16px 18px">'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Se cargará el texto reemplazando automáticamente los datos disponibles del estudio. Lo que no esté cargado queda [entre corchetes] para completar.</div>'
+      +groups+'</div></div>';
+  document.body.appendChild(ov);
+}
+function cargarPlantilla(id){
+  var pl=PLANTILLAS[id]; if(!pl)return;
+  var el=document.getElementById('informe-txt'); if(!el)return;
+  if(el.value.trim() && !confirm('Ya hay texto en el informe narrativo. ¿Reemplazarlo con la plantilla "'+pl.titulo+'"?'))return;
+  var vars=plantillaVars();
+  var txt=plantillaCondicionales(pl.texto, vars);
+  txt=plantillaAplicar(txt, vars);
+  el.value=txt;
+  var ov=document.getElementById('plantilla-overlay'); if(ov)ov.remove();
+  if(typeof eeToast==='function')eeToast('📋 Plantilla cargada — revisá y completá los campos [entre corchetes]','ok');
 }
 function imprimirInforme(){generarInforme();setTimeout(()=>window.print(),150);}
 
