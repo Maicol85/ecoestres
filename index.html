@@ -345,10 +345,10 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 
 <!-- ═══ SEGUNDA FILA DE TABS (siempre visible) ═══ -->
 <style>
-.subtabs{position:sticky;top:0;z-index:40;display:flex;gap:6px;flex-wrap:wrap;background:var(--bg2,var(--bg3));border:1px solid var(--border);border-radius:10px;padding:6px;margin-bottom:16px}
-.subtab{flex:1 1 auto;min-width:130px;padding:9px 12px;border:none;border-radius:8px;background:transparent;color:var(--text2);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
-.subtab:hover{background:var(--bg3);color:var(--text)}
-.subtab.active{background:var(--accent2);color:#fff}
+.subtabs{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin:-2px 0 14px}
+.subtab{flex:0 0 auto;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--text2);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:5px;line-height:1.3;white-space:nowrap}
+.subtab:hover{color:var(--text);border-color:var(--text2)}
+.subtab.active{background:transparent;color:var(--accent);border-color:var(--accent)}
 .calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
 .calc-card{background:var(--bg2,var(--bg3));border:1px solid var(--border);border-radius:11px;padding:14px 15px}
 .calc-card h4{font-size:13.5px;font-weight:800;color:var(--text);margin:0 0 3px}
