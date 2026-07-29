@@ -1484,6 +1484,9 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="card"><div class="card-head">📄 Texto del informe</div><div class="card-body">
     <textarea id="informe-txt" style="min-height:340px;font-size:12px;line-height:1.7" placeholder="Presioná 'Generar informe' para autocompletar, o escribí directamente…"></textarea>
   </div></div>
+  <div class="card" style="margin-top:14px"><div class="card-body">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer"><input type="checkbox" id="inf-caso-interes" style="width:17px;height:17px;min-width:17px;flex:0 0 auto;padding:0;margin:0;background:none;border:none;accent-color:var(--accent2)"> 🎓 Marcar como caso de interés (ateneo / docencia / publicación)</label>
+  </div></div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
     <button class="hdr-save-btn" onclick="guardar()">💾 Guardar</button>
     <button class="hdr-ibtn" onclick="nuevoEstudio()" title="Limpiar estudio" style="border:1px solid var(--border2)">🗑<span class="lbl">Limpiar</span></button>
@@ -1516,13 +1519,16 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   .ee-mod-lbl{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);cursor:pointer;padding:6px 10px;border:1px solid var(--border2,rgba(148,163,184,.28));border-radius:8px;background:var(--bg2)}
   .ee-mod-lbl input{width:16px;height:16px;flex:0 0 auto;accent-color:var(--accent2)}
   .ee-mod-lbl.core{opacity:.7;cursor:default}
+  #perfil-card .ee-perfil-row{display:flex;flex-wrap:wrap;gap:28px;align-items:center;margin-bottom:12px}
+  #perfil-card .ee-perfil-opt{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;margin:0}
+  #perfil-card .ee-perfil-opt input[type=radio]{-webkit-appearance:radio;appearance:auto;width:17px;height:17px;min-width:17px;flex:0 0 auto;padding:0;margin:0;background:none;border:none;border-radius:0;box-shadow:none;accent-color:var(--accent2)}
   </style>
   <div class="card" id="perfil-card" style="margin-top:14px">
     <div class="card-head">🎛️ Perfil de estudio por defecto</div>
     <div class="card-body">
-      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-        <label style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap"><input type="radio" name="ee-perfil" value="basico" onchange="eePerfilChange()" style="width:17px;height:17px;flex:0 0 auto;padding:0;margin:0;accent-color:var(--accent2)"> Básico</label>
-        <label style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap"><input type="radio" name="ee-perfil" value="avanzado" onchange="eePerfilChange()" style="width:17px;height:17px;flex:0 0 auto;padding:0;margin:0;accent-color:var(--accent2)"> Avanzado</label>
+      <div class="ee-perfil-row">
+        <label class="ee-perfil-opt"><input type="radio" name="ee-perfil" value="basico" onchange="eePerfilChange()"> Básico</label>
+        <label class="ee-perfil-opt"><input type="radio" name="ee-perfil" value="avanzado" onchange="eePerfilChange()"> Avanzado</label>
       </div>
       <div class="note-box" style="margin-bottom:12px">ℹ️ El perfil <b>Básico</b> incluye los módulos esenciales (Paciente, Eco Basal, ECG/Arritmias, Bull's Eye contractilidad, Criterios, Protocolo A·B·C básico + conclusión, Imágenes, Informe). El <b>Avanzado</b> agrega los módulos opcionales de abajo; cada uno se puede activar o desactivar. Los módulos desactivados desaparecen del menú y del PDF, pero sus datos no se pierden.</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px" id="ee-mod-list">
@@ -1606,7 +1612,8 @@ function recolectarEstado(){
   const vals={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
-  return{vals,bull,strainBull,ecgSlots,ecgSlotsAuto,ettSlots,ettPerPage,dobuData,peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
+  var _ci=document.getElementById('inf-caso-interes');
+  return{vals,bull,strainBull,ecgSlots,ecgSlotsAuto,ettSlots,ettPerPage,dobuData,caso_interes:((_ci&&_ci.checked)?'1':''),peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
 }
 function cargarEstado(){
   let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
@@ -1614,6 +1621,7 @@ function cargarEstado(){
   try{
     const s=JSON.parse(raw);
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
+    var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull)bull=s.bull;
     ['basal','low','pico','recup','extra'].forEach(function(k){ if(!Array.isArray(bull[k]))bull[k]=Array(17).fill(1); });
     if(s.strainBull)strainBull=s.strainBull;                      // Bull's Eye strain (CAMBIO 5)
@@ -1665,6 +1673,7 @@ function importarDatos(e){
   const r=new FileReader();
   r.onload=ev=>{try{const s=JSON.parse(ev.target.result);
     if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
+    var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull)bull=s.bull;
     if(Array.isArray(s.ecgSlots)){ecgSlots=s.ecgSlots;ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!s.ecgSlots.some(function(x){return x&&x.img;});}
     if(Array.isArray(s.ettSlots))ettSlots=s.ettSlots;
@@ -3414,6 +3423,13 @@ function ebTextoInforme(){
   var _editId=null, _sel=[], _cmpDoc=null;
   function recs(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function save(a){ try{ localStorage.setItem(LSKEY, JSON.stringify(a)); }catch(e){ alert('No se pudo guardar (¿espacio de almacenamiento lleno?): '+e.message); } }
+  /* Marca/desmarca "caso de interés" directo en localStorage, sin reabrir el estudio */
+  window.eeToggleStar=function(id){
+    var arr=recs(); var i=arr.findIndex(function(x){return x.id===id;}); if(i<0)return;
+    arr[i].caso_interes=(String(arr[i].caso_interes||'')==='1')?'':'1';
+    save(arr);
+    if(typeof eeGuardadosList==='function')eeGuardadosList();
+  };
   function F(r,id){ return (r&&r.vals&&r.vals[id]!=null)?r.vals[id]:''; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function toast(m){ if(typeof eeToast==='function')eeToast(m); }
@@ -3434,6 +3450,7 @@ function ebTextoInforme(){
   function applyEstado(s){
     if(!s)return;
     if(s.vals)Object.keys(s.vals).forEach(function(id){ var el=document.getElementById(id); if(!el)return; var v=s.vals[id]; if(el.type==='checkbox')el.checked=!!v; else el.value=v; });
+    var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull){ ['basal','low','pico','recup','extra'].forEach(function(k){ bull[k]=Array.isArray(s.bull[k])?s.bull[k].slice():Array(17).fill(1); }); }
     if(Array.isArray(s.ecgSlots)){ ecgSlots=s.ecgSlots.map(function(x){return {name:x.name,img:x.img};}); ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!ecgSlots.some(function(x){return x&&x.img;}); }
     if(Array.isArray(s.ettSlots)){ ettSlots=s.ettSlots.map(function(x){return {img:x.img,txt:x.txt};}); }
@@ -3663,16 +3680,18 @@ function ebTextoInforme(){
     }catch(err){ alert('No se pudo generar el PDF del comparativo: '+err.message); }
   };
 
-  window.eeGuardadosClearFilter=function(){ var a=document.getElementById('eeg-fnom'),b=document.getElementById('eeg-ffecha'); if(a)a.value=''; if(b)b.value=''; eeGuardadosList(); };
+  window.eeGuardadosClearFilter=function(){ var a=document.getElementById('eeg-fnom'),b=document.getElementById('eeg-ffecha'),c=document.getElementById('eeg-fstar'); if(a)a.value=''; if(b)b.value=''; if(c)c.checked=false; eeGuardadosList(); };
 
   window.eeGuardadosList=function(){
     var list=document.getElementById('eeg-list'); if(!list)return;
     var nom=(document.getElementById('eeg-fnom')||{}).value||''; nom=nom.toLowerCase().trim();
     var fch=(document.getElementById('eeg-ffecha')||{}).value||'';
+    var star=!!(document.getElementById('eeg-fstar')||{}).checked;
     var R=recs().slice().sort(function(x,y){ return (y.ts||0)-(x.ts||0); });
     var filt=R.filter(function(r){
       if(nom){ var n=(String(F(r,'p-nombre'))+' '+String(F(r,'p-hc'))).toLowerCase(); if(n.indexOf(nom)<0)return false; }
       if(fch){ if(String(F(r,'p-fecha'))!==fch)return false; }
+      if(star && String(r.caso_interes||'')!=='1')return false;
       return true;
     });
     if(!filt.length){ list.innerHTML='<div class="eea-note">'+(R.length?'Ningún estudio coincide con el filtro.':'Todavía no hay estudios guardados. Usá «Guardar como nuevo».')+'</div>'; }
@@ -3682,6 +3701,7 @@ function ebTextoInforme(){
         var meta=[fmtFecha(F(r,'p-fecha')), F(r,'p-hc')?('HC '+F(r,'p-hc')):'', estr].filter(Boolean).join(' · ');
         return '<div class="eeg-item">'
           +'<label class="eeg-chk"><input type="checkbox" '+(_sel.indexOf(r.id)>=0?'checked':'')+' onchange="eeCompareToggle(\''+r.id+'\',this.checked)"></label>'
+          +'<button class="eeg-star" title="'+((String(r.caso_interes||'')==='1')?'Quitar de casos de interés':'Marcar como caso de interés')+'" onclick="eeToggleStar(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;font-size:19px;line-height:1;padding:0 3px;flex:0 0 auto;color:'+((String(r.caso_interes||'')==='1')?'#F59E0B':'var(--text2)')+'">'+((String(r.caso_interes||'')==='1')?'⭐':'☆')+'</button>'
           +'<div class="eeg-info"><div class="eeg-name">'+esc(F(r,'p-nombre')||'(sin nombre)')+(_editId===r.id?' <span class="eeg-editing">· en edición</span>':'')+'</div><div class="eeg-meta">'+esc(meta)+'</div></div>'
           +'<div class="eeg-acts"><button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
           +'</div>';
@@ -3701,6 +3721,7 @@ function ebTextoInforme(){
       +'<div class="eeg-filters">'
         +'<input id="eeg-fnom" placeholder="Filtrar por paciente o HC…" oninput="eeGuardadosList()">'
         +'<input id="eeg-ffecha" type="date" oninput="eeGuardadosList()" title="Filtrar por fecha del estudio">'
+        +'<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;white-space:nowrap"><input type="checkbox" id="eeg-fstar" onchange="eeGuardadosList()" style="width:15px;height:15px;min-width:15px;flex:0 0 auto;padding:0;margin:0;background:none;border:none;accent-color:var(--accent2)"> ⭐ Casos de interés</label>'
         +'<button class="btn btn-ghost" onclick="eeGuardadosClearFilter()">Limpiar</button>'
       +'</div>'
       +'<div id="eeg-comparebar"></div>'
