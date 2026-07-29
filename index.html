@@ -4418,6 +4418,25 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       }
     }
 
+    // Fila horizontal: TODOS los bull's eye en una sola fila, columnas iguales,
+    // a la misma altura; se reduce el tamaño para que entren juntos (CAMBIO Bull's Eye horizontal).
+    function imgRow(list, maxH){
+      if(!list.length)return;
+      var n=list.length, gap=6;
+      var cellW=(pgW-(n-1)*gap)/n;
+      var cap=maxH||58;
+      var sizes=list.map(function(o){ var d=o.dims||{w:4,h:3}; var w=cellW, h=w*(d.h/d.w); if(h>cap){ h=cap; w=h*(d.w/d.h); } return {w:w,h:h}; });
+      var rowH=Math.max.apply(null,sizes.map(function(s){return s.h;}))+(list.some(function(o){return o.lbl;})?5:1);
+      checkPage(rowH+2);
+      list.forEach(function(o,c){
+        var s=sizes[c];
+        var x=mL+c*(cellW+gap)+(cellW-s.w)/2;
+        try{ doc.addImage(o.src,undefined,x,y,s.w,s.h); }catch(e){}
+        if(o.lbl){ fn(7); tc(70,70,70); var lb=doc.splitTextToSize(String(o.lbl),cellW); doc.text(lb[0]||'',mL+c*(cellW+gap)+cellW/2,y+s.h+3.6,{align:'center'}); }
+      });
+      y+=rowH+2;
+    }
+
     // Bloque ETT: imagen a la izquierda, texto (mediciones) a la derecha.
     // 2 columnas; 2 filas/página (2×2=4) o 3 filas/página (3×2=6). Salto automático.
     function imgBlockETT(list, perPage){
@@ -4655,10 +4674,10 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     if(V('res-comment'))drawText(V('res-comment'));
 
     // 10 · Imágenes Bull's Eye
-    if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA", 60); imgBlock(assets.bullImgs); }
+    if(assets.bullImgs.length){ drawBar("BULL'S EYE POR ETAPA", 60); imgRow(assets.bullImgs); }
 
     // Bull's Eye Strain (CAMBIO 5) — debajo de los Bull's Eye de contractilidad
-    if(assets.strainImgs&&assets.strainImgs.length){ drawBar("BULL'S EYE STRAIN", 60); imgBlock(assets.strainImgs); }
+    if(assets.strainImgs&&assets.strainImgs.length){ drawBar("BULL'S EYE STRAIN", 60); imgRow(assets.strainImgs); }
 
     // 11 · Imágenes ETT (imagen izquierda, texto derecha)
     if(assets.ettCells&&assets.ettCells.length){ drawBar('IMÁGENES ETT', (assets.ettPerPage===6?45:65)); imgBlockETT(assets.ettCells, assets.ettPerPage); }
