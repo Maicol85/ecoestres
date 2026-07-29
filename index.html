@@ -1082,6 +1082,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <div class="fg"><label>Δ VTI (pico − basal)</label><input id="c-dvti" readonly placeholder="—"></div>
     </div>
     <div class="fg"><label>Alteraciones de motilidad nuevas y territorio (Bull's Eye)</label><input id="c-alt-nuevas" readonly placeholder="— (desde Bull's Eye del pico)"></div>
+    <div data-mod="elastancia">
     <div style="margin:10px 0 4px;font-size:11px;font-weight:700;color:var(--accent2)">Elastancia telesistólica (reserva contráctil hemodinámica)</div>
     <div class="grid2">
       <div class="fg"><label>VSF basal (mL) — vol. sistólico final</label><input type="number" id="c-vsf-bas" step="0.1" placeholder="45 (o VTSVI eco basal)" oninput="protoCalc()"></div>
@@ -1093,6 +1094,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     </div>
     <div class="fg"><label>Ea = (PAS pico/VSFp) / (PAS reposo/VSFr)</label><input id="c-ea" readonly placeholder="—"></div>
     <div class="proto-res" id="c-ea-res"></div>
+    </div>
     <div class="proto-res" id="c-res"></div>
     <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="c-narr" rows="3" placeholder="Ej.: FEVI 60%→68% (ΔFEVI +8), SGL -20%→-24%, sin nuevas alteraciones segmentarias. Reserva contráctil conservada."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('c')">💡 Sugerir texto</button></div>
@@ -1100,7 +1102,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div></div>
 
   <!-- ══════════ D — DILATACIÓN Y OTROS ══════════ -->
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅓 Dilatación y otros signos</span><span class="arr">▼</span></div>
+  <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅓 Dilatación y otros signos</span><span class="arr">▼</span></div>
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> signos indirectos de isquemia extensa/severa: dilatación transitoria del VI (isquemia multivaso), insuficiencia mitral inducida y respuesta anómala de la PA (la hipotensión con estrés es un signo ominoso).</div>
     <div class="grid2">
@@ -1115,7 +1117,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div></div>
 
   <!-- ══════════ F — FLUJO CORONARIO (CFVR) ══════════ -->
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅕 Flujo coronario (CFVR)</span><span class="arr">▼</span></div>
+  <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅕 Flujo coronario (CFVR)</span><span class="arr">▼</span></div>
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la reserva de flujo coronario (velocidad diastólica pico/reposo en DA). Una CFVR reducida (&lt;2.0) indica enfermedad epicárdica significativa o disfunción microvascular, y agrega valor pronóstico.</div>
     <div class="grid3">
@@ -1130,7 +1132,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div></div>
 
   <!-- ══════════ L — LLENADO / RESERVA DIASTÓLICA ══════════ -->
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅛 Llenado / reserva diastólica</span><span class="arr">▼</span></div>
+  <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅛 Llenado / reserva diastólica</span><span class="arr">▼</span></div>
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la respuesta diastólica al estrés (presiones de llenado, líneas B, PSAP, aurícula izquierda). Un E/e' pico ≥15 con líneas B y PSAP elevadas define un <em>eco estrés diastólico positivo</em> (ICFEp inducible).</div>
     <div class="grid2">
@@ -1139,11 +1141,11 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     </div>
     <div class="grid2">
       <div class="fg"><label>e' reposo (cm/s)</label><input id="l-eprima-rep" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg"><label>IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"></div>
+      <div class="fg" data-mod="reservaDiast"><label>IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"></div>
     </div>
     <div id="p-ee-pic-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
     <div class="grid2">
-      <div class="fg"><label>Score líneas B post-estrés</label><select id="l-post" onchange="evalCriterios();protoCalc()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
+      <div class="fg" data-mod="reservaDiast"><label>Score líneas B post-estrés</label><select id="l-post" onchange="evalCriterios();protoCalc()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
       <div class="fg"><label>PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP();protoCalc()"></div>
     </div>
     <div class="grid2">
@@ -1151,7 +1153,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <div class="fg"><label>Strain AI (%) — si disponible</label><input type="number" id="l-strain-ai" step="0.1" placeholder="Ej. 28"></div>
     </div>
     <div class="fg"><label>Patrón diastólico con estrés</label><select id="l-diast-estres" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterado">Alterado (presiones de llenado elevadas)</option></select></div>
-    <div class="fg" style="margin-top:6px"><label>Líneas B basales · Zonas evaluadas</label>
+    <div class="fg" data-mod="reservaDiast" style="margin-top:6px"><label>Líneas B basales · Zonas evaluadas</label>
       <div style="display:flex;gap:8px"><select id="l-bas" style="flex:1"><option value="0">0 — Normal</option><option value="1">1-2/campo — Borderline</option><option value="2">≥3/campo — Congestión</option></select><input id="l-zonas" placeholder="Ej. 4 zonas anteriores bilaterales" style="flex:2"></div></div>
     <div class="proto-res" id="l-res"></div>
     <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="l-narr" rows="2" placeholder="Ej.: E/e' pico 11, sin líneas B, PSAP pico 34 mmHg. Sin disfunción diastólica inducible."></textarea>
@@ -1160,7 +1162,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div></div>
 
   <!-- ══════════ P — PRESIONES / PULMONAR ══════════ -->
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅟 Presiones / pulmonar</span><span class="arr">▼</span></div>
+  <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅟 Presiones / pulmonar</span><span class="arr">▼</span></div>
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la hemodinamia pulmonar y el acoplamiento VD-arteria pulmonar con el estrés. La HTP inducida (PSAP pico &gt;60 o Δ&gt;20 mmHg), la RVP elevada y una relación TAPSE/PSAP baja indican desacople VD-AP y peor pronóstico.</div>
     <div class="grid2">
@@ -1187,7 +1189,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div></div>
 
   <!-- ══════════ R — RECUPERACIÓN Y VD ══════════ -->
-  <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🅡 Recuperación y VD</span><span class="arr">▼</span></div>
+  <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅡 Recuperación y VD</span><span class="arr">▼</span></div>
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la cinética de recuperación (normalización de la motilidad, reserva cronotrópica/HRR) y la función del VD. Una recuperación lenta de la motilidad indica isquemia severa; una HRR reducida es marcador pronóstico independiente.</div>
     <div class="grid2">
@@ -1360,7 +1362,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   .strain-name{background:var(--bg2);border:1px solid var(--border2,rgba(148,163,184,.32));border-radius:6px;color:var(--accent2);font-weight:700;font-size:13px;text-align:center;padding:5px 8px;margin-bottom:6px;width:80%;max-width:240px;box-sizing:border-box}
   .strain-name:focus{outline:none;border-color:var(--accent2)}
   </style>
-  <div class="card" id="strain-bull-card">
+  <div class="card" id="strain-bull-card" data-mod="strainBull">
     <div class="card-head">🎯 Bull's Eye Strain — comparativo</div>
     <div class="card-body">
       <div class="note-box" style="margin-bottom:12px">ℹ️ Tocá cada segmento para ciclar su estado. 17 segmentos AHA, sin números. Escala de colores estilo General Electric. Nombres editables según el protocolo.</div>
@@ -1506,6 +1508,37 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       </div>
     </div></div>
   </div>
+
+  <!-- ═══ PERFIL DE ESTUDIO ═══ -->
+  <style>
+  .ee-mod-lbl{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);cursor:pointer;padding:6px 10px;border:1px solid var(--border2,rgba(148,163,184,.28));border-radius:8px;background:var(--bg2)}
+  .ee-mod-lbl input{width:16px;height:16px;flex:0 0 auto;accent-color:var(--accent2)}
+  .ee-mod-lbl.core{opacity:.7;cursor:default}
+  </style>
+  <div class="card" id="perfil-card" style="margin-top:14px">
+    <div class="card-head">🎛️ Perfil de estudio por defecto</div>
+    <div class="card-body">
+      <div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px">
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;cursor:pointer"><input type="radio" name="ee-perfil" value="basico" onchange="eePerfilChange()" style="accent-color:var(--accent2)"> Básico</label>
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;cursor:pointer"><input type="radio" name="ee-perfil" value="avanzado" onchange="eePerfilChange()" style="accent-color:var(--accent2)"> Avanzado</label>
+      </div>
+      <div class="note-box" style="margin-bottom:12px">ℹ️ El perfil <b>Básico</b> incluye los módulos esenciales (Paciente, Eco Basal, ECG/Arritmias, Bull's Eye contractilidad, Criterios, Protocolo A·B·C básico + conclusión, Imágenes, Informe). El <b>Avanzado</b> agrega los módulos opcionales de abajo; cada uno se puede activar o desactivar. Los módulos desactivados desaparecen del menú y del PDF, pero sus datos no se pierden.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px" id="ee-mod-list">
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-ecoetapas" onchange="eeModChange()"> Tabla Eco por Etapas</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-territorio" onchange="eeModChange()"> Territorio vascular</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-viabilidad" onchange="eeModChange()"> Viabilidad (bifásico)</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-cfvr" onchange="eeModChange()"> CFVR / Strain</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-reservaDiast" onchange="eeModChange()"> Reserva diastólica completa (IRC, Score líneas B)</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-elastancia" onchange="eeModChange()"> Elastancia / Reserva contráctil</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-strainBull" onchange="eeModChange()"> Bull's Eye Strain</label>
+        <label class="ee-mod-lbl"><input type="checkbox" id="ee-mod-abcdFull" onchange="eeModChange()"> ABCD-FLPR completo (D, F, L, P, R)</label>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn btn-ghost" onclick="eeApplyStudy()">✔️ Aplicar solo a este estudio</button>
+        <button class="btn btn-primary" onclick="eeSaveDefault()">💾 Guardar como perfil por defecto</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -1601,6 +1634,8 @@ function nuevoEstudio(){
   var _snb=document.getElementById('strain-name-basal'); if(_snb)_snb.value='Strain Basal';
   var _snp=document.getElementById('strain-name-pico'); if(_snp)_snp.value='Strain Pico';
   if(typeof initStrainBulls==='function')initStrainBulls();
+  // Los módulos vuelven al perfil guardado (nuevo estudio)
+  if(typeof eeResetPerfilStudy==='function')eeResetPerfilStudy();
   actualizarUI();
 }
 function exportarDatos(){
@@ -1637,6 +1672,55 @@ function goTo(page){
   if(page==='ecoetapas')eteRefresh();
   if(page==='cfvr')initStrainBulls();
 }
+/* ═══════════ PERFIL DE ESTUDIO — módulos configurables (básico / avanzado) ═══════════ */
+var EE_ADV_KEYS=['ecoetapas','territorio','viabilidad','cfvr','reservaDiast','elastancia','strainBull','abcdFull'];
+var EE_NAV_PAGES={ecoetapas:'ecoetapas',territorio:'territorio',viabilidad:'viabilidad',cfvr:'cfvr'};
+var eeModulos=null;   // mapa runtime de módulos activos {key:bool}
+function eePerfilDefaults(perfil){ var m={}; EE_ADV_KEYS.forEach(function(k){ m[k]=(perfil==='avanzado'); }); return m; }
+function eeLoadPerfil(){ try{ return localStorage.getItem('ee_perfil')||'avanzado'; }catch(e){ return 'avanzado'; } }
+function eeLoadModulos(){ try{ var raw=localStorage.getItem('ee_modulos'); if(raw){ var m=JSON.parse(raw); EE_ADV_KEYS.forEach(function(k){ if(typeof m[k]!=='boolean')m[k]=true; }); return m; } }catch(e){} return eePerfilDefaults(eeLoadPerfil()); }
+function eeModActive(k){ return eeModulos?(eeModulos[k]!==false):true; }
+function applyModules(map){
+  if(!map)map=eeModulos||eePerfilDefaults('avanzado');
+  eeModulos=map;
+  Object.keys(EE_NAV_PAGES).forEach(function(k){
+    var page=EE_NAV_PAGES[k], on=map[k]!==false;
+    var nav=document.querySelector('.nav-item[onclick*="\''+page+'\'"]');
+    if(nav)nav.style.display=on?'':'none';
+    var pg=document.getElementById('page-'+page);
+    if(pg&&!on&&pg.classList.contains('active')&&typeof goTo==='function')goTo('paciente');
+  });
+  ['reservaDiast','elastancia','strainBull','abcdFull'].forEach(function(k){
+    var on=map[k]!==false;
+    document.querySelectorAll('[data-mod="'+k+'"]').forEach(function(el){ el.style.display=on?'':'none'; });
+  });
+}
+function eeReadUI(){
+  var pr=document.querySelector('input[name="ee-perfil"]:checked'); var perfil=pr?pr.value:'avanzado';
+  var map={};
+  if(perfil==='basico'){ EE_ADV_KEYS.forEach(function(k){ map[k]=false; }); }
+  else { EE_ADV_KEYS.forEach(function(k){ var c=document.getElementById('ee-mod-'+k); map[k]=c?c.checked:true; }); }
+  return {perfil:perfil,map:map};
+}
+function eeSyncUI(perfil,map){
+  document.querySelectorAll('input[name="ee-perfil"]').forEach(function(r){ r.checked=(r.value===perfil); });
+  EE_ADV_KEYS.forEach(function(k){ var c=document.getElementById('ee-mod-'+k); if(c){ c.checked=(map[k]!==false); c.disabled=(perfil==='basico'); var lbl=c.closest?c.closest('.ee-mod-lbl'):null; if(lbl)lbl.classList.toggle('core',perfil==='basico'); } });
+}
+function eePerfilChange(){
+  var pr=document.querySelector('input[name="ee-perfil"]:checked'); var perfil=pr?pr.value:'avanzado';
+  var map=eePerfilDefaults(perfil);
+  eeSyncUI(perfil,map); applyModules(map);
+}
+function eeModChange(){ applyModules(eeReadUI().map); }
+function eeApplyStudy(){ applyModules(eeReadUI().map); if(typeof eeToast==='function')eeToast('✔️ Perfil aplicado solo a este estudio'); }
+function eeSaveDefault(){
+  var r=eeReadUI();
+  try{ localStorage.setItem('ee_perfil',r.perfil); localStorage.setItem('ee_modulos',JSON.stringify(r.map)); }catch(e){}
+  applyModules(r.map);
+  if(typeof eeToast==='function')eeToast('💾 Guardado como perfil por defecto');
+}
+function eeInitPerfil(){ var perfil=eeLoadPerfil(), map=eeLoadModulos(); eeSyncUI(perfil,map); applyModules(map); }
+function eeResetPerfilStudy(){ var perfil=eeLoadPerfil(), map=eeLoadModulos(); eeSyncUI(perfil,map); applyModules(map); }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
 function toggleStep(hdr){const body=hdr.nextElementSibling;const open=body.classList.contains('open');body.classList.toggle('open',!open);hdr.classList.toggle('open',!open);hdr.querySelector('.arr').textContent=open?'▼':'▲';}
@@ -2265,6 +2349,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const fd=document.getElementById('p-fecha');if(fd)fd.value=hoy;
   initBulls();ecgImgRender();estImgRender();
   cargarEstado();
+  if(typeof eeInitPerfil==='function')eeInitPerfil();   // carga perfil de estudio guardado
   setInterval(guardar,30000);
   const listeners=[
     ['p-fnac','input',calcEdad],['p-edad','input',onEdadChange],
@@ -2997,7 +3082,7 @@ function ebTextoInforme(){
     else{
       var T=A.T;
       var h='';
-      h+='<div class="eea-note">Auditoría calculada en este equipo desde <code>localStorage[\'ecoestres_informes\']</code>. '+(T?('<strong>'+T+'</strong> estudio(s) guardado(s).'):'No hay estudios guardados aún en esa clave — los indicadores se mostrarán cuando existan.')+' Semáforos según umbrales de calidad razonables.</div>';
+      h+='<div class="eea-note">Auditoría calculada en este equipo desde <code>localStorage[\'ecoestres_informes\']</code>. '+(T?('<strong>'+T+'</strong> estudio(s) guardado(s).'):'No hay estudios guardados aún en esa clave — los indicadores se mostrarán cuando existan.')+' Semáforos según umbrales de calidad razonables. <b>Los indicadores se calculan según los módulos activos en tu perfil de estudio.</b></div>';
       // VOLUMEN
       h+='<div class="eea-sec">Volumen</div>';
       h+='<div class="eea-grid" style="margin-bottom:10px">'+card(T,'Estudios totales','')+card((function(){var s=0;A.months.forEach(function(m){s+=m.n;});return s;})(),'Últimos 6 meses','')+'</div>';
@@ -3048,6 +3133,8 @@ function ebTextoInforme(){
       // CALIDAD
       var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T);
       var wm=A.wmsi; var wmColor=wm==null?'var(--text2)':wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)';
+      // Completitud por módulo: si el módulo está desactivado en el perfil, no cuenta como brecha (N/A)
+      var qc=function(mk,q,lbl){ if(typeof eeModActive==='function'&&!eeModActive(mk)) return card('—',lbl,'desactivado en tu perfil','var(--text2)'); return card(pct(q,T)+'%',lbl,q+'/'+T,semHigh(pct(q,T),70,40)); };
       h+='<div class="eea-sec">Calidad</div>';
       h+='<div class="eea-grid">'
         +card(pMax+'%','FC objetivo (máxima)',A.maxTest+'/'+T,semHigh(pMax,85,70))
@@ -3057,10 +3144,10 @@ function ebTextoInforme(){
         +card(pBull+'%','Con Bull’s Eye',A.bulls+'/'+T,semHigh(pBull,85,60))
         +card(pInf+'%','Con informe narrativo',A.infs+'/'+T,semHigh(pInf,85,60))
         +card(wm!=null?wm.toFixed(2):'—','WMSI prom. pico','',wmColor)
-        +card(pct(A.qEa,T)+'%','Elastancia completada',A.qEa+'/'+T,semHigh(pct(A.qEa,T),70,40))
-        +card(pct(A.qCfvr,T)+'%','CFVR completada',A.qCfvr+'/'+T,semHigh(pct(A.qCfvr,T),70,40))
-        +card(pct(A.qEte,T)+'%','Tabla eco por etapas',A.qEte+'/'+T,semHigh(pct(A.qEte,T),70,40))
-        +card(pct(A.qStrain,T)+'%','Bull’s Eye strain',A.qStrain+'/'+T,semHigh(pct(A.qStrain,T),70,40))
+        +qc('elastancia',A.qEa,'Elastancia completada')
+        +qc('cfvr',A.qCfvr,'CFVR completada')
+        +qc('ecoetapas',A.qEte,'Tabla eco por etapas')
+        +qc('strainBull',A.qStrain,'Bull’s Eye strain')
         +'</div>';
       // HALLAZGOS
       h+='<div class="eea-sec">Hallazgos</div>';
@@ -3123,6 +3210,7 @@ function ebTextoInforme(){
     y=hdrH+5;
     fn(8); tc(90,90,90); doc.text('Fecha de exportación: '+fmtToday()+'   ·   Estudios auditados: '+T,mL,y); y+=4.5;
     fn(7.2); tc(120,120,120); doc.text('Indicadores calculados en este equipo desde los estudios guardados. Semáforos según umbrales de calidad razonables.',mL,y); y+=4;
+    fn(7.2); tc(120,120,120); doc.text('Los indicadores se calculan según los módulos activos en tu perfil de estudio.',mL,y); y+=4;
 
     // ── Utilidades de dibujo ──
     function bar(t){ y+=2.5; ensure(12); fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F'); fb(9); tc(255,255,255); doc.text(String(t),mL+4,y+4.9); y+=11; }
@@ -3233,12 +3321,13 @@ function ebTextoInforme(){
     y=hdrH+5;
     fn(8); tc(90,90,90); doc.text((periodoF?('Período: '+periodoF+'   ·   '):'')+'Fecha de exportación: '+fmtToday()+'   ·   Estudios auditados: '+T,mL,y); y+=4.5;
     fn(7.2); tc(120,120,120); doc.text('Indicadores calculados en este equipo desde los estudios guardados. Semáforos según umbrales de calidad razonables.',mL,y); y+=4;
+    fn(7.2); tc(120,120,120); doc.text('Los indicadores se calculan según los módulos activos en tu perfil de estudio.',mL,y); y+=4;
     function bar(t){ y+=2.5; ensure(12); fc(TEMA[0],TEMA[1],TEMA[2]); doc.rect(mL,y,pgW,7,'F'); fb(9); tc(255,255,255); doc.text(String(t),mL+4,y+4.9); y+=11; }
     function row(label,val,sub,color){ ensure(6.2); fn(8.5); tc(30,30,30); doc.text(String(label),mL+2,y); fb(9); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text(String(val==null||val===''?'—':val),mL+92,y); if(sub){ fn(7.5); tc(110,110,110); doc.text(String(sub),mL+118,y); } var st=semTxt(color); if(st){ var col=st==='Verde'?[22,140,70]:st==='Amarillo'?[184,134,11]:[190,40,40]; fb(8); tc(col[0],col[1],col[2]); doc.text('('+st+')',mL+150,y); } y+=6; }
     function dist(title,entries){ var tot=entries.reduce(function(a,b){return a+(b.n||0);},0)||1; ensure(6); fb(7.6); tc(90,90,90); doc.text(String(title),mL+2,y); y+=5; entries.forEach(function(e){ var p=Math.round((e.n||0)/tot*100); ensure(5); fn(8); tc(40,40,40); doc.text('- '+e.label,mL+4,y); fb(8); tc(TEMA[0],TEMA[1],TEMA[2]); doc.text((e.n||0)+' · '+p+'%',mL+92,y); y+=4.8; }); y+=1.5; }
     if(chk('ee-pdf-volumen')){ bar('Volumen'); row('Estudios totales',T); var u6=0; A.months.forEach(function(m){u6+=m.n;}); row('Últimos 6 meses',u6); dist('Estudios por mes',A.months.map(function(m){return {label:m.label,n:m.n};})); dist('Tipo de estrés',['Esfuerzo','Dobutamina','Dipiridamol','Adenosina','Sin dato'].map(function(k){return {label:k,n:A.est[k]};})); bar('Protocolo - seguridad y farmacos'); row('Contraindicaciones relativas',pct(A.ciPres,T)+'%',A.ciPres+'/'+T,semLow(pct(A.ciPres,T),10,30)); row('Atropina administrada',pct(A.atrop,T)+'%',A.atrop+'/'+T); row('Medicacion de rescate',pct(A.rescate,T)+'%',A.rescate+'/'+T,semLow(pct(A.rescate,T),10,30)); }
     if(chk('ee-pdf-resultados')){ bar('Resultados'); row('Positivos isquemia',pct(A.res.pos,T)+'%',A.res.pos+'/'+T,'var(--red)'); row('Negativos',pct(A.res.neg,T)+'%',A.res.neg+'/'+T,'var(--green)'); row('Indeterminados',pct(A.res.inc,T)+'%',A.res.inc+'/'+T,'var(--yellow)'); row('Viabilidad presente',pct(A.res.via,T)+'%',A.res.via+'/'+T); row('Con síntomas',pct(A.sint,T)+'%',A.sint+'/'+T,'var(--amber)'); row('Lineas B >=3/campo post',pct(A.lbHi,T)+'%',A.lbHi+'/'+T,'var(--amber)'); row('IM inducible mod-sev',pct(A.imInd,T)+'%',A.imInd+'/'+T,'var(--amber)'); row('Deterioro SGL en pico',pct(A.sglDet,T)+'%',A.sglDet+'/'+T,'var(--amber)'); dist('Protocolo',[{label:'Completado',n:A.completado},{label:'Interrumpido',n:A.interrump}]); row('Motivo finalización más frecuente',A.motivoTop); bar('Reserva contractil'); row('Elastancia calculada',pct(A.eaCalc,T)+'%',A.eaCalc+'/'+T,semHigh(pct(A.eaCalc,T),70,40)); row('Reserva reducida (Ea<0.9)',pct(A.eaRed,T)+'%',A.eaRed+'/'+T,A.eaRed>0?'var(--red)':'var(--green)'); row('Delta FEVI promedio',A.dFevi!=null?((A.dFevi>0?'+':'')+A.dFevi.toFixed(1)):'—'); row('Delta SGL promedio',A.dSgl!=null?((A.dSgl>0?'+':'')+A.dSgl.toFixed(1)):'—'); bar('ABCD-FLPR'); dist('Positivos por letra',[{label:'B ECG',n:A.posLetras.B},{label:'C Contractilidad',n:A.posLetras.C},{label:'D Dilat/IM/PA',n:A.posLetras.D},{label:'F CFVR',n:A.posLetras.F},{label:'L Llenado diast.',n:A.posLetras.L},{label:'P Presiones pulm.',n:A.posLetras.P},{label:'R Recuper/VD',n:A.posLetras.R}]); row("Reserva diast. alterada (E/e' pico >14)",pct(A.diastAlt,T)+'%',A.diastAlt+'/'+T,'var(--amber)'); row('CFVR reducida (<1.5)',pct(A.cfvrRed15,T)+'%',A.cfvrRed15+'/'+T,'var(--red)'); row('Reserva cronotropica reducida',(A.cronoTot?pct(A.cronoRed,A.cronoTot):0)+'%',A.cronoRed+'/'+(A.cronoTot||0),'var(--amber)'); row('Compromiso VD inducible',pct(A.vdInd,T)+'%',A.vdInd+'/'+T,'var(--amber)'); }
-    if(chk('ee-pdf-calidad')){ bar('Calidad'); var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T); row('FC objetivo (máxima)',pMax+'%',A.maxTest+'/'+T,semHigh(pMax,85,70)); row('METs promedio',A.mets!=null?A.mets.toFixed(1):'—'); row('Doble producto reg.',pDp+'%',A.dp+'/'+T,semHigh(pDp,85,60)); row('Con imágenes',pImg+'%',A.imgs+'/'+T,semHigh(pImg,85,60)); row('Con Bull’s Eye',pBull+'%',A.bulls+'/'+T,semHigh(pBull,85,60)); row('Con informe narrativo',pInf+'%',A.infs+'/'+T,semHigh(pInf,85,60)); var wm=A.wmsi,wmColor=wm==null?'':(wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)'); row('WMSI prom. pico',wm!=null?wm.toFixed(2):'—','',wmColor); row('Elastancia completada',pct(A.qEa,T)+'%',A.qEa+'/'+T,semHigh(pct(A.qEa,T),70,40)); row('CFVR completada',pct(A.qCfvr,T)+'%',A.qCfvr+'/'+T,semHigh(pct(A.qCfvr,T),70,40)); row('Tabla eco por etapas',pct(A.qEte,T)+'%',A.qEte+'/'+T,semHigh(pct(A.qEte,T),70,40)); row("Bull's Eye strain",pct(A.qStrain,T)+'%',A.qStrain+'/'+T,semHigh(pct(A.qStrain,T),70,40)); }
+    if(chk('ee-pdf-calidad')){ bar('Calidad'); var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T); row('FC objetivo (máxima)',pMax+'%',A.maxTest+'/'+T,semHigh(pMax,85,70)); row('METs promedio',A.mets!=null?A.mets.toFixed(1):'—'); row('Doble producto reg.',pDp+'%',A.dp+'/'+T,semHigh(pDp,85,60)); row('Con imágenes',pImg+'%',A.imgs+'/'+T,semHigh(pImg,85,60)); row('Con Bull’s Eye',pBull+'%',A.bulls+'/'+T,semHigh(pBull,85,60)); row('Con informe narrativo',pInf+'%',A.infs+'/'+T,semHigh(pInf,85,60)); var wm=A.wmsi,wmColor=wm==null?'':(wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)'); row('WMSI prom. pico',wm!=null?wm.toFixed(2):'—','',wmColor); var qrow=function(mk,q,lbl){ if(typeof eeModActive==='function'&&!eeModActive(mk)){ row(lbl,'N/A','desactivado'); return; } row(lbl,pct(q,T)+'%',q+'/'+T,semHigh(pct(q,T),70,40)); }; qrow('elastancia',A.qEa,'Elastancia completada'); qrow('cfvr',A.qCfvr,'CFVR completada'); qrow('ecoetapas',A.qEte,'Tabla eco por etapas'); qrow('strainBull',A.qStrain,"Bull's Eye strain"); }
     if(chk('ee-pdf-hallazgos')){ bar('Hallazgos'); dist('FEVI basal',['Normal ≥55','Leve 45-54','Reducida 35-44','Severa <35','Sin dato'].map(function(k){return {label:k,n:A.fevi[k]};})); row('Alt. motilidad pico',pct(A.altPico,T)+'%',A.altPico+'/'+T,'var(--amber)'); row('Territorio más frecuente',A.terrTop); row('PSAP basal >40',pct(A.psapHi,T)+'%',A.psapHi+'/'+T,A.psapHi>0?'var(--amber)':'var(--green)'); }
     if(chk('ee-pdf-brechas')){ bar('Brechas'); var pSinInf=pct(A.sinInf,T),pSinBull=pct(A.sinBull,T),pSinSeg=pct(A.sinSeg,A.pacTotal); row('Sin informe narrativo',A.sinInf,pSinInf+'%',semLow(pSinInf,10,30)); row('Sin Bull’s Eye',A.sinBull,pSinBull+'%',semLow(pSinBull,10,30)); row('Pacientes sin seguim. 6m',A.sinSeg,(A.pacTotal?pSinSeg+'% de '+A.pacTotal:'—'),semLow(pSinSeg,10,30)); }
     ensure(24); y=Math.max(y+8,255);
@@ -4623,6 +4712,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
 
     // 8b · Tabla Eco por Etapas (CAMBIO 2) — después de Ecocardiograma Basal, antes del Resultado ABCD-FLPR
     (function(){
+      if(typeof eeModActive==='function'&&!eeModActive('ecoetapas'))return;   // módulo desactivado en el perfil
       var data=(typeof etePDFData==='function')?etePDFData():null; if(!data)return;
       var heads=(typeof eteHeaderLabels==='function')?eteHeaderLabels():['Reposo','Baja','Alta','Pico','Recup.'];
       drawBar('TABLA ECO POR ETAPAS', 34);
@@ -4659,6 +4749,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var an=(typeof getAnormPico==='function')?getAnormPico():{segs:[]};
     var abcd=[];
     function nar(id){ var t=V(id); return t?(' — '+t):''; }
+    function MOD(k){ return (typeof eeModActive!=='function')||eeModActive(k); }   // módulo activo en el perfil
     abcd.push('A — Adecuación: '+(V('a-sufic')||(fcpct!=null?(fcpct+'% FC máx. teórica'):'—'))+(V('a-fcmax')?(', FC máx '+V('a-fcmax')+' lpm'):'')+(V('a-motivo')?(', motivo: '+V('a-motivo')):'')+'.'+nar('a-narr'));
     abcd.push('B — ECG: '+(T('b-ecg-estres')||'sin cambios significativos')+'.'+nar('b-ecg-desc'));
     var cTxt='C — Contractilidad y reserva contráctil: WMSI basal '+(wmsiB!=null?wmsiB:'—')+', pico '+(wmsiP!=null?wmsiP:'—')+(wmsiR!=null?(', recuperación '+wmsiR):'')+'.';
@@ -4667,14 +4758,16 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     if(V('c-fevi-bas')||V('c-fevi-pic'))cTxt+=' FEVI '+(V('c-fevi-bas')||'—')+'% -> '+(V('c-fevi-pic')||'—')+'%'+(V('c-dfevi')?(' (Delta FEVI '+V('c-dfevi')+')'):'')+'.';
     if(V('c-dsgl'))cTxt+=' Delta SGL '+V('c-dsgl')+'.';
     if(V('c-dvti'))cTxt+=' Delta VTI '+V('c-dvti')+'.';
-    if(V('c-ea'))cTxt+=' Ea (elastancia) '+V('c-ea')+'.';
+    if(V('c-ea')&&MOD('elastancia'))cTxt+=' Ea (elastancia) '+V('c-ea')+'.';
     cTxt+=nar('c-narr'); abcd.push(cTxt);
+    if(MOD('abcdFull')){
     abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'+nar('d-narr'));
     var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
     abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.'+nar('f-narr'));
-    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(V('l-irc')?(', IRC '+V('l-irc')):'')+'; líneas B '+(T('l-post')||'—')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
+    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(MOD('reservaDiast')&&V('l-irc')?(', IRC '+V('l-irc')):'')+(MOD('reservaDiast')?('; líneas B '+(T('l-post')||'—')):'')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
     abcd.push('P — Presiones/pulmonar: PSAP '+(V('p-psap-bas')||'—')+' -> '+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?('; TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?('; RVP '+V('p-rvp')):'')+'; patrón diastólico basal '+(T('p-diast')||'—')+'.'+nar('p-narr'));
     abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
+    }
     drawBullet(abcd);
     var resMap={neg:'NEGATIVO para isquemia inducible',pos:'POSITIVO para isquemia inducible',inc:'INDETERMINADO / no concluyente',via:'con VIABILIDAD miocárdica presente',novia:'SIN viabilidad miocárdica'};
     var rg=document.getElementById('res-global')?document.getElementById('res-global').value:'';
@@ -4724,7 +4817,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       // Bull's Eye Strain (CAMBIO 5) — solo si "Incluir en PDF" está marcado
       try{
         var incStrain=document.getElementById('strain-include-pdf');
-        if(incStrain&&incStrain.checked){
+        if(incStrain&&incStrain.checked&&(typeof eeModActive!=='function'||eeModActive('strainBull'))){
           var sList=[{which:'basal',id:'strain-name-basal',def:'Strain Basal'},{which:'pico',id:'strain-name-pico',def:'Strain Pico'}];
           for(var si=0;si<sList.length;si++){ var spng=await strainToPng(sList[si].which); if(spng){ var sd=await loadDims(spng); var nmEl=document.getElementById(sList[si].id); var nm=(nmEl&&String(nmEl.value||'').trim())?String(nmEl.value).trim():sList[si].def; assets.strainImgs.push({src:spng,lbl:nm,dims:sd}); } }
         }
