@@ -265,6 +265,9 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 .ee-toast-ok{background:#16a34a;}
 .ee-toast-err{background:#dc2626;}
 @media print{ .ee-float,#ee-login,.ee-modal,.hdr-ibtn,.hdr-logo-edit,.hdr-logo-del,.ee-toast{display:none!important;} }
+/* === Accesibilidad (auditoria UX/a11y P1/P2) === */
+:focus-visible{outline:3px solid #38bdf8!important;outline-offset:2px!important;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -299,7 +302,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 </script>
 <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
 <header>
-  <button class="mob-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="mob-toggle" aria-label="Abrir menú" onclick="toggleSidebar()">☰</button>
   <div class="hdr-logo">
     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
       <rect width="28" height="28" rx="7" fill="#E11D48" opacity=".12"/>
@@ -397,23 +400,23 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         <div class="card-head">📐 Dimensiones VI (Modo M / 2D)</div>
         <div class="card-body">
           <div class="grid2">
-            <div class="fg"><label>DIVI (mm)</label><input type="number" id="eb-divi" step="0.1" placeholder="48" oninput="ebCalcMasa()"></div>
-            <div class="fg"><label>DSVI (mm)</label><input type="number" id="eb-dsvi" step="0.1" placeholder="30" oninput="ebCalcFAC()"></div>
+            <div class="fg"><label for="eb-divi">DIVI (mm)</label><input type="number" id="eb-divi" step="0.1" placeholder="48" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label for="eb-dsvi">DSVI (mm)</label><input type="number" id="eb-dsvi" step="0.1" placeholder="30" oninput="ebCalcFAC()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>SIVd (mm)</label><input type="number" id="eb-sivd" step="0.1" placeholder="9" oninput="ebCalcMasa()"></div>
-            <div class="fg"><label>PPVId (mm)</label><input type="number" id="eb-ppvid" step="0.1" placeholder="9" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label for="eb-sivd">SIVd (mm)</label><input type="number" id="eb-sivd" step="0.1" placeholder="9" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label for="eb-ppvid">PPVId (mm)</label><input type="number" id="eb-ppvid" step="0.1" placeholder="9" oninput="ebCalcMasa()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Fracción acortamiento (%)</label><input type="number" id="eb-fac" readonly placeholder="—"></div>
-            <div class="fg"><label>Masa VI (g) — Devereux</label><input type="number" id="eb-masa" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-fac">Fracción acortamiento (%)</label><input type="number" id="eb-fac" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-masa">Masa VI (g) — Devereux</label><input type="number" id="eb-masa" readonly placeholder="—"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Masa VI indexada (g/m²)</label><input type="number" id="eb-masa-i" readonly placeholder="—"></div>
-            <div class="fg"><label>SC (m²)</label><input type="number" id="eb-sc" step="0.01" placeholder="1.80" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label for="eb-masa-i">Masa VI indexada (g/m²)</label><input type="number" id="eb-masa-i" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-sc">SC (m²)</label><input type="number" id="eb-sc" step="0.01" placeholder="1.80" oninput="ebCalcMasa()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>RWT (grosor relativo pared)</label><input type="number" id="eb-rwt" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-rwt">RWT (grosor relativo pared)</label><input type="number" id="eb-rwt" readonly placeholder="—"></div>
             <div class="fg"><label>Geometría VI</label><div id="eb-geom-vi" style="font-size:11px;font-weight:600;margin-top:8px;color:var(--text2)">—</div></div>
           </div>
           <div id="eb-vi-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
@@ -431,27 +434,27 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <option value="3d">3D</option>
             </select>
           </div>
-          <div class="fg"><label>FEVI (%)</label><input type="number" id="eb-fevi" placeholder="60" oninput="ebEvalFEVI()"></div>
+          <div class="fg"><label for="eb-fevi">FEVI (%)</label><input type="number" id="eb-fevi" placeholder="60" oninput="ebEvalFEVI()"></div>
           <div id="eb-fevi-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:10px"></div>
 
           <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:6px">Simpson biplanar</div>
           <div class="grid2">
-            <div class="fg"><label>Vol. diastólico 4C (mL)</label><input type="number" id="eb-vd4c" placeholder="120" oninput="ebCalcSimpson()"></div>
-            <div class="fg"><label>Vol. sistólico 4C (mL)</label><input type="number" id="eb-vs4c" placeholder="45" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vd4c">Vol. diastólico 4C (mL)</label><input type="number" id="eb-vd4c" placeholder="120" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vs4c">Vol. sistólico 4C (mL)</label><input type="number" id="eb-vs4c" placeholder="45" oninput="ebCalcSimpson()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Vol. diastólico 2C (mL)</label><input type="number" id="eb-vd2c" placeholder="115" oninput="ebCalcSimpson()"></div>
-            <div class="fg"><label>Vol. sistólico 2C (mL)</label><input type="number" id="eb-vs2c" placeholder="42" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vd2c">Vol. diastólico 2C (mL)</label><input type="number" id="eb-vd2c" placeholder="115" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vs2c">Vol. sistólico 2C (mL)</label><input type="number" id="eb-vs2c" placeholder="42" oninput="ebCalcSimpson()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>VTDVI biplano (mL)</label><input type="number" id="eb-vtd" readonly placeholder="—"></div>
-            <div class="fg"><label>VTSVI biplano (mL)</label><input type="number" id="eb-vts" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-vtd">VTDVI biplano (mL)</label><input type="number" id="eb-vtd" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-vts">VTSVI biplano (mL)</label><input type="number" id="eb-vts" readonly placeholder="—"></div>
           </div>
-          <div class="fg"><label>FEVI Simpson biplano (%)</label><input type="number" id="eb-fevi-simpson" readonly placeholder="—"></div>
+          <div class="fg"><label for="eb-fevi-simpson">FEVI Simpson biplano (%)</label><input type="number" id="eb-fevi-simpson" readonly placeholder="—"></div>
           <div id="eb-fevi-simp-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
 
           <div style="height:1px;background:var(--border);margin:12px 0"></div>
-          <div class="fg"><label>GLS basal (%) — si disponible</label><input type="number" id="eb-gls" step="0.1" placeholder="-20" oninput="ebEvalGLS()"></div>
+          <div class="fg"><label for="eb-gls">GLS basal (%) — si disponible</label><input type="number" id="eb-gls" step="0.1" placeholder="-20" oninput="ebEvalGLS()"></div>
           <div id="eb-gls-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
         </div>
       </div>
@@ -465,14 +468,14 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         <div class="card-head">🌊 Doppler transmitral</div>
         <div class="card-body">
           <div class="grid2">
-            <div class="fg"><label>Onda E (cm/s)</label><input type="number" id="eb-e" step="0.1" placeholder="70" oninput="ebCalcDiast()"></div>
-            <div class="fg"><label>Onda A (cm/s)</label><input type="number" id="eb-a" step="0.1" placeholder="60" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label for="eb-e">Onda E (cm/s)</label><input type="number" id="eb-e" step="0.1" placeholder="70" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label for="eb-a">Onda A (cm/s)</label><input type="number" id="eb-a" step="0.1" placeholder="60" oninput="ebCalcDiast()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Relación E/A</label><input type="number" id="eb-ea" readonly placeholder="—"><div id="eb-ea-res" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
-            <div class="fg"><label>Tiempo desaceleración E (ms)</label><input type="number" id="eb-td" placeholder="200" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label for="eb-ea">Relación E/A</label><input type="number" id="eb-ea" readonly placeholder="—"><div id="eb-ea-res" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
+            <div class="fg"><label for="eb-td">Tiempo desaceleración E (ms)</label><input type="number" id="eb-td" placeholder="200" oninput="ebCalcDiast()"></div>
           </div>
-          <div class="fg"><label>TRIV (ms)</label><input type="number" id="eb-triv" placeholder="80"></div>
+          <div class="fg"><label for="eb-triv">TRIV (ms)</label><input type="number" id="eb-triv" placeholder="80"></div>
           <div class="note-box" style="margin-top:8px">ℹ️ TD normal: 160–200 ms. TD &lt;160 ms con E/A &gt;2 → patrón restrictivo. TD &gt;220 ms con E/A &lt;0.8 → relajación alterada.</div>
         </div>
       </div>
@@ -481,18 +484,18 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         <div class="card-head">📍 TDI — Doppler Tisular Mitral</div>
         <div class="card-body">
           <div class="grid2">
-            <div class="fg"><label>e' septal (cm/s)</label><input type="number" id="eb-e-sep" step="0.1" placeholder="8" oninput="ebCalcDiast()"></div>
-            <div class="fg"><label>e' lateral (cm/s)</label><input type="number" id="eb-e-lat" step="0.1" placeholder="10" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label for="eb-e-sep">e' septal (cm/s)</label><input type="number" id="eb-e-sep" step="0.1" placeholder="8" oninput="ebCalcDiast()"></div>
+            <div class="fg"><label for="eb-e-lat">e' lateral (cm/s)</label><input type="number" id="eb-e-lat" step="0.1" placeholder="10" oninput="ebCalcDiast()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>e' promedio (cm/s)</label><input type="number" id="eb-e-prom" readonly placeholder="—"></div>
-            <div class="fg"><label>Relación E/e promedio</label><input type="number" id="eb-eeprom" readonly placeholder="—"><div id="eb-eeprom-res" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
+            <div class="fg"><label for="eb-e-prom">e' promedio (cm/s)</label><input type="number" id="eb-e-prom" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-eeprom">Relación E/e promedio</label><input type="number" id="eb-eeprom" readonly placeholder="—"><div id="eb-eeprom-res" style="font-size:11px;font-weight:600;margin-top:2px"></div></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>E/e' septal</label><input type="number" id="eb-ee-sep" readonly placeholder="—"></div>
-            <div class="fg"><label>E/e' lateral</label><input type="number" id="eb-ee-lat" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-ee-sep">E/e' septal</label><input type="number" id="eb-ee-sep" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-ee-lat">E/e' lateral</label><input type="number" id="eb-ee-lat" readonly placeholder="—"></div>
           </div>
-          <div class="fg"><label>s' septal (cm/s)</label><input type="number" id="eb-s-sep" step="0.1" placeholder="8"></div>
+          <div class="fg"><label for="eb-s-sep">s' septal (cm/s)</label><input type="number" id="eb-s-sep" step="0.1" placeholder="8"></div>
           <div id="eb-diast-res" style="font-size:12px;font-weight:600;margin-top:8px;line-height:1.6"></div>
         </div>
       </div>
@@ -524,10 +527,10 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card">
         <div class="card-head">📐 Dimensiones VD</div>
         <div class="card-body">
-          <div class="fg"><label>DTDVD basal (mm) — apical 4C</label><input type="number" id="eb-vd-bas" step="0.1" placeholder="36" oninput="ebEvalVD()"></div>
-          <div class="fg"><label>DTDVD medio (mm)</label><input type="number" id="eb-vd-med" step="0.1" placeholder="28"></div>
-          <div class="fg"><label>DTDVD longitudinal (mm)</label><input type="number" id="eb-vd-long" step="0.1" placeholder="70"></div>
-          <div class="fg"><label>Grosor pared libre VD (mm)</label><input type="number" id="eb-vd-pared" step="0.1" placeholder="4" oninput="ebEvalVD()"></div>
+          <div class="fg"><label for="eb-vd-bas">DTDVD basal (mm) — apical 4C</label><input type="number" id="eb-vd-bas" step="0.1" placeholder="36" oninput="ebEvalVD()"></div>
+          <div class="fg"><label for="eb-vd-med">DTDVD medio (mm)</label><input type="number" id="eb-vd-med" step="0.1" placeholder="28"></div>
+          <div class="fg"><label for="eb-vd-long">DTDVD longitudinal (mm)</label><input type="number" id="eb-vd-long" step="0.1" placeholder="70"></div>
+          <div class="fg"><label for="eb-vd-pared">Grosor pared libre VD (mm)</label><input type="number" id="eb-vd-pared" step="0.1" placeholder="4" oninput="ebEvalVD()"></div>
           <div id="eb-vd-dim-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
           <div class="note-box" style="margin-top:8px">ℹ️ VD basal normal: ≤41 mm (♀) / ≤41 mm (♂). Pared libre &gt;5 mm = hipertrofia VD.</div>
         </div>
@@ -536,15 +539,15 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card">
         <div class="card-head">💓 Función sistólica VD</div>
         <div class="card-body">
-          <div class="fg"><label>TAPSE (mm)</label><input type="number" id="eb-tapse" step="0.1" placeholder="22" oninput="ebEvalVD()"></div>
+          <div class="fg"><label for="eb-tapse">TAPSE (mm)</label><input type="number" id="eb-tapse" step="0.1" placeholder="22" oninput="ebEvalVD()"></div>
           <div id="eb-tapse-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
-          <div class="fg"><label>S' tricuspídea TDI (cm/s)</label><input type="number" id="eb-s-tric" step="0.1" placeholder="12" oninput="ebEvalVD()"></div>
+          <div class="fg"><label for="eb-s-tric">S' tricuspídea TDI (cm/s)</label><input type="number" id="eb-s-tric" step="0.1" placeholder="12" oninput="ebEvalVD()"></div>
           <div id="eb-stric-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
           <div class="grid2">
-            <div class="fg"><label>Área diastólica VD (cm²)</label><input type="number" id="eb-vd-ad" step="0.1" placeholder="16" oninput="ebCalcFAC_VD()"></div>
-            <div class="fg"><label>Área sistólica VD (cm²)</label><input type="number" id="eb-vd-as" step="0.1" placeholder="8" oninput="ebCalcFAC_VD()"></div>
+            <div class="fg"><label for="eb-vd-ad">Área diastólica VD (cm²)</label><input type="number" id="eb-vd-ad" step="0.1" placeholder="16" oninput="ebCalcFAC_VD()"></div>
+            <div class="fg"><label for="eb-vd-as">Área sistólica VD (cm²)</label><input type="number" id="eb-vd-as" step="0.1" placeholder="8" oninput="ebCalcFAC_VD()"></div>
           </div>
-          <div class="fg"><label>FAC VD (%)</label><input type="number" id="eb-fac-vd" readonly placeholder="—"></div>
+          <div class="fg"><label for="eb-fac-vd">FAC VD (%)</label><input type="number" id="eb-fac-vd" readonly placeholder="—"></div>
           <div id="eb-fac-vd-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="note-box" style="margin-top:8px">ℹ️ TAPSE normal: ≥17 mm. S' normal: ≥9.5 cm/s. FAC normal: ≥35%.</div>
         </div>
@@ -558,15 +561,15 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card">
         <div class="card-head">🫁 Aurícula Izquierda</div>
         <div class="card-body">
-          <div class="fg"><label>Diámetro AI — paraesternal (mm)</label><input type="number" id="eb-ai-diam" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
+          <div class="fg"><label for="eb-ai-diam">Diámetro AI — paraesternal (mm)</label><input type="number" id="eb-ai-diam" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
           <div id="eb-ai-diam-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
           <div class="grid2">
-            <div class="fg"><label>Vol. AI 4C (mL)</label><input type="number" id="eb-ai-vol4c" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
-            <div class="fg"><label>Vol. AI 2C (mL)</label><input type="number" id="eb-ai-vol2c" step="0.1" placeholder="36" oninput="ebEvalAI()"></div>
+            <div class="fg"><label for="eb-ai-vol4c">Vol. AI 4C (mL)</label><input type="number" id="eb-ai-vol4c" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
+            <div class="fg"><label for="eb-ai-vol2c">Vol. AI 2C (mL)</label><input type="number" id="eb-ai-vol2c" step="0.1" placeholder="36" oninput="ebEvalAI()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Vol. AI biplano (mL)</label><input type="number" id="eb-ai-vol" readonly placeholder="—"></div>
-            <div class="fg"><label>Vol. AI indexado (mL/m²)</label><input type="number" id="eb-ai-vol-i" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-ai-vol">Vol. AI biplano (mL)</label><input type="number" id="eb-ai-vol" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-ai-vol-i">Vol. AI indexado (mL/m²)</label><input type="number" id="eb-ai-vol-i" readonly placeholder="—"></div>
           </div>
           <div id="eb-ai-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
           <div class="note-box" style="margin-top:8px">ℹ️ Vol. AI indexado normal: ≤34 mL/m². &gt;34: leve. &gt;41: moderado. &gt;48: severo.</div>
@@ -581,9 +584,9 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card">
         <div class="card-head">🫁 Aurícula Derecha</div>
         <div class="card-body">
-          <div class="fg"><label>Área AD (cm²)</label><input type="number" id="eb-ad-area" step="0.1" placeholder="14" oninput="ebEvalAD()"></div>
+          <div class="fg"><label for="eb-ad-area">Área AD (cm²)</label><input type="number" id="eb-ad-area" step="0.1" placeholder="14" oninput="ebEvalAD()"></div>
           <div id="eb-ad-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
-          <div class="fg"><label>VCI (mm)</label><input type="number" id="eb-vci" step="0.1" placeholder="18" oninput="ebCalcPAD()"></div>
+          <div class="fg"><label for="eb-vci">VCI (mm)</label><input type="number" id="eb-vci" step="0.1" placeholder="18" oninput="ebCalcPAD()"></div>
           <div class="fg"><label>Colapso VCI con inspiración</label>
             <select id="eb-vci-colapso" onchange="ebCalcPAD()">
               <option value="">—</option>
@@ -592,7 +595,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <option value="no">Sin colapso</option>
             </select>
           </div>
-          <div class="fg"><label>PAD estimada (mmHg)</label><input type="number" id="eb-pad" readonly placeholder="—"></div>
+          <div class="fg"><label for="eb-pad">PAD estimada (mmHg)</label><input type="number" id="eb-pad" readonly placeholder="—"></div>
           <div id="eb-pad-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="note-box" style="margin-top:8px">ℹ️ Área AD normal: ≤18 cm². VCI &lt;21 mm + colapso &gt;50% → PAD 3 mmHg. VCI &gt;21 mm o colapso &lt;50% → PAD 8 mmHg. Ambos patológicos → PAD 15 mmHg.</div>
         </div>
@@ -606,14 +609,14 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card-head">🩸 Aorta</div>
       <div class="card-body">
         <div class="grid3">
-          <div class="fg"><label>Anillo aórtico (mm)</label><input type="number" id="eb-ao-anillo" step="0.1" placeholder="22"></div>
-          <div class="fg"><label>Senos de Valsalva (mm)</label><input type="number" id="eb-ao-senos" step="0.1" placeholder="33" oninput="ebEvalAorta()"></div>
-          <div class="fg"><label>Unión sinotubular (mm)</label><input type="number" id="eb-ao-ust" step="0.1" placeholder="28"></div>
+          <div class="fg"><label for="eb-ao-anillo">Anillo aórtico (mm)</label><input type="number" id="eb-ao-anillo" step="0.1" placeholder="22"></div>
+          <div class="fg"><label for="eb-ao-senos">Senos de Valsalva (mm)</label><input type="number" id="eb-ao-senos" step="0.1" placeholder="33" oninput="ebEvalAorta()"></div>
+          <div class="fg"><label for="eb-ao-ust">Unión sinotubular (mm)</label><input type="number" id="eb-ao-ust" step="0.1" placeholder="28"></div>
         </div>
         <div class="grid3">
-          <div class="fg"><label>Aorta ascendente (mm)</label><input type="number" id="eb-ao-asc" step="0.1" placeholder="32" oninput="ebEvalAorta()"></div>
-          <div class="fg"><label>Arco aórtico (mm)</label><input type="number" id="eb-ao-arco" step="0.1" placeholder="28"></div>
-          <div class="fg"><label>Aorta descendente (mm)</label><input type="number" id="eb-ao-desc" step="0.1" placeholder="24"></div>
+          <div class="fg"><label for="eb-ao-asc">Aorta ascendente (mm)</label><input type="number" id="eb-ao-asc" step="0.1" placeholder="32" oninput="ebEvalAorta()"></div>
+          <div class="fg"><label for="eb-ao-arco">Arco aórtico (mm)</label><input type="number" id="eb-ao-arco" step="0.1" placeholder="28"></div>
+          <div class="fg"><label for="eb-ao-desc">Aorta descendente (mm)</label><input type="number" id="eb-ao-desc" step="0.1" placeholder="24"></div>
         </div>
         <div id="eb-ao-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
         <div class="note-box" style="margin-top:8px">ℹ️ Senos de Valsalva: ≤40 mm normal (♂), ≤36 mm (♀). Aorta ascendente: ≤38 mm. Indexar en pacientes con SC muy diferente a 1.7 m².</div>
@@ -643,10 +646,10 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
             </select>
           </div>
           <div class="grid2">
-            <div class="fg"><label>GM medio (mmHg)</label><input type="number" id="eb-vm-gm" step="0.1" placeholder="3" oninput="ebEvalVM()"></div>
-            <div class="fg"><label>TP (ms)</label><input type="number" id="eb-vm-tp" placeholder="60" oninput="ebEvalVM()"></div>
+            <div class="fg"><label for="eb-vm-gm">GM medio (mmHg)</label><input type="number" id="eb-vm-gm" step="0.1" placeholder="3" oninput="ebEvalVM()"></div>
+            <div class="fg"><label for="eb-vm-tp">TP (ms)</label><input type="number" id="eb-vm-tp" placeholder="60" oninput="ebEvalVM()"></div>
           </div>
-          <div class="fg"><label>Área válvular por PHT (cm²)</label><input type="number" id="eb-vm-area-pht" readonly placeholder="—"></div>
+          <div class="fg"><label for="eb-vm-area-pht">Área válvular por PHT (cm²)</label><input type="number" id="eb-vm-area-pht" readonly placeholder="—"></div>
           <div class="fg"><label>IM (insuficiencia mitral)</label>
             <select id="eb-im-grado">
               <option value="no">Sin IM</option>
@@ -676,16 +679,16 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
             </select>
           </div>
           <div class="grid2">
-            <div class="fg"><label>Vmax (m/s)</label><input type="number" id="eb-va-vmax" step="0.1" placeholder="1.2" oninput="ebEvalVA()"></div>
-            <div class="fg"><label>GM medio (mmHg)</label><input type="number" id="eb-va-gm" step="0.1" placeholder="5" oninput="ebEvalVA()"></div>
+            <div class="fg"><label for="eb-va-vmax">Vmax (m/s)</label><input type="number" id="eb-va-vmax" step="0.1" placeholder="1.2" oninput="ebEvalVA()"></div>
+            <div class="fg"><label for="eb-va-gm">GM medio (mmHg)</label><input type="number" id="eb-va-gm" step="0.1" placeholder="5" oninput="ebEvalVA()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>ITVao (cm)</label><input type="number" id="eb-va-itv" step="0.1" placeholder="22" oninput="ebCalcAVA()"></div>
-            <div class="fg"><label>DTSVI (mm)</label><input type="number" id="eb-va-dtsvi" step="0.1" placeholder="22" oninput="ebCalcAVA()"></div>
+            <div class="fg"><label for="eb-va-itv">ITVao (cm)</label><input type="number" id="eb-va-itv" step="0.1" placeholder="22" oninput="ebCalcAVA()"></div>
+            <div class="fg"><label for="eb-va-dtsvi">DTSVI (mm)</label><input type="number" id="eb-va-dtsvi" step="0.1" placeholder="22" oninput="ebCalcAVA()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label>ITVtsvi (cm)</label><input type="number" id="eb-va-itvtsvi" step="0.1" placeholder="18" oninput="ebCalcAVA()"></div>
-            <div class="fg"><label>AVA por ecuación continuidad (cm²)</label><input type="number" id="eb-va-ava" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-va-itvtsvi">ITVtsvi (cm)</label><input type="number" id="eb-va-itvtsvi" step="0.1" placeholder="18" oninput="ebCalcAVA()"></div>
+            <div class="fg"><label for="eb-va-ava">AVA por ecuación continuidad (cm²)</label><input type="number" id="eb-va-ava" readonly placeholder="—"></div>
           </div>
           <div class="fg"><label>IAo (insuficiencia aórtica)</label>
             <select id="eb-iao-grado">
@@ -712,9 +715,9 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <option value="reumatica">Reumática</option>
             </select>
           </div>
-          <div class="fg"><label>Velocidad máx. IT (m/s)</label><input type="number" id="eb-it-vmax" step="0.1" placeholder="2.5" oninput="ebCalcPSAP()"></div>
-          <div class="fg"><label>Gradiente IT (mmHg)</label><input type="number" id="eb-it-grad" readonly placeholder="—"></div>
-          <div class="fg"><label>PSAP estimada (mmHg)</label><input type="number" id="eb-psap" readonly placeholder="—"></div>
+          <div class="fg"><label for="eb-it-vmax">Velocidad máx. IT (m/s)</label><input type="number" id="eb-it-vmax" step="0.1" placeholder="2.5" oninput="ebCalcPSAP()"></div>
+          <div class="fg"><label for="eb-it-grad">Gradiente IT (mmHg)</label><input type="number" id="eb-it-grad" readonly placeholder="—"></div>
+          <div class="fg"><label for="eb-psap">PSAP estimada (mmHg)</label><input type="number" id="eb-psap" readonly placeholder="—"></div>
           <div id="eb-psap-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="fg" style="margin-top:8px"><label>IT (insuficiencia tricuspídea)</label>
             <select id="eb-it-grado">
@@ -739,7 +742,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <option value="displasica">Displásica</option>
             </select>
           </div>
-          <div class="fg"><label>Gradiente máximo VP (mmHg)</label><input type="number" id="eb-vp-grad" step="0.1" placeholder="8" oninput="ebEvalVP()"></div>
+          <div class="fg"><label for="eb-vp-grad">Gradiente máximo VP (mmHg)</label><input type="number" id="eb-vp-grad" step="0.1" placeholder="8" oninput="ebEvalVP()"></div>
           <div id="eb-vp-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="fg" style="margin-top:8px"><label>IP (insuficiencia pulmonar)</label>
             <select id="eb-ip-grado">
@@ -749,7 +752,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <option value="sev">Severa</option>
             </select>
           </div>
-          <div class="fg"><label>PSVD (mmHg)</label><input type="number" id="eb-psvd" step="0.1" placeholder="25"></div>
+          <div class="fg"><label for="eb-psvd">PSVD (mmHg)</label><input type="number" id="eb-psvd" step="0.1" placeholder="25"></div>
         </div>
       </div>
     </div>
@@ -822,8 +825,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card-head">🧾 Datos del paciente</div>
       <div class="card-body">
         <div class="grid2">
-          <div class="fg"><label>Apellido y nombre</label><input id="p-nombre" placeholder="García, Juan"></div>
-          <div class="fg"><label>HC / ID</label><input id="p-hc" placeholder="123456"></div>
+          <div class="fg"><label for="p-nombre">Apellido y nombre</label><input id="p-nombre" placeholder="García, Juan"></div>
+          <div class="fg"><label for="p-hc">HC / ID</label><input id="p-hc" placeholder="123456"></div>
         </div>
         <div style="margin:2px 0 10px"><button type="button" class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="eeImportEcoSmart()">📥 Importar eco basal desde EcoSmart</button></div>
         <div class="grid3">
@@ -840,18 +843,18 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <input type="number" id="p-fnac-anio" min="1900" max="2100" placeholder="Año" oninput="calcEdad()" style="width:92px">
             </div>
           </div>
-          <div class="fg"><label>Edad (años)</label><input type="number" id="p-edad" placeholder="55" oninput="onEdadChange()"></div>
-          <div class="fg"><label>Sexo</label><select id="p-sexo" onchange="ptpCad()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+          <div class="fg"><label for="p-edad">Edad (años)</label><input type="number" id="p-edad" placeholder="55" oninput="onEdadChange()"></div>
+          <div class="fg"><label for="p-sexo">Sexo</label><select id="p-sexo" onchange="ptpCad()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
         </div>
         <div class="grid3">
-          <div class="fg"><label>Peso (kg)</label><input type="number" id="p-peso" step="0.1" placeholder="70" oninput="calcAntro();if(typeof calcDobuDosis==='function')calcDobuDosis()"></div>
-          <div class="fg"><label>Talla (cm)</label><input type="number" id="p-talla" step="0.1" placeholder="170" oninput="calcAntro()"></div>
-          <div class="fg"><label>IMC (kg/m²)</label><input type="number" id="p-imc" readonly placeholder="—"></div>
+          <div class="fg"><label for="p-peso">Peso (kg)</label><input type="number" id="p-peso" step="0.1" placeholder="70" oninput="calcAntro();if(typeof calcDobuDosis==='function')calcDobuDosis()"></div>
+          <div class="fg"><label for="p-talla">Talla (cm)</label><input type="number" id="p-talla" step="0.1" placeholder="170" oninput="calcAntro()"></div>
+          <div class="fg"><label for="p-imc">IMC (kg/m²)</label><input type="number" id="p-imc" readonly placeholder="—"></div>
         </div>
         <div class="grid3">
-          <div class="fg"><label>Fecha del estudio</label><input type="date" id="p-fecha"></div>
-          <div class="fg"><label>Fecha de solicitud</label><input type="date" id="p-fecha-sol"></div>
-          <div class="fg"><label>Médico solicitante</label><input id="p-medico" placeholder="Dr. Pérez"></div>
+          <div class="fg"><label for="p-fecha">Fecha del estudio</label><input type="date" id="p-fecha"></div>
+          <div class="fg"><label for="p-fecha-sol">Fecha de solicitud</label><input type="date" id="p-fecha-sol"></div>
+          <div class="fg"><label for="p-medico">Médico solicitante</label><input id="p-medico" placeholder="Dr. Pérez"></div>
         </div>
         <div class="fg"><label>Factores de riesgo</label>
           <div style="display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px;align-items:center">
@@ -863,7 +866,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
             <label style="display:inline-flex;align-items:center;gap:7px;white-space:nowrap;flex:0 0 auto;font-size:12px;cursor:pointer;color:var(--text2)"><input type="checkbox" id="frcv-ahf" style="flex:0 0 auto;width:16px;height:16px;padding:0;margin:0;accent-color:var(--accent2)"> AHF EC</label>
           </div>
         </div>
-        <div class="fg"><label>Medicación relevante</label><input id="p-medicacion" placeholder="Atenolol 50mg, AAS 100mg…"></div>
+        <div class="fg"><label for="p-medicacion">Medicación relevante</label><input id="p-medicacion" placeholder="Atenolol 50mg, AAS 100mg…"></div>
         <div class="fg"><label>Beta-bloqueantes suspendidos</label>
           <select id="p-bb"><option value="">No aplica</option><option value="si">Sí — 48h antes</option><option value="no">No suspendidos</option></select>
         </div>
@@ -986,23 +989,23 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <div class="card-head">📊 Parámetros hemodinámicos</div>
       <div class="card-body">
         <div class="grid2">
-          <div class="fg"><label>FC basal (lpm)</label><input type="number" id="b-fc-bas" placeholder="70"></div>
-          <div class="fg"><label>PA basal (mmHg)</label><input id="b-pa-bas" placeholder="130/80"></div>
+          <div class="fg"><label for="b-fc-bas">FC basal (lpm)</label><input type="number" id="b-fc-bas" placeholder="70"></div>
+          <div class="fg"><label for="b-pa-bas">PA basal (mmHg)</label><input id="b-pa-bas" placeholder="130/80"></div>
         </div>
         <div class="grid2">
-          <div class="fg"><label>FC máxima alcanzada</label><input type="number" id="b-fc-max" placeholder="145" oninput="calcFCpct()"></div>
-          <div class="fg"><label>FC máxima teórica</label><input type="number" id="b-fc-teo" readonly placeholder="—"></div>
+          <div class="fg"><label for="b-fc-max">FC máxima alcanzada</label><input type="number" id="b-fc-max" placeholder="145" oninput="calcFCpct()"></div>
+          <div class="fg"><label for="b-fc-teo">FC máxima teórica</label><input type="number" id="b-fc-teo" readonly placeholder="—"></div>
         </div>
         <div class="fg">
           <label>% FC máx. teórica — <span id="fc-pct-txt" style="color:var(--text)"></span></label>
           <div class="prog-wrap"><div class="prog-fill" id="fc-pct-bar" style="width:0%"></div></div>
         </div>
         <div class="grid2">
-          <div class="fg"><label>PA pico (mmHg)</label><input id="b-pa-pico" placeholder="180/90"></div>
-          <div class="fg"><label>METs alcanzados</label><input type="number" id="b-mets" step="0.5" placeholder="8.5"></div>
+          <div class="fg"><label for="b-pa-pico">PA pico (mmHg)</label><input id="b-pa-pico" placeholder="180/90"></div>
+          <div class="fg"><label for="b-mets">METs alcanzados</label><input type="number" id="b-mets" step="0.5" placeholder="8.5"></div>
         </div>
         <div class="grid2">
-          <div class="fg"><label>Duración estrés (min)</label><input type="number" id="b-dur" placeholder="8"></div>
+          <div class="fg"><label for="b-dur">Duración estrés (min)</label><input type="number" id="b-dur" placeholder="8"></div>
           <div class="fg"><label>Motivo suspensión</label>
             <select id="b-stop"><option value="">—</option><option>Protocolo completado</option><option>FC objetivo alcanzada</option><option>Angina</option><option>Cambios ECG</option><option>Hipotensión</option><option>Fatiga/disnea</option><option>Arritmia</option><option>Decisión médica</option></select>
           </div>
@@ -1070,17 +1073,17 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> si el nivel de estrés fue suficiente para descartar isquemia. Una prueba <em>submáxima</em> (&lt;85% FCM) puede dar falsos negativos y limita el valor diagnóstico.</div>
     <div class="grid3">
-      <div class="fg"><label>FC máxima alcanzada (lpm)</label><input id="a-fcmax" readonly placeholder="— (desde tabla de etapas)"></div>
-      <div class="fg"><label>% FCM alcanzado</label><input id="a-fcpct" readonly placeholder="—"></div>
-      <div class="fg"><label>FC objetivo (85% FCmax teórica)</label><input id="a-fc-obj" readonly placeholder="—"></div>
+      <div class="fg"><label for="a-fcmax">FC máxima alcanzada (lpm)</label><input id="a-fcmax" readonly placeholder="— (desde tabla de etapas)"></div>
+      <div class="fg"><label for="a-fcpct">% FCM alcanzado</label><input id="a-fcpct" readonly placeholder="—"></div>
+      <div class="fg"><label for="a-fc-obj">FC objetivo (85% FCmax teórica)</label><input id="a-fc-obj" readonly placeholder="—"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>Suficiencia de la prueba</label><input id="a-sufic" readonly placeholder="Automático según % FCM"></div>
-      <div class="fg"><label>Dosis dobutamina máxima</label><input id="a-dosis-dobu" placeholder="40 mcg/kg/min"></div>
+      <div class="fg"><label for="a-sufic">Suficiencia de la prueba</label><input id="a-sufic" readonly placeholder="Automático según % FCM"></div>
+      <div class="fg"><label for="a-dosis-dobu">Dosis dobutamina máxima</label><input id="a-dosis-dobu" placeholder="40 mcg/kg/min"></div>
     </div>
-    <div class="fg"><label>Motivo de suspensión</label><input id="a-motivo" readonly placeholder="— (desde tabla de etapas)"></div>
+    <div class="fg"><label for="a-motivo">Motivo de suspensión</label><input id="a-motivo" readonly placeholder="— (desde tabla de etapas)"></div>
     <div class="proto-res" id="a-res"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="a-narr" rows="2" placeholder="Ej.: Prueba máxima (89% FCM), finalizada por agotamiento. Estrés adecuado para valoración de isquemia."></textarea>
+    <div class="proto-narr"><label for="a-narr">📝 Interpretación (editable)</label><textarea id="a-narr" rows="2" placeholder="Ej.: Prueba máxima (89% FCM), finalizada por agotamiento. Estrés adecuado para valoración de isquemia."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('a')">💡 Sugerir texto</button></div>
     <div class="note-box" style="margin-top:8px">ℹ️ FCmax teórica = 220 − edad. Con dobutamina, agregar atropina hasta 1mg si no alcanza FC objetivo.</div>
   </div></div>
@@ -1090,10 +1093,10 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> cambios eléctricos de isquemia (infra/supradesnivel ST, inversión de T, arritmias). Complementa la motilidad; el infra ST no localiza el territorio.</div>
     <div class="grid2">
-      <div class="fg"><label>ECG basal</label><select id="b-ecg-bas"><option value="normal">Normal</option><option value="bri">BRI</option><option value="brd">BRD</option><option value="hvi">HVI con strain</option><option value="st">Cambios ST basales</option><option value="wcpw">WPW</option><option value="otro">Otro</option></select></div>
-      <div class="fg"><label>Resultado ECG durante estrés</label><select id="b-ecg-estres" onchange="protoCalc()"><option value="no">Normal / sin cambios significativos</option><option value="st-dep">Alteraciones ST — depresión ≥1mm</option><option value="st-ele">Alteraciones ST — elevación ≥1mm</option><option value="t-inv">Inversión de onda T</option><option value="arritmia">Arritmias significativas</option><option value="bri-func">BRI funcional (FC-dependiente)</option></select></div>
+      <div class="fg"><label for="b-ecg-bas">ECG basal</label><select id="b-ecg-bas"><option value="normal">Normal</option><option value="bri">BRI</option><option value="brd">BRD</option><option value="hvi">HVI con strain</option><option value="st">Cambios ST basales</option><option value="wcpw">WPW</option><option value="otro">Otro</option></select></div>
+      <div class="fg"><label for="b-ecg-estres">Resultado ECG durante estrés</label><select id="b-ecg-estres" onchange="protoCalc()"><option value="no">Normal / sin cambios significativos</option><option value="st-dep">Alteraciones ST — depresión ≥1mm</option><option value="st-ele">Alteraciones ST — elevación ≥1mm</option><option value="t-inv">Inversión de onda T</option><option value="arritmia">Arritmias significativas</option><option value="bri-func">BRI funcional (FC-dependiente)</option></select></div>
     </div>
-    <div class="proto-narr"><label>📝 Descripción / interpretación (editable)</label><textarea id="b-ecg-desc" rows="2" placeholder="Ej.: ST infradesnivelado 1.5mm horizontal en V4-V6 en pico de estrés, normaliza en recuperación."></textarea>
+    <div class="proto-narr"><label for="b-ecg-desc">📝 Descripción / interpretación (editable)</label><textarea id="b-ecg-desc" rows="2" placeholder="Ej.: ST infradesnivelado 1.5mm horizontal en V4-V6 en pico de estrés, normaliza en recuperación."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('b')">💡 Sugerir texto</button></div>
     <div class="warn-box">⚠️ BRI durante estrés a FC &lt;125 lpm → origen isquémico (DA). BRI a FC &gt;125 lpm → funcional.</div>
   </div></div>
@@ -1133,26 +1136,26 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       </table>
     </div>
     <div class="grid3" style="margin-top:8px">
-      <div class="fg"><label>Δ FEVI (pico − basal)</label><input id="c-dfevi" readonly placeholder="—"></div>
-      <div class="fg"><label>Δ SGL (pico − basal)</label><input id="c-dsgl" readonly placeholder="—"></div>
-      <div class="fg"><label>Δ VTI (pico − basal)</label><input id="c-dvti" readonly placeholder="—"></div>
+      <div class="fg"><label for="c-dfevi">Δ FEVI (pico − basal)</label><input id="c-dfevi" readonly placeholder="—"></div>
+      <div class="fg"><label for="c-dsgl">Δ SGL (pico − basal)</label><input id="c-dsgl" readonly placeholder="—"></div>
+      <div class="fg"><label for="c-dvti">Δ VTI (pico − basal)</label><input id="c-dvti" readonly placeholder="—"></div>
     </div>
-    <div class="fg"><label>Alteraciones de motilidad nuevas y territorio (Bull's Eye)</label><input id="c-alt-nuevas" readonly placeholder="— (desde Bull's Eye del pico)"></div>
+    <div class="fg"><label for="c-alt-nuevas">Alteraciones de motilidad nuevas y territorio (Bull's Eye)</label><input id="c-alt-nuevas" readonly placeholder="— (desde Bull's Eye del pico)"></div>
     <div data-mod="elastancia">
     <div style="margin:10px 0 4px;font-size:11px;font-weight:700;color:var(--accent2)">Elastancia telesistólica (reserva contráctil hemodinámica)</div>
     <div class="grid2">
-      <div class="fg"><label>VSF basal (mL) — vol. sistólico final</label><input type="number" id="c-vsf-bas" step="0.1" placeholder="45 (o VTSVI eco basal)" oninput="protoCalc()"></div>
-      <div class="fg"><label>VSF pico (mL)</label><input type="number" id="c-vsf-pic" step="0.1" placeholder="30" oninput="protoCalc()"></div>
+      <div class="fg"><label for="c-vsf-bas">VSF basal (mL) — vol. sistólico final</label><input type="number" id="c-vsf-bas" step="0.1" placeholder="45 (o VTSVI eco basal)" oninput="protoCalc()"></div>
+      <div class="fg"><label for="c-vsf-pic">VSF pico (mL)</label><input type="number" id="c-vsf-pic" step="0.1" placeholder="30" oninput="protoCalc()"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>PAS reposo (mmHg)</label><input id="c-pas-rep" readonly placeholder="— (desde tabla etapas)"></div>
-      <div class="fg"><label>PAS pico (mmHg)</label><input id="c-pas-pic" readonly placeholder="— (desde tabla etapas)"></div>
+      <div class="fg"><label for="c-pas-rep">PAS reposo (mmHg)</label><input id="c-pas-rep" readonly placeholder="— (desde tabla etapas)"></div>
+      <div class="fg"><label for="c-pas-pic">PAS pico (mmHg)</label><input id="c-pas-pic" readonly placeholder="— (desde tabla etapas)"></div>
     </div>
-    <div class="fg"><label>Ea = (PAS pico/VSFp) / (PAS reposo/VSFr)</label><input id="c-ea" readonly placeholder="—"></div>
+    <div class="fg"><label for="c-ea">Ea = (PAS pico/VSFp) / (PAS reposo/VSFr)</label><input id="c-ea" readonly placeholder="—"></div>
     <div class="proto-res" id="c-ea-res"></div>
     </div>
     <div class="proto-res" id="c-res"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="c-narr" rows="3" placeholder="Ej.: FEVI 60%→68% (ΔFEVI +8), SGL -20%→-24%, sin nuevas alteraciones segmentarias. Reserva contráctil conservada."></textarea>
+    <div class="proto-narr"><label for="c-narr">📝 Interpretación (editable)</label><textarea id="c-narr" rows="3" placeholder="Ej.: FEVI 60%→68% (ΔFEVI +8), SGL -20%→-24%, sin nuevas alteraciones segmentarias. Reserva contráctil conservada."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('c')">💡 Sugerir texto</button></div>
     <div class="note-box" style="margin-top:8px">ℹ️ Isquemia: nueva alteración en ≥2 segmentos adyacentes o empeoramiento. Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y Ea &gt;1.1.</div>
   </div></div>
@@ -1162,12 +1165,12 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> signos indirectos de isquemia extensa/severa: dilatación transitoria del VI (isquemia multivaso), insuficiencia mitral inducida y respuesta anómala de la PA (la hipotensión con estrés es un signo ominoso).</div>
     <div class="grid2">
-      <div class="fg"><label>IM inducida (grado)</label><select id="d-im" onchange="evalCriterios();protoCalc()"><option value="no">No</option><option value="leve">Leve</option><option value="mod">Moderada</option><option value="sev">Severa</option></select></div>
-      <div class="fg"><label>Dilatación VI con estrés</label><select id="d-dilat" onchange="evalCriterios();protoCalc()"><option value="no">No presente</option><option value="si">Presente — isquemia multivaso</option></select></div>
+      <div class="fg"><label for="d-im">IM inducida (grado)</label><select id="d-im" onchange="evalCriterios();protoCalc()"><option value="no">No</option><option value="leve">Leve</option><option value="mod">Moderada</option><option value="sev">Severa</option></select></div>
+      <div class="fg"><label for="d-dilat">Dilatación VI con estrés</label><select id="d-dilat" onchange="evalCriterios();protoCalc()"><option value="no">No presente</option><option value="si">Presente — isquemia multivaso</option></select></div>
     </div>
-    <div class="fg"><label>Respuesta presora al estrés</label><select id="d-pa" onchange="evalCriterios();protoCalc()"><option value="normal">Normal (↑ PAS &gt;10mmHg)</option><option value="hipo">Hipotensiva (↓ PAS &gt;10mmHg) — signo ominoso</option><option value="insuf">Respuesta insuficiente</option><option value="hiper">Hipertensiva excesiva</option></select></div>
+    <div class="fg"><label for="d-pa">Respuesta presora al estrés</label><select id="d-pa" onchange="evalCriterios();protoCalc()"><option value="normal">Normal (↑ PAS &gt;10mmHg)</option><option value="hipo">Hipotensiva (↓ PAS &gt;10mmHg) — signo ominoso</option><option value="insuf">Respuesta insuficiente</option><option value="hiper">Hipertensiva excesiva</option></select></div>
     <div class="proto-res" id="d-res"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="d-narr" rows="2" placeholder="Ej.: Sin dilatación transitoria ni IM inducida. Respuesta presora normal."></textarea>
+    <div class="proto-narr"><label for="d-narr">📝 Interpretación (editable)</label><textarea id="d-narr" rows="2" placeholder="Ej.: Sin dilatación transitoria ni IM inducida. Respuesta presora normal."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('d')">💡 Sugerir texto</button></div>
     <div class="warn-box">⚠️ Hipotensión con estrés = caída &gt;10mmHg PAS basal → suspender inmediatamente. Marcador de disfunción grave.</div>
   </div></div>
@@ -1177,12 +1180,12 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la reserva de flujo coronario (velocidad diastólica pico/reposo en DA). Una CFVR reducida (&lt;2.0) indica enfermedad epicárdica significativa o disfunción microvascular, y agrega valor pronóstico.</div>
     <div class="grid3">
-      <div class="fg"><label>VDP — vel. diastólica pico (cm/s)</label><input type="number" id="f-cfvr-vdp" step="0.1" placeholder="70" oninput="protoCalc()"></div>
-      <div class="fg"><label>VDR — vel. diastólica reposo (cm/s)</label><input type="number" id="f-cfvr-vdr" step="0.1" placeholder="28" oninput="protoCalc()"></div>
-      <div class="fg"><label>CFVR DA = VDP / VDR</label><input type="number" id="f-cfvr-da" step="0.1" placeholder="2.5" oninput="evalCFVRprot();protoCalc()"></div>
+      <div class="fg"><label for="f-cfvr-vdp">VDP — vel. diastólica pico (cm/s)</label><input type="number" id="f-cfvr-vdp" step="0.1" placeholder="70" oninput="protoCalc()"></div>
+      <div class="fg"><label for="f-cfvr-vdr">VDR — vel. diastólica reposo (cm/s)</label><input type="number" id="f-cfvr-vdr" step="0.1" placeholder="28" oninput="protoCalc()"></div>
+      <div class="fg"><label for="f-cfvr-da">CFVR DA = VDP / VDR</label><input type="number" id="f-cfvr-da" step="0.1" placeholder="2.5" oninput="evalCFVRprot();protoCalc()"></div>
     </div>
     <div id="f-cfvr-da-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="f-narr" rows="2" placeholder="Ej.: CFVR DA 2.6 (VDP 70 / VDR 27) — reserva de flujo conservada."></textarea>
+    <div class="proto-narr"><label for="f-narr">📝 Interpretación (editable)</label><textarea id="f-narr" rows="2" placeholder="Ej.: CFVR DA 2.6 (VDP 70 / VDR 27) — reserva de flujo conservada."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('f')">💡 Sugerir texto</button></div>
     <div class="note-box">ℹ️ Interpretación: &gt;2.0 normal · 1.5–2.0 límite · &lt;1.5 reducida. Ver módulo CFVR/Strain para las 3 arterias.</div>
   </div></div>
@@ -1192,27 +1195,27 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la respuesta diastólica al estrés (presiones de llenado, líneas B, PSAP, aurícula izquierda). Un E/e' pico ≥15 con líneas B y PSAP elevadas define un <em>eco estrés diastólico positivo</em> (ICFEp inducible).</div>
     <div class="grid2">
-      <div class="fg"><label>E/e' pico</label><input type="number" id="p-ee-pic" step="0.1" placeholder="13" oninput="evalEEpico();protoCalc()"></div>
-      <div class="fg"><label>e' pico (cm/s)</label><input type="number" id="l-eprima-pic" step="0.1" placeholder="12" oninput="protoCalc()"></div>
+      <div class="fg"><label for="p-ee-pic">E/e' pico</label><input type="number" id="p-ee-pic" step="0.1" placeholder="13" oninput="evalEEpico();protoCalc()"></div>
+      <div class="fg"><label for="l-eprima-pic">e' pico (cm/s)</label><input type="number" id="l-eprima-pic" step="0.1" placeholder="12" oninput="protoCalc()"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>e' reposo (cm/s)</label><input id="l-eprima-rep" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg" data-mod="reservaDiast"><label>IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"></div>
+      <div class="fg"><label for="l-eprima-rep">e' reposo (cm/s)</label><input id="l-eprima-rep" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg" data-mod="reservaDiast"><label for="l-irc">IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"></div>
     </div>
     <div id="p-ee-pic-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
     <div class="grid2">
-      <div class="fg" data-mod="reservaDiast"><label>Score líneas B post-estrés</label><select id="l-post" onchange="evalCriterios();protoCalc()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
-      <div class="fg"><label>PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP();protoCalc()"></div>
+      <div class="fg" data-mod="reservaDiast"><label for="l-post">Score líneas B post-estrés</label><select id="l-post" onchange="evalCriterios();protoCalc()"><option value="0">0 — Normal</option><option value="1">1-2/campo — Leve aumento</option><option value="2">≥3/campo — Congestión significativa</option></select></div>
+      <div class="fg"><label for="p-psap-pic">PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP();protoCalc()"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>Volumen AI (mL)</label><input id="l-vol-ai" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg"><label>Strain AI (%) — si disponible</label><input type="number" id="l-strain-ai" step="0.1" placeholder="Ej. 28"></div>
+      <div class="fg"><label for="l-vol-ai">Volumen AI (mL)</label><input id="l-vol-ai" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label for="l-strain-ai">Strain AI (%) — si disponible</label><input type="number" id="l-strain-ai" step="0.1" placeholder="Ej. 28"></div>
     </div>
-    <div class="fg"><label>Patrón diastólico con estrés</label><select id="l-diast-estres" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterado">Alterado (presiones de llenado elevadas)</option></select></div>
+    <div class="fg"><label for="l-diast-estres">Patrón diastólico con estrés</label><select id="l-diast-estres" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterado">Alterado (presiones de llenado elevadas)</option></select></div>
     <div class="fg" data-mod="reservaDiast" style="margin-top:6px"><label>Líneas B basales · Zonas evaluadas</label>
       <div style="display:flex;gap:8px"><select id="l-bas" style="flex:1"><option value="0">0 — Normal</option><option value="1">1-2/campo — Borderline</option><option value="2">≥3/campo — Congestión</option></select><input id="l-zonas" placeholder="Ej. 4 zonas anteriores bilaterales" style="flex:2"></div></div>
     <div class="proto-res" id="l-res"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="l-narr" rows="2" placeholder="Ej.: E/e' pico 11, sin líneas B, PSAP pico 34 mmHg. Sin disfunción diastólica inducible."></textarea>
+    <div class="proto-narr"><label for="l-narr">📝 Interpretación (editable)</label><textarea id="l-narr" rows="2" placeholder="Ej.: E/e' pico 11, sin líneas B, PSAP pico 34 mmHg. Sin disfunción diastólica inducible."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('l')">💡 Sugerir texto</button></div>
     <div class="note-box">ℹ️ E/e' pico ≥15 = PCP elevada. Líneas B ≥3/campo = congestión venocapilar inducida. E/e' basal en sección P.</div>
   </div></div>
@@ -1222,24 +1225,24 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la hemodinamia pulmonar y el acoplamiento VD-arteria pulmonar con el estrés. La HTP inducida (PSAP pico &gt;60 o Δ&gt;20 mmHg), la RVP elevada y una relación TAPSE/PSAP baja indican desacople VD-AP y peor pronóstico.</div>
     <div class="grid2">
-      <div class="fg"><label>PSAP basal (mmHg)</label><input type="number" id="p-psap-bas" placeholder="28" oninput="protoCalc()"></div>
-      <div class="fg"><label>PSAP pico (mmHg)</label><input id="p-psap-pic-disp" readonly placeholder="— (ver sección L)"></div>
+      <div class="fg"><label for="p-psap-bas">PSAP basal (mmHg)</label><input type="number" id="p-psap-bas" placeholder="28" oninput="protoCalc()"></div>
+      <div class="fg"><label for="p-psap-pic-disp">PSAP pico (mmHg)</label><input id="p-psap-pic-disp" readonly placeholder="— (ver sección L)"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>TAPSE (mm)</label><input id="p-tapse" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg"><label>Relación TAPSE/PSAP (mm/mmHg)</label><input id="p-tapse-psap" readonly placeholder="—"></div>
+      <div class="fg"><label for="p-tapse">TAPSE (mm)</label><input id="p-tapse" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label for="p-tapse-psap">Relación TAPSE/PSAP (mm/mmHg)</label><input id="p-tapse-psap" readonly placeholder="—"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>Vel. máx IT (m/s)</label><input id="p-maxit" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg"><label>VTI TSVD (cm)</label><input type="number" id="p-vti-tsvd" step="0.1" placeholder="18" oninput="protoCalc()"></div>
+      <div class="fg"><label for="p-maxit">Vel. máx IT (m/s)</label><input id="p-maxit" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label for="p-vti-tsvd">VTI TSVD (cm)</label><input type="number" id="p-vti-tsvd" step="0.1" placeholder="18" oninput="protoCalc()"></div>
     </div>
-    <div class="fg"><label>RVP = Vel. máx IT / VTI TSVD</label><input id="p-rvp" readonly placeholder="—"></div>
-    <div class="fg"><label>E/e' basal</label><input type="number" id="p-ee-bas" step="0.1" placeholder="8.5" oninput="evalEE();protoCalc()"></div>
+    <div class="fg"><label for="p-rvp">RVP = Vel. máx IT / VTI TSVD</label><input id="p-rvp" readonly placeholder="—"></div>
+    <div class="fg"><label for="p-ee-bas">E/e' basal</label><input type="number" id="p-ee-bas" step="0.1" placeholder="8.5" oninput="evalEE();protoCalc()"></div>
     <div id="p-ee-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
-    <div class="fg" style="margin-top:6px"><label>Patrón diastólico basal</label><select id="p-diast"><option value="normal">Normal</option><option value="gr1">Grado I — Relajación alterada</option><option value="gr2">Grado II — Pseudonormal</option><option value="gr3">Grado III — Restrictivo</option></select></div>
+    <div class="fg" style="margin-top:6px"><label for="p-diast">Patrón diastólico basal</label><select id="p-diast"><option value="normal">Normal</option><option value="gr1">Grado I — Relajación alterada</option><option value="gr2">Grado II — Pseudonormal</option><option value="gr3">Grado III — Restrictivo</option></select></div>
     <div class="proto-res" id="p-psap-res"></div>
     <div class="proto-res" id="p-vdap-res"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="p-narr" rows="2" placeholder="Ej.: PSAP 28→34 mmHg, TAPSE/PSAP 0.65 mm/mmHg. Acoplamiento VD-AP conservado, sin HTP inducida."></textarea>
+    <div class="proto-narr"><label for="p-narr">📝 Interpretación (editable)</label><textarea id="p-narr" rows="2" placeholder="Ej.: PSAP 28→34 mmHg, TAPSE/PSAP 0.65 mm/mmHg. Acoplamiento VD-AP conservado, sin HTP inducida."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('p')">💡 Sugerir texto</button></div>
     <div class="note-box">ℹ️ PSAP pico &gt;60mmHg o aumento &gt;20mmHg = HTP inducida. TAPSE/PSAP &lt;0.55 = desacople VD-AP.</div>
   </div></div>
@@ -1249,21 +1252,21 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la cinética de recuperación (normalización de la motilidad, reserva cronotrópica/HRR) y la función del VD. Una recuperación lenta de la motilidad indica isquemia severa; una HRR reducida es marcador pronóstico independiente.</div>
     <div class="grid2">
-      <div class="fg"><label>Tiempo normalización motilidad (min)</label><input type="number" id="r-trecup" step="0.5" placeholder="3" oninput="protoCalc()"></div>
-      <div class="fg"><label>FC a 3 min recuperación (lpm)</label><input type="number" id="r-fc3" placeholder="90" oninput="protoCalc()"></div>
+      <div class="fg"><label for="r-trecup">Tiempo normalización motilidad (min)</label><input type="number" id="r-trecup" step="0.5" placeholder="3" oninput="protoCalc()"></div>
+      <div class="fg"><label for="r-fc3">FC a 3 min recuperación (lpm)</label><input type="number" id="r-fc3" placeholder="90" oninput="protoCalc()"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>FC máxima alcanzada (lpm)</label><input id="r-fcmax" readonly placeholder="— (desde tabla etapas)"></div>
-      <div class="fg"><label>HRR = FC máx − FC 3 min recup.</label><input id="r-hrr" readonly placeholder="—"></div>
+      <div class="fg"><label for="r-fcmax">FC máxima alcanzada (lpm)</label><input id="r-fcmax" readonly placeholder="— (desde tabla etapas)"></div>
+      <div class="fg"><label for="r-hrr">HRR = FC máx − FC 3 min recup.</label><input id="r-hrr" readonly placeholder="—"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label>TAPSE (mm)</label><input id="r-tapse" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg"><label>Motilidad VD</label><select id="r-mot-vd" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterada">Alterada</option></select></div>
+      <div class="fg"><label for="r-tapse">TAPSE (mm)</label><input id="r-tapse" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label for="r-mot-vd">Motilidad VD</label><select id="r-mot-vd" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterada">Alterada</option></select></div>
     </div>
-    <div class="fg"><label>Síntomas en recuperación</label><select id="r-sint"><option value="no">Sin síntomas</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="arritmia">Arritmia</option></select></div>
+    <div class="fg"><label for="r-sint">Síntomas en recuperación</label><select id="r-sint"><option value="no">Sin síntomas</option><option value="angina">Angina</option><option value="disnea">Disnea</option><option value="arritmia">Arritmia</option></select></div>
     <div class="proto-res" id="r-crono-res"></div>
     <div class="proto-res" id="r-res"></div>
-    <div class="proto-narr"><label>📝 Interpretación (editable)</label><textarea id="r-narr" rows="2" placeholder="Ej.: Motilidad normaliza a los 2 min. HRR 42 lpm (reserva cronotrópica normal). VD normal."></textarea>
+    <div class="proto-narr"><label for="r-narr">📝 Interpretación (editable)</label><textarea id="r-narr" rows="2" placeholder="Ej.: Motilidad normaliza a los 2 min. HRR 42 lpm (reserva cronotrópica normal). VD normal."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('r')">💡 Sugerir texto</button></div>
     <div class="note-box">ℹ️ Recuperación tardía (&gt;3 min) → isquemia severa. HRR &lt;12 lpm (o &lt;18 sin frenar) = reserva cronotrópica reducida (marcador pronóstico).</div>
   </div></div>
@@ -1272,9 +1275,9 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🧾 Conclusión final (integración ABCD-FLPR)</span><span class="arr">▼</span></div>
   <div class="step-body">
     <div class="proto-desc">🎓 <strong>Integración:</strong> combina todos los dominios A-B-C-D-F-L-P-R en un resultado global y un párrafo de conclusión. El botón redacta un borrador integrando los parámetros cargados; editalo libremente.</div>
-    <div class="fg"><label>Resultado final para isquemia</label><select id="abcd-result" onchange="protoSyncResult()"><option value="">Seleccionar…</option><option value="neg">NEGATIVO para isquemia</option><option value="pos">POSITIVO para isquemia</option><option value="inc">INDETERMINADO / no concluyente</option></select></div>
+    <div class="fg"><label for="abcd-result">Resultado final para isquemia</label><select id="abcd-result" onchange="protoSyncResult()"><option value="">Seleccionar…</option><option value="neg">NEGATIVO para isquemia</option><option value="pos">POSITIVO para isquemia</option><option value="inc">INDETERMINADO / no concluyente</option></select></div>
     <div style="text-align:center;margin:10px 0"><button type="button" class="btn btn-primary" onclick="protoConclusion()">✨ Generar conclusión automática</button></div>
-    <div class="fg"><label>Conclusión (texto libre editable)</label><textarea id="abcd-concl" rows="5" placeholder="Presioná «Generar conclusión automática» para redactar un borrador integrando A-B-C-D-F-L-P-R, o escribí directamente."></textarea></div>
+    <div class="fg"><label for="abcd-concl">Conclusión (texto libre editable)</label><textarea id="abcd-concl" rows="5" placeholder="Presioná «Generar conclusión automática» para redactar un borrador integrando A-B-C-D-F-L-P-R, o escribí directamente."></textarea></div>
   </div></div>
 
   <!-- ═══ SCORE ABCD-FLPR ═══ -->
@@ -1316,7 +1319,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
           <select id="res-global" onchange="updateResult()"><option value="">Seleccionar…</option><option value="neg">Negativo para isquemia</option><option value="pos">Positivo para isquemia</option><option value="inc">Indeterminado / No concluyente</option><option value="via">Viabilidad presente</option><option value="novia">Sin viabilidad</option></select>
         </div>
         <div class="result-box" id="result-box"></div>
-        <div class="fg" style="margin-top:10px"><label>Comentario clínico</label><textarea id="res-comment" placeholder="Contexto clínico, observaciones adicionales…"></textarea></div>
+        <div class="fg" style="margin-top:10px"><label for="res-comment">Comentario clínico</label><textarea id="res-comment" placeholder="Contexto clínico, observaciones adicionales…"></textarea></div>
       </div></div>
     </div>
     <div class="card"><div class="card-head">📊 Resumen WMSI + FEVI</div><div class="card-body">
@@ -1414,20 +1417,20 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     </div></div>
     <div class="card"><div class="card-head">📐 GLS — Strain Longitudinal Global</div><div class="card-body">
       <div class="grid2">
-        <div class="fg"><label>GLS basal (%)</label><input type="number" id="gls-bas" step="0.1" placeholder="-20" oninput="evalGLS()"></div>
-        <div class="fg"><label>GLS pico estrés (%)</label><input type="number" id="gls-pic" step="0.1" placeholder="-23" oninput="evalGLS()"></div>
+        <div class="fg"><label for="gls-bas">GLS basal (%)</label><input type="number" id="gls-bas" step="0.1" placeholder="-20" oninput="evalGLS()"></div>
+        <div class="fg"><label for="gls-pic">GLS pico estrés (%)</label><input type="number" id="gls-pic" step="0.1" placeholder="-23" oninput="evalGLS()"></div>
       </div>
       <div id="gls-res" style="font-size:12px;font-weight:600;margin:6px 0"></div>
       <div class="grid2" style="margin-top:8px">
-        <div class="fg"><label>Reserva de strain (Δ%)</label><input type="number" id="gls-reserva" readonly placeholder="—"></div>
+        <div class="fg"><label for="gls-reserva">Reserva de strain (Δ%)</label><input type="number" id="gls-reserva" readonly placeholder="—"></div>
         <div class="fg"><label>Interpretación</label><div id="gls-interp" style="font-size:11px;margin-top:8px;font-weight:600;color:var(--text2)">—</div></div>
       </div>
       <div class="note-box" style="margin-top:10px">ℹ️ GLS normal ≤−20%. Zona gris: −16% a −20%. Disfunción subclínica: &gt;−16%. Reserva de strain (mejoría &gt;2%) = respuesta normal al estrés.</div>
       <div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">GLS por territorio (opcional)</div>
       <div class="grid3">
-        <div class="fg"><label style="color:#3B82F6">GLS LAD</label><input type="number" id="gls-lad" step="0.1" placeholder="-20"></div>
-        <div class="fg"><label style="color:#EF4444">GLS RCA</label><input type="number" id="gls-rca" step="0.1" placeholder="-19"></div>
-        <div class="fg"><label style="color:#22C55E">GLS LCx</label><input type="number" id="gls-lcx" step="0.1" placeholder="-21"></div>
+        <div class="fg"><label for="gls-lad" style="color:#3B82F6">GLS LAD</label><input type="number" id="gls-lad" step="0.1" placeholder="-20"></div>
+        <div class="fg"><label for="gls-rca" style="color:#EF4444">GLS RCA</label><input type="number" id="gls-rca" step="0.1" placeholder="-19"></div>
+        <div class="fg"><label for="gls-lcx" style="color:#22C55E">GLS LCx</label><input type="number" id="gls-lcx" step="0.1" placeholder="-21"></div>
       </div>
     </div></div>
   </div>
@@ -1562,11 +1565,11 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="page-sub">Institución, exportación e importación de datos.</div>
   <div class="grid2">
     <div class="card"><div class="card-head">🏥 Institución</div><div class="card-body">
-      <div class="fg"><label>Nombre institución</label><input id="cfg-inst" placeholder="GREMEDA" oninput="guardarConfig()"></div>
-      <div class="fg"><label>Ciudad / Departamento</label><input id="cfg-ciudad" placeholder="Artigas, Uruguay" oninput="guardarConfig()"></div>
-      <div class="fg"><label>Médico informante (por defecto)</label><input id="cfg-medico" placeholder="Dr. Maicol Dos Santos" oninput="guardarConfig()"></div>
-      <div class="fg"><label>Matrícula</label><input id="cfg-matricula" placeholder="CJPP ..." oninput="guardarConfig()"></div>
-      <div class="fg"><label>Firma (pie del informe)</label><input id="cfg-firma" placeholder="Firma / aclaración" oninput="guardarConfig()"></div>
+      <div class="fg"><label for="cfg-inst">Nombre institución</label><input id="cfg-inst" placeholder="GREMEDA" oninput="guardarConfig()"></div>
+      <div class="fg"><label for="cfg-ciudad">Ciudad / Departamento</label><input id="cfg-ciudad" placeholder="Artigas, Uruguay" oninput="guardarConfig()"></div>
+      <div class="fg"><label for="cfg-medico">Médico informante (por defecto)</label><input id="cfg-medico" placeholder="Dr. Maicol Dos Santos" oninput="guardarConfig()"></div>
+      <div class="fg"><label for="cfg-matricula">Matrícula</label><input id="cfg-matricula" placeholder="CJPP ..." oninput="guardarConfig()"></div>
+      <div class="fg"><label for="cfg-firma">Firma (pie del informe)</label><input id="cfg-firma" placeholder="Firma / aclaración" oninput="guardarConfig()"></div>
     </div></div>
     <div class="card"><div class="card-head">💾 Datos</div><div class="card-body">
       <div class="btn-row" style="flex-direction:column;gap:8px">
@@ -1622,8 +1625,8 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>1 · Doble producto</h4>
       <div class="calc-formula">FC × PAS sistólica — consumo miocárdico de O₂.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>FC (lpm)</label><input type="number" id="calc-dp-fc" oninput="calcDP()"></div>
-        <div class="fg"><label>PAS (mmHg)</label><input type="number" id="calc-dp-pas" oninput="calcDP()"></div>
+        <div class="fg"><label for="calc-dp-fc">FC (lpm)</label><input type="number" id="calc-dp-fc" oninput="calcDP()"></div>
+        <div class="fg"><label for="calc-dp-pas">PAS (mmHg)</label><input type="number" id="calc-dp-pas" oninput="calcDP()"></div>
       </div>
       <div class="calc-res" id="calc-dp-res">Ingresá los valores.</div>
     </div>
@@ -1632,8 +1635,8 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>2 · % FCM alcanzada</h4>
       <div class="calc-formula">(FC máx alcanzada / FCM teórica) × 100. FCM teórica = 220 − edad.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>FC máx alcanzada</label><input type="number" id="calc-fcm-max" oninput="calcFCM()"></div>
-        <div class="fg"><label>FCM teórica</label><input type="number" id="calc-fcm-teo" oninput="calcFCM()"></div>
+        <div class="fg"><label for="calc-fcm-max">FC máx alcanzada</label><input type="number" id="calc-fcm-max" oninput="calcFCM()"></div>
+        <div class="fg"><label for="calc-fcm-teo">FCM teórica</label><input type="number" id="calc-fcm-teo" oninput="calcFCM()"></div>
       </div>
       <div class="calc-res" id="calc-fcm-res">Ingresá los valores.</div>
     </div>
@@ -1642,8 +1645,8 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>3 · TAPSE / PSAP</h4>
       <div class="calc-formula">Acoplamiento VD–arteria pulmonar (mm/mmHg). Normal ≥0.55.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>TAPSE (mm)</label><input type="number" id="calc-tps-tapse" step="0.1" oninput="calcTPS()"></div>
-        <div class="fg"><label>PSAP (mmHg)</label><input type="number" id="calc-tps-psap" oninput="calcTPS()"></div>
+        <div class="fg"><label for="calc-tps-tapse">TAPSE (mm)</label><input type="number" id="calc-tps-tapse" step="0.1" oninput="calcTPS()"></div>
+        <div class="fg"><label for="calc-tps-psap">PSAP (mmHg)</label><input type="number" id="calc-tps-psap" oninput="calcTPS()"></div>
       </div>
       <div class="calc-res" id="calc-tps-res">Ingresá los valores.</div>
     </div>
@@ -1652,8 +1655,8 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>4 · RVP (resistencia vascular pulmonar)</h4>
       <div class="calc-formula">Vmax IT (m/s) / VTI TSVD (cm) × 10 — normal &lt;2 UW.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>Vmax IT (m/s)</label><input type="number" id="calc-rvp-it" step="0.1" oninput="calcRVP()"></div>
-        <div class="fg"><label>VTI TSVD (cm)</label><input type="number" id="calc-rvp-vti" step="0.1" oninput="calcRVP()"></div>
+        <div class="fg"><label for="calc-rvp-it">Vmax IT (m/s)</label><input type="number" id="calc-rvp-it" step="0.1" oninput="calcRVP()"></div>
+        <div class="fg"><label for="calc-rvp-vti">VTI TSVD (cm)</label><input type="number" id="calc-rvp-vti" step="0.1" oninput="calcRVP()"></div>
       </div>
       <div class="calc-res" id="calc-rvp-res">Ingresá los valores.</div>
     </div>
@@ -1662,10 +1665,10 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>5 · Elastancia arterial (reserva contráctil)</h4>
       <div class="calc-formula">(PAS pico / VSF pico) / (PAS reposo / VSF reposo). Normal &gt;1.1 · límite 0.9–1.1 · reducida &lt;0.9.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>PAS pico (mmHg)</label><input type="number" id="calc-ea-paspic" oninput="calcEA()"></div>
-        <div class="fg"><label>VSF pico (mL)</label><input type="number" id="calc-ea-vsfpic" step="0.1" oninput="calcEA()"></div>
-        <div class="fg"><label>PAS reposo (mmHg)</label><input type="number" id="calc-ea-pasrep" oninput="calcEA()"></div>
-        <div class="fg"><label>VSF reposo (mL)</label><input type="number" id="calc-ea-vsfrep" step="0.1" oninput="calcEA()"></div>
+        <div class="fg"><label for="calc-ea-paspic">PAS pico (mmHg)</label><input type="number" id="calc-ea-paspic" oninput="calcEA()"></div>
+        <div class="fg"><label for="calc-ea-vsfpic">VSF pico (mL)</label><input type="number" id="calc-ea-vsfpic" step="0.1" oninput="calcEA()"></div>
+        <div class="fg"><label for="calc-ea-pasrep">PAS reposo (mmHg)</label><input type="number" id="calc-ea-pasrep" oninput="calcEA()"></div>
+        <div class="fg"><label for="calc-ea-vsfrep">VSF reposo (mL)</label><input type="number" id="calc-ea-vsfrep" step="0.1" oninput="calcEA()"></div>
       </div>
       <div class="calc-res" id="calc-ea-res">Ingresá los valores.</div>
     </div>
@@ -1674,9 +1677,9 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>6 · Índice cronotrópico</h4>
       <div class="calc-formula">(FC pico − FC basal) / (FC teórica − FC basal). Normal ≥0.80.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>FC pico</label><input type="number" id="calc-ci-fcpic" oninput="calcCI()"></div>
-        <div class="fg"><label>FC basal</label><input type="number" id="calc-ci-fcbas" oninput="calcCI()"></div>
-        <div class="fg"><label>FC teórica</label><input type="number" id="calc-ci-fcteo" oninput="calcCI()"></div>
+        <div class="fg"><label for="calc-ci-fcpic">FC pico</label><input type="number" id="calc-ci-fcpic" oninput="calcCI()"></div>
+        <div class="fg"><label for="calc-ci-fcbas">FC basal</label><input type="number" id="calc-ci-fcbas" oninput="calcCI()"></div>
+        <div class="fg"><label for="calc-ci-fcteo">FC teórica</label><input type="number" id="calc-ci-fcteo" oninput="calcCI()"></div>
       </div>
       <div class="calc-res" id="calc-ci-res">Ingresá los valores.</div>
     </div>
@@ -1685,8 +1688,8 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>7 · Duke Treadmill Score</h4>
       <div class="calc-formula">(METs × 5) − (4 × mm ST) − (4 × índice angina). ≥5 bajo riesgo · −10 a 4 intermedio · &lt;−10 alto riesgo.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>METs alcanzados</label><input type="number" id="calc-duke-mets" step="0.1" oninput="calcDuke()"></div>
-        <div class="fg"><label>Desnivel ST (mm)</label><input type="number" id="calc-duke-st" step="0.5" oninput="calcDuke()"></div>
+        <div class="fg"><label for="calc-duke-mets">METs alcanzados</label><input type="number" id="calc-duke-mets" step="0.1" oninput="calcDuke()"></div>
+        <div class="fg"><label for="calc-duke-st">Desnivel ST (mm)</label><input type="number" id="calc-duke-st" step="0.5" oninput="calcDuke()"></div>
         <div class="fg" style="grid-column:1/-1"><label>Angina de esfuerzo</label>
           <select id="calc-duke-ang" onchange="calcDuke()"><option value="0">0 — Sin angina</option><option value="1">1 — Angina no limitante</option><option value="2">2 — Angina que limita / motivo de suspensión</option></select></div>
       </div>
@@ -1697,9 +1700,9 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <h4>8 · Probabilidad pre-test (ESC 2019)</h4>
       <div class="calc-formula">Modelo edad · sexo · tipo de dolor. Misma tabla que en Paciente.</div>
       <div class="calc-inputs">
-        <div class="fg"><label>Edad (años)</label><input type="number" id="calc-ptp-edad" oninput="calcPTP()"></div>
-        <div class="fg"><label>Sexo</label><select id="calc-ptp-sexo" onchange="calcPTP()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
-        <div class="fg" style="grid-column:1/-1"><label>Síntomas</label><select id="calc-ptp-sint" onchange="calcPTP()"><option value="">—</option><option value="tip">Dolor típico</option><option value="atip">Dolor atípico</option><option value="asint">Asintomático / disnea</option></select></div>
+        <div class="fg"><label for="calc-ptp-edad">Edad (años)</label><input type="number" id="calc-ptp-edad" oninput="calcPTP()"></div>
+        <div class="fg"><label for="calc-ptp-sexo">Sexo</label><select id="calc-ptp-sexo" onchange="calcPTP()"><option value="">—</option><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+        <div class="fg" style="grid-column:1/-1"><label for="calc-ptp-sint">Síntomas</label><select id="calc-ptp-sint" onchange="calcPTP()"><option value="">—</option><option value="tip">Dolor típico</option><option value="atip">Dolor atípico</option><option value="asint">Asintomático / disnea</option></select></div>
       </div>
       <div class="calc-res" id="calc-ptp-res">Completá edad, sexo y síntomas.</div>
     </div>
@@ -2693,8 +2696,8 @@ function ecgImgRender(){
   grid.innerHTML=ecgSlots.map(function(s,i){
     var has=!!s.img;
     return '<div class="ecg-slot'+(has?' has-img':'')+'" data-ecgidx="'+i+'" onclick="ecgPasteTarget='+i+'">'
-      +(has?'<img src="'+s.img+'">':'<div class="eico">🖼️</div><div class="etxt">Clic · Ctrl+V</div>')
-      +'<button class="rx" onclick="ecgSlotRemove(event,'+i+')">✕</button>'
+      +(has?'<img src="'+s.img+'" alt="Imagen cargada">':'<div class="eico">🖼️</div><div class="etxt">Clic · Ctrl+V</div>')
+      +'<button class="rx" aria-label="Quitar ECG" onclick="ecgSlotRemove(event,'+i+')">✕</button>'
       +'<div class="slbl"><input type="text" value="'+String(s.name||'').replace(/"/g,'&quot;')+'" onclick="event.stopPropagation()" onchange="ecgSlotName('+i+',this.value)"></div>'
       +'<input type="file" accept="image/*" onclick="event.stopPropagation()" onchange="ecgSlotFile('+i+',this)">'
       +'</div>';
@@ -2821,8 +2824,8 @@ function estImgRender(){
     var has=!!s.img;
     return '<div class="ett-cell">'
       +'<div class="ecg-slot'+(has?' has-img':'')+'" data-ettidx="'+i+'" onclick="ettPasteTarget='+i+'">'
-        +(has?'<img src="'+s.img+'">':'<div class="eico">🖼️</div><div class="etxt">Clic · Ctrl+V</div>')
-        +'<button class="rx" onclick="ettSlotRemove(event,'+i+')">✕</button>'
+        +(has?'<img src="'+s.img+'" alt="Imagen cargada">':'<div class="eico">🖼️</div><div class="etxt">Clic · Ctrl+V</div>')
+        +'<button class="rx" aria-label="Quitar imagen" onclick="ettSlotRemove(event,'+i+')">✕</button>'
         +'<input type="file" accept="image/*" onclick="event.stopPropagation()" onchange="ettSlotFile('+i+',this)">'
       +'</div>'
       +'<textarea class="ett-txt" placeholder="Cálculos, mediciones u observaciones…" oninput="ettSlotTxt('+i+',this.value)">'+String(s.txt||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</textarea>'
@@ -3104,7 +3107,7 @@ function abrirPlantillas(){
   ov.innerHTML='<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.4)">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2)">'
       +'<div style="font-size:15px;font-weight:800;color:var(--text)">📋 Plantillas de informe</div>'
-      +'<button class="btn btn-ghost" style="padding:4px 11px" onclick="document.getElementById(\'plantilla-overlay\').remove()">✕</button></div>'
+      +'<button class="btn btn-ghost" aria-label="Cerrar" style="padding:4px 11px" onclick="document.getElementById(\'plantilla-overlay\').remove()">✕</button></div>'
     +'<div style="padding:16px 18px">'
       +'<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Se cargará el texto reemplazando automáticamente los datos disponibles del estudio. Lo que no esté cargado queda [entre corchetes] para completar.</div>'
       +groups+'</div></div>';
@@ -3587,12 +3590,12 @@ function ebTextoInforme(){
 <!-- ═══ Panel datos del médico ═══ -->
 <div class="ee-modal" id="ee-med-modal" onclick="if(event.target===this)medClose()">
   <div class="ee-modal-box">
-    <h3>👤 Datos del médico <button class="x" onclick="medClose()">✕</button></h3>
-    <label>Nombre</label><input id="pm-nombre" placeholder="Dr. ...">
-    <label>Matrícula</label><input id="pm-mat" placeholder="CJPP ...">
-    <label>Institución</label><input id="pm-inst" placeholder="GREMEDA">
-    <label>Ciudad / Departamento</label><input id="pm-ciudad" placeholder="Artigas, Uruguay">
-    <label>Firma (pie del informe)</label><input id="pm-firma" placeholder="Firma / aclaración">
+    <h3>👤 Datos del médico <button class="x" aria-label="Cerrar" onclick="medClose()">✕</button></h3>
+    <label for="pm-nombre">Nombre</label><input id="pm-nombre" placeholder="Dr. ...">
+    <label for="pm-mat">Matrícula</label><input id="pm-mat" placeholder="CJPP ...">
+    <label for="pm-inst">Institución</label><input id="pm-inst" placeholder="GREMEDA">
+    <label for="pm-ciudad">Ciudad / Departamento</label><input id="pm-ciudad" placeholder="Artigas, Uruguay">
+    <label for="pm-firma">Firma (pie del informe)</label><input id="pm-firma" placeholder="Firma / aclaración">
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
       <button class="btn btn-ghost" onclick="medClose()">Cerrar</button>
       <button class="btn btn-primary" onclick="medSave()">Guardar</button>
@@ -3702,15 +3705,15 @@ function ebTextoInforme(){
 </style>
 <div class="ee-modal" id="ee-audit" onclick="if(event.target===this)eeAuditClose()">
   <div class="ee-modal-box">
-    <h3>🔬 Auditoría individual <span style="display:flex;gap:8px;align-items:center"><button class="x" onclick="eeAuditClose()">✕</button></span></h3>
+    <h3>🔬 Auditoría individual <span style="display:flex;gap:8px;align-items:center"><button class="x" aria-label="Cerrar" onclick="eeAuditClose()">✕</button></span></h3>
     <div id="ee-audit-body"></div>
     <div class="eea-sec" style="margin-top:20px">📄 Informe de Auditoría — Export PDF</div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div><label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Título del informe</label><input type="text" id="ee-pdf-titulo" value="Informe de Auditoría — Laboratorio de Ecoestrés" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-        <div><label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Institución</label><input type="text" id="ee-pdf-inst" placeholder="Hospital / Centro médico" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-        <div><label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Período cubierto</label><input type="text" id="ee-pdf-periodo" placeholder="Enero–Diciembre 2025" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-        <div><label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Responsable / Jefe de servicio</label><input type="text" id="ee-pdf-responsable" placeholder="Dr./Dra. Nombre Apellido" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-titulo" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Título del informe</label><input type="text" id="ee-pdf-titulo" value="Informe de Auditoría — Laboratorio de Ecoestrés" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-inst" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Institución</label><input type="text" id="ee-pdf-inst" placeholder="Hospital / Centro médico" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-periodo" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Período cubierto</label><input type="text" id="ee-pdf-periodo" placeholder="Enero–Diciembre 2025" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-responsable" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Responsable / Jefe de servicio</label><input type="text" id="ee-pdf-responsable" placeholder="Dr./Dra. Nombre Apellido" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
       </div>
       <div style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">Secciones a incluir</label>
         <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px">
@@ -4181,7 +4184,7 @@ function ebTextoInforme(){
 </style>
 <div class="ee-modal" id="ee-guardados" onclick="if(event.target===this)eeGuardadosClose()">
   <div class="ee-modal-box">
-    <h3>🗂 Estudios guardados <button class="x" onclick="eeGuardadosClose()">✕</button></h3>
+    <h3>🗂 Estudios guardados <button class="x" aria-label="Cerrar" onclick="eeGuardadosClose()">✕</button></h3>
     <div id="ee-guardados-body"></div>
   </div>
 </div>
@@ -4504,7 +4507,7 @@ function ebTextoInforme(){
           +'<label class="eeg-chk"><input type="checkbox" '+(_sel.indexOf(r.id)>=0?'checked':'')+' onchange="eeCompareToggle(\''+r.id+'\',this.checked)"></label>'
           +'<button class="eeg-star" title="'+((String(r.caso_interes||'')==='1')?'Quitar de casos de interés':'Marcar como caso de interés')+'" onclick="eeToggleStar(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;font-size:19px;line-height:1;padding:0 3px;flex:0 0 auto;color:'+((String(r.caso_interes||'')==='1')?'#F59E0B':'var(--text2)')+'">'+((String(r.caso_interes||'')==='1')?'⭐':'☆')+'</button>'
           +'<div class="eeg-info"><div class="eeg-name">'+esc(F(r,'p-nombre')||'(sin nombre)')+(_editId===r.id?' <span class="eeg-editing">· en edición</span>':'')+'</div><div class="eeg-meta">'+esc(meta)+'</div></div>'
-          +'<div class="eeg-acts">'+(_evo?('<button class="btn btn-ghost" onclick="eeEvolucion(\''+_ci.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')" title="Comparar estudios del mismo paciente">📈 Ver evolución</button>'):'')+'<button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
+          +'<div class="eeg-acts">'+(_evo?('<button class="btn btn-ghost" onclick="eeEvolucion(\''+_ci.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')" title="Comparar estudios del mismo paciente">📈 Ver evolución</button>'):'')+'<button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" aria-label="Eliminar" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
           +'</div>';
       }).join('');
     }
