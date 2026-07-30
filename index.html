@@ -1611,6 +1611,15 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
         <button class="btn btn-ghost" onclick="eeApplyStudy()">✔️ Aplicar solo a este estudio</button>
         <button class="btn btn-primary" onclick="eeSaveDefault()">💾 Guardar como perfil por defecto</button>
       </div>
+      <div id="ee-cfg-lab-wrap" style="margin-top:16px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🔬 Laboratorio</div>
+        <button class="btn btn-ghost" onclick="eeLab()">🔬 Abrir Laboratorio</button>
+        <div class="note-box" style="margin-top:6px">Disponible en perfil Avanzado.</div>
+      </div>
+      <div style="margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📄 PDF</div>
+        <label class="ee-mod-lbl" style="max-width:280px"><input type="checkbox" id="ee-qr-enabled" onchange="eeQrToggle()"> Incluir QR en PDF</label>
+      </div>
     </div>
   </div>
 </div>
@@ -2070,6 +2079,7 @@ function eeReadUI(){
 function eeSyncUI(perfil,map){
   document.querySelectorAll('input[name="ee-perfil"]').forEach(function(r){ r.checked=(r.value===perfil); });
   EE_ADV_KEYS.forEach(function(k){ var c=document.getElementById('ee-mod-'+k); if(c){ c.checked=(map[k]!==false); c.disabled=(perfil==='basico'); var lbl=c.closest?c.closest('.ee-mod-lbl'):null; if(lbl)lbl.classList.toggle('core',perfil==='basico'); } });
+  var _lw=document.getElementById('ee-cfg-lab-wrap'); if(_lw)_lw.style.display=(perfil==='basico')?'none':'';   // Laboratorio solo en Avanzado
 }
 function eePerfilChange(){
   var pr=document.querySelector('input[name="ee-perfil"]:checked'); var perfil=pr?pr.value:'avanzado';
@@ -2084,7 +2094,11 @@ function eeSaveDefault(){
   applyModules(r.map);
   if(typeof eeToast==='function')eeToast('💾 Guardado como perfil por defecto');
 }
-function eeInitPerfil(){ var perfil=eeLoadPerfil(), map=eeLoadModulos(); eeSyncUI(perfil,map); applyModules(map); }
+function eeInitPerfil(){ var perfil=eeLoadPerfil(), map=eeLoadModulos(); eeSyncUI(perfil,map); applyModules(map);
+  var _qc=document.getElementById('ee-qr-enabled'); if(_qc){ try{ _qc.checked=(localStorage.getItem('ee_qr_enabled')!=='0'); }catch(e){ _qc.checked=true; } }
+}
+function eeQrToggle(){ var _qc=document.getElementById('ee-qr-enabled'); try{ localStorage.setItem('ee_qr_enabled', (_qc&&_qc.checked)?'1':'0'); }catch(e){} if(typeof eeToast==='function')eeToast((_qc&&_qc.checked)?'QR activado en el PDF':'QR desactivado en el PDF'); }
+window.eeQrToggle=eeQrToggle;
 function eeResetPerfilStudy(){ var perfil=eeLoadPerfil(), map=eeLoadModulos(); eeSyncUI(perfil,map); applyModules(map); }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
@@ -2490,19 +2504,19 @@ function abcdRadarRender(){
   svg.innerHTML=html;
 }
 window.abcdScoreRender=abcdScoreRender; window.abcdScoreData=abcdScoreData; window.abcdRadarRender=abcdRadarRender;
-/* ═══ QR para el PDF (qrcodejs, cacheado) ═══ */
+/* ═══ QR para el PDF — canvas nativo, sin librerías externas (matriz precalculada de https://ceibomed.com) ═══ */
+var EE_QR_MATRIX="1111111001011110001111111,1000001001110100001000001,1011101001001100001011101,1011101010101111001011101,1011101001000010101011101,1000001010110110001000001,1111111010101010101111111,0000000010110010100000000,0110001000111001101101000,1101010000110101101101011,0111001100001101001001101,0100100110010010110001000,1111111111000111101100001,0010110110001001101100011,1101101110000111010001101,0010010010011100110111000,1111001001011010111110010,0000000010111010100010001,1111111000001010101010001,1000001001000101100010000,1011101000110001111110001,1011101001110011110010110,1011101011010100010111011,1000001011110100100110000,1111111000001100110001001";
 var _eeQrCache={};
 function eeQrDataURL(text){
   if(_eeQrCache[text])return _eeQrCache[text];
   try{
-    if(typeof QRCode==='undefined')return null;
-    var div=document.createElement('div'); div.style.cssText='position:absolute;left:-9999px;top:0'; document.body.appendChild(div);
-    new QRCode(div,{text:text,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
-    var cv=div.querySelector('canvas'); var url=null;
-    if(cv&&cv.toDataURL){ url=cv.toDataURL('image/png'); } else { var img=div.querySelector('img'); if(img)url=img.src; }
-    document.body.removeChild(div);
-    if(url)_eeQrCache[text]=url;
-    return url;
+    var rows=EE_QR_MATRIX.split(','), n=rows.length, qz=2, scale=8, size=(n+qz*2)*scale;
+    var cv=document.createElement('canvas'); cv.width=size; cv.height=size;
+    var ctx=cv.getContext('2d'); if(!ctx)return null;
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,size,size);
+    ctx.fillStyle='#000000';
+    for(var r=0;r<n;r++){ var row=rows[r]; for(var c=0;c<n;c++){ if(row.charAt(c)==='1') ctx.fillRect((c+qz)*scale,(r+qz)*scale,scale,scale); } }
+    var url=cv.toDataURL('image/png'); if(url)_eeQrCache[text]=url; return url;
   }catch(e){ return null; }
 }
 window.eeQrDataURL=eeQrDataURL;
@@ -5448,10 +5462,11 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     function footer(){
       var tot=doc.internal.getNumberOfPages();
       var inst=V('cfg-inst')||'CeiboMed';
-      var qr=(typeof eeQrDataURL==='function')?eeQrDataURL('https://ceibomed.com'):null;   // QR a ceibomed.com
+      var _qrOn=(function(){ try{ return localStorage.getItem('ee_qr_enabled')!=='0'; }catch(e){ return true; } })();   // toggle Config (ee_qr_enabled), ON por defecto
+      var qr=(_qrOn&&typeof eeQrDataURL==='function')?eeQrDataURL('https://ceibomed.com'):null;   // QR a ceibomed.com
       for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
         doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'});
-        if(qr){ try{ doc.addImage(qr,'PNG',210-15-4,297-15-3,15,15); }catch(e){} }
+        if(qr){ try{ doc.addImage(qr,'PNG',192,274,14,14); fn(5); tc(170,170,170); doc.text('ceibomed.com',199,290,{align:'center'}); }catch(e){} }
       }
     }
 
