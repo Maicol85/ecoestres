@@ -1913,7 +1913,13 @@ let dobuData={};
 const KEY='ecoestres_smart_v1';
 
 function autoGuardarDraft(){   // autosave silencioso del borrador (usado por el intervalo)
-  try{ localStorage.setItem(KEY,JSON.stringify(recolectarEstado())); }catch(e){}
+  try{ localStorage.setItem(KEY,JSON.stringify(recolectarEstado())); }
+  catch(e){
+    if(e && (e.name==='QuotaExceededError' || e.code===22 || e.code===1014)){
+      if(typeof eeToast==='function') eeToast('⚠ No se pudo autoguardar: almacenamiento del navegador lleno. Exportá un respaldo (JSON) para no perder datos.','err');
+      else console.warn('autosave: almacenamiento lleno', e);
+    } else { console.warn('autosave fallo', e); }
+  }
 }
 function guardar(){
   // 1) Validar nombre del paciente
@@ -2001,16 +2007,18 @@ function importarDatos(e){
   const f=e.target.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=ev=>{try{const s=JSON.parse(ev.target.result);
-    if(s.peState&&typeof peState!=='undefined')peState=s.peState;
+    // Validacion de esquema: aceptar solo un objeto y tipos correctos por campo antes de aplicar
+    if(!s||typeof s!=='object'||Array.isArray(s)){alert('Archivo inválido: se esperaba un objeto de datos EcoEstrés.');return;}
+    if(Array.isArray(s.peState)&&typeof peState!=='undefined')peState=s.peState;
     if(Array.isArray(s.ecgRows)){ecgRows=s.ecgRows.map(function(x){return{key:x.key,name:x.name,auto:(x.auto!==false)};});ecgRowsAuto=(typeof s.ecgRowsAuto==='boolean')?s.ecgRowsAuto:true;}else{ecgRows=[];ecgRowsAuto=true;}
     if(typeof ecgTableRender==='function')ecgTableRender();
-    if(s.vals)Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
+    if(s.vals&&typeof s.vals==='object'&&!Array.isArray(s.vals))Object.entries(s.vals).forEach(([id,v])=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;});
     var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
-    if(s.bull)bull=s.bull;
+    if(s.bull&&typeof s.bull==='object'&&!Array.isArray(s.bull))bull=s.bull;
     if(Array.isArray(s.ecgSlots)){ecgSlots=s.ecgSlots;ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!s.ecgSlots.some(function(x){return x&&x.img;});}
     if(Array.isArray(s.ettSlots))ettSlots=s.ettSlots;
-    if(s.ettPerPage)ettPerPage=s.ettPerPage;
-    if(s.dobuData)dobuData=s.dobuData;
+    if(typeof s.ettPerPage==='number')ettPerPage=s.ettPerPage;
+    if(s.dobuData&&typeof s.dobuData==='object'&&!Array.isArray(s.dobuData))dobuData=s.dobuData;
     actualizarUI();alert('✅ Datos importados');
   }catch(err){alert('Error: '+err.message);}};
   r.readAsText(f);
@@ -4696,7 +4704,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     '2c':{t:'2 cámaras', ll:'Anterior', l:[0,6,12], ax:16, rl:'Inferior',       r:[3,9,14]},
     '3c':{t:'3 cámaras', ll:'Anteroseptal', l:[1,7,13], ax:16, rl:'Inferolateral', r:[4,10,15]}
   };
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }  // unificada con la version completa: escapa tambien >
   function col(st){ return SEG_COLORS[st||0]; }
   function keyName(){ return (typeof peKeyNames==='function')?peKeyNames():{basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación'}; }
   window.bvStageName=function(st){ if(st==='extra')return bullExtra.name||'Etapa opcional'; return keyName()[st]||st; };
