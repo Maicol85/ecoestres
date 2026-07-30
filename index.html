@@ -335,6 +335,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
   <div class="nav-item" onclick="goTo('ecg')"><span class="ni">📈</span> ECG / Arritmias</div>
   <div class="nav-item" onclick="goTo('protoestres')"><span class="ni">🏃</span> Protocolo de Estrés</div>
+  <div class="nav-item" onclick="goTo('ecoetapas')"><span class="ni">📊</span> Eco por etapas</div>
   <div class="nav-item" onclick="goTo('bullo')"><span class="ni">🎯</span> Bull's Eye 17 seg</div>
   <div class="nav-item" onclick="goTo('criterios')"><span class="ni">⚡</span> Criterios de positividad</div>
   <div class="nav-item" onclick="goTo('territorio')"><span class="ni">🗺️</span> Territorio vascular</div>
@@ -967,7 +968,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 <!-- ═══ PROTOCOLO DE ESTRÉS (tab nueva) ═══ -->
 <div class="page" id="page-protoestres">
   <div class="page-title">🏃 Protocolo de Estrés</div>
-  <div class="page-sub">Etapas del protocolo, parámetros hemodinámicos globales y tabla eco por etapas.</div>
+  <div class="page-sub">Etapas del protocolo y parámetros hemodinámicos globales.</div>
   <div class="grid2">
     <div class="card">
       <div class="card-head">🪜 Etapas del protocolo</div>
@@ -1028,7 +1029,13 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     </div>
   </div>
 
-  <div class="card" data-mod="ecoetapas" style="margin-top:14px">
+</div>
+
+<!-- ═══ ECO POR ETAPAS (tab independiente) ═══ -->
+<div class="page" id="page-ecoetapas">
+  <div class="page-title">📊 Eco por etapas</div>
+  <div class="page-sub">Parámetros ecocardiográficos por etapa del estrés.</div>
+  <div class="card" data-mod="ecoetapas">
     <div class="card-head">📑 Tabla Eco por Etapas</div>
     <div class="card-body" style="overflow-x:auto">
       <p style="font-size:11px;color:var(--text2);margin:0 0 10px">Parámetros ecocardiográficos por etapa del estrés. Se precargan automáticamente (en color); todas las celdas son editables.</p>
@@ -2040,7 +2047,8 @@ function goTo(page){
   if(page==='viabilidad')renderDobuTable();
   if(page==='imagenes')estImgRender();
   if(page==='ecg')ecgImgRender();
-  if(page==='protoestres'){ if(typeof peRender==='function')try{peRender();}catch(e){} eteRefresh(); }
+  if(page==='protoestres'){ if(typeof peRender==='function')try{peRender();}catch(e){} }
+  if(page==='ecoetapas')eteRefresh();
   if(page==='cfvr')initStrainBulls();
   if(page==='informe'&&typeof informeResultSync==='function')informeResultSync();
   document.querySelectorAll('.subtab').forEach(function(t){ t.classList.toggle('active',(t.getAttribute('onclick')||'').includes("'"+page+"'")); });
@@ -2048,7 +2056,7 @@ function goTo(page){
 }
 /* ═══════════ PERFIL DE ESTUDIO — módulos configurables (básico / avanzado) ═══════════ */
 var EE_ADV_KEYS=['ecoetapas','territorio','viabilidad','cfvr','reservaDiast','elastancia','strainBull','abcdFull'];
-var EE_NAV_PAGES={territorio:'territorio',viabilidad:'viabilidad',cfvr:'cfvr'};   // ecoetapas ahora es sección (data-mod) dentro de Protocolo de Estrés
+var EE_NAV_PAGES={ecoetapas:'ecoetapas',territorio:'territorio',viabilidad:'viabilidad',cfvr:'cfvr'};   // ecoetapas: tab independiente entre Protocolo de Estrés y Bull's Eye
 var eeModulos=null;   // mapa runtime de módulos activos {key:bool}
 function eePerfilDefaults(perfil){ var m={}; EE_ADV_KEYS.forEach(function(k){ m[k]=(perfil==='avanzado'); }); return m; }
 function eeLoadPerfil(){ try{ return localStorage.getItem('ee_perfil')||'avanzado'; }catch(e){ return 'avanzado'; } }
@@ -2064,7 +2072,7 @@ function applyModules(map){
     var pg=document.getElementById('page-'+page);
     if(pg&&!on&&pg.classList.contains('active')&&typeof goTo==='function')goTo('paciente');
   });
-  ['ecoetapas','reservaDiast','elastancia','strainBull','abcdFull'].forEach(function(k){
+  ['reservaDiast','elastancia','strainBull','abcdFull'].forEach(function(k){
     var on=map[k]!==false;
     document.querySelectorAll('[data-mod="'+k+'"]').forEach(function(el){ el.style.display=on?'':'none'; });
   });
