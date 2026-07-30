@@ -4090,7 +4090,7 @@ function ebTextoInforme(){
 
     // ── Pie de página ──
     var np=doc.internal.getNumberOfPages();
-    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); }
+    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,295,{align:'center'}); }
 
     var fname='Auditoria_Laboratorio_'+(inst.replace(/[^a-zA-Z0-9]+/g,'_'))+'_'+fmtToday().replace(/\//g,'-')+'.pdf';
     doc.save(fname);
@@ -4148,7 +4148,7 @@ function ebTextoInforme(){
     fn(8.5); tc(30,30,30); doc.text('Responsable: '+(respF||'___________________________'),mL,y); y+=6;
     doc.text('Fecha de emisión: '+fmtToday(),mL,y);
     var np=doc.internal.getNumberOfPages();
-    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); }
+    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,295,{align:'center'}); }
     var fname='Auditoria_Laboratorio_'+(inst.replace(/[^a-zA-Z0-9]+/g,'_'))+'_'+fmtToday().replace(/\//g,'-')+'.pdf';
     doc.save(fname);
     if(typeof eeToast==='function') eeToast('📄 PDF de auditoría generado');
@@ -4473,7 +4473,7 @@ function ebTextoInforme(){
     }
     // pie
     var tot=doc.internal.getNumberOfPages();
-    for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); doc.setTextColor(150,150,150); doc.text('EcoEstrés Smart · CeiboMed · Comparativo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); }
+    for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); doc.setTextColor(150,150,150); doc.text('EcoEstrés Smart · CeiboMed · Comparativo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,294.5,{align:'center'}); }
     return doc;
   }
 
@@ -5466,6 +5466,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       var qr=(_qrOn&&typeof eeQrDataURL==='function')?eeQrDataURL('https://ceibomed.com'):null;   // QR a ceibomed.com
       for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
         doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'});
+        doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,294.5,{align:'center'}); fn(6.3); tc(150,150,150);
         if(qr){ try{ doc.addImage(qr,'PNG',192,274,14,14); fn(5); tc(170,170,170); doc.text('ceibomed.com',199,290,{align:'center'}); }catch(e){} }
       }
     }
@@ -6003,6 +6004,28 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
   var bodyObs=new MutationObserver(function(muts){ muts.forEach(function(mu){ for(var i=0;i<mu.addedNodes.length;i++){ var n=mu.addedNodes[i]; if(n.nodeType===1) enhance(n); } }); });
   function init(){ enhance(document); initModals(); bodyObs.observe(document.body,{childList:true,subtree:true}); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+<script>
+/* Aviso de datos locales (primer inicio) */
+(function(){
+  var KEY="ecoestres_aviso_datos_visto";
+  function show(){
+    try{ if(localStorage.getItem(KEY)==='1') return; }catch(e){}
+    var ov=document.createElement('div');
+    ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-label','Aviso sobre datos locales');
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px';
+    var box=document.createElement('div');
+    box.style.cssText='background:#fff;color:#1a2a3a;max-width:440px;width:100%;border-radius:14px;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,.4);font-family:system-ui,Segoe UI,sans-serif';
+    box.innerHTML='<div style="font-size:15px;font-weight:700;margin-bottom:10px">Aviso importante</div><div style="font-size:13.5px;line-height:1.6;color:#374151">⚠️ Los datos se guardan localmente en este navegador. Si borrás el navegador o cambiás de dispositivo, los datos se pierden. Exportá tu backup regularmente.</div>';
+    var btn=document.createElement('button');
+    btn.type='button'; btn.textContent='Entendido';
+    btn.style.cssText='margin-top:16px;width:100%;padding:11px;background:#38bdf8;color:#0b1220;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px';
+    btn.onclick=function(){ try{localStorage.setItem(KEY,'1');}catch(e){} if(ov.parentNode)ov.parentNode.removeChild(ov); };
+    box.appendChild(btn); ov.appendChild(box); document.body.appendChild(ov);
+    setTimeout(function(){ try{btn.focus();}catch(e){} },40);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',show); else show();
 })();
 </script>
 </body>
