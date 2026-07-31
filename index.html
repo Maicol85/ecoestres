@@ -1164,7 +1164,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div class="proto-res" id="c-res"></div>
     <div class="proto-narr"><label for="c-narr">📝 Interpretación (editable)</label><textarea id="c-narr" rows="3" placeholder="Ej.: FEVI 60%→68% (ΔFEVI +8), SGL -20%→-24%, sin nuevas alteraciones segmentarias. Reserva contráctil conservada."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('c')">💡 Sugerir texto</button></div>
-    <div class="note-box" style="margin-top:8px">ℹ️ Isquemia: nueva alteración en ≥2 segmentos adyacentes o empeoramiento. Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y Ea &gt;1.1.</div>
+    <div class="note-box" style="margin-top:8px">ℹ️ Isquemia: nueva o progresiva alteración de motilidad inducida por estrés; ≥2 segmentos concordantes aumenta la certeza (ASE Stress Echo 2020). Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y Ea &gt;1.1.</div>
   </div></div>
 
   <!-- ══════════ D — DILATACIÓN Y OTROS ══════════ -->
@@ -1185,7 +1185,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <!-- ══════════ F — FLUJO CORONARIO (CFVR) ══════════ -->
   <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅕 Flujo coronario (CFVR)</span><span class="arr">▼</span></div>
   <div class="step-body">
-    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la reserva de flujo coronario (velocidad diastólica pico/reposo en DA). Una CFVR reducida (&lt;2.0) indica enfermedad epicárdica significativa o disfunción microvascular, y agrega valor pronóstico.</div>
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la reserva de flujo coronario (velocidad diastólica pico/reposo en DA). Una CFVR reducida (&lt;1.5; límite 1.5–1.99) indica enfermedad epicárdica significativa o disfunción microvascular, y agrega valor pronóstico.</div>
     <div class="grid3">
       <div class="fg"><label for="f-cfvr-vdp">VDP — vel. diastólica pico (cm/s)</label><input type="number" id="f-cfvr-vdp" step="0.1" placeholder="70" oninput="protoCalc()"></div>
       <div class="fg"><label for="f-cfvr-vdr">VDR — vel. diastólica reposo (cm/s)</label><input type="number" id="f-cfvr-vdr" step="0.1" placeholder="28" oninput="protoCalc()"></div>
@@ -1194,7 +1194,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div id="f-cfvr-da-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
     <div class="proto-narr"><label for="f-narr">📝 Interpretación (editable)</label><textarea id="f-narr" rows="2" placeholder="Ej.: CFVR DA 2.6 (VDP 70 / VDR 27) — reserva de flujo conservada."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('f')">💡 Sugerir texto</button></div>
-    <div class="note-box">ℹ️ Interpretación: &gt;2.0 normal · 1.5–2.0 límite · &lt;1.5 reducida. Ver módulo CFVR/Strain para las 3 arterias.</div>
+    <div class="note-box">ℹ️ Interpretación: ≥2.0 normal · 1.5–1.99 límite / reducida leve · &lt;1.5 reducida (CFVR Doppler de DA — ASE Stress Echo 2020). Ver módulo CFVR/Strain para las 3 arterias.</div>
   </div></div>
 
   <!-- ══════════ L — LLENADO / RESERVA DIASTÓLICA ══════════ -->
@@ -1207,7 +1207,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     </div>
     <div class="grid2">
       <div class="fg"><label for="l-eprima-rep">e' reposo (cm/s)</label><input id="l-eprima-rep" readonly placeholder="— (desde eco basal)"></div>
-      <div class="fg" data-mod="reservaDiast"><label for="l-irc">IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"></div>
+      <div class="fg" data-mod="reservaDiast"><label for="l-irc">IRC = e' reposo × (e' pico − e' reposo)</label><input id="l-irc" readonly placeholder="—"><div class="note-box" style="margin-top:4px;font-size:10px">⚗ Índice exploratorio — no forma parte de los parámetros estándar ASE 2025. No usar para decisiones diagnósticas automáticas.</div></div>
     </div>
     <div id="p-ee-pic-res" style="font-size:11px;font-weight:600;margin:2px 0"></div>
     <div class="grid2">
@@ -1230,7 +1230,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <!-- ══════════ P — PRESIONES / PULMONAR ══════════ -->
   <div class="step-card" data-mod="abcdFull"><div class="step-hdr" onclick="toggleStep(this)"><span>🅟 Presiones / pulmonar</span><span class="arr">▼</span></div>
   <div class="step-body">
-    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la hemodinamia pulmonar y el acoplamiento VD-arteria pulmonar con el estrés. La HTP inducida (PSAP pico &gt;60 o Δ&gt;20 mmHg), la RVP elevada y una relación TAPSE/PSAP baja indican desacople VD-AP y peor pronóstico.</div>
+    <div class="proto-desc">🎓 <strong>Qué evalúa:</strong> la hemodinamia pulmonar y el acoplamiento VD-arteria pulmonar con el estrés. Una respuesta de presión pulmonar elevada al ejercicio (PSAP pico &gt;60 o Δ&gt;20 mmHg), la RVP elevada y una relación TAPSE/PSAP baja indican desacople VD-AP y peor pronóstico.</div>
     <div class="grid2">
       <div class="fg"><label for="p-psap-bas">PSAP basal (mmHg)</label><input type="number" id="p-psap-bas" placeholder="28" oninput="protoCalc()"></div>
       <div class="fg"><label for="p-psap-pic-disp">PSAP pico (mmHg)</label><input id="p-psap-pic-disp" readonly placeholder="— (ver sección L)"></div>
@@ -1249,9 +1249,9 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div class="fg" style="margin-top:6px"><label for="p-diast">Patrón diastólico basal</label><select id="p-diast"><option value="normal">Normal</option><option value="gr1">Grado I — Relajación alterada</option><option value="gr2">Grado II — Pseudonormal</option><option value="gr3">Grado III — Restrictivo</option></select></div>
     <div class="proto-res" id="p-psap-res"></div>
     <div class="proto-res" id="p-vdap-res"></div>
-    <div class="proto-narr"><label for="p-narr">📝 Interpretación (editable)</label><textarea id="p-narr" rows="2" placeholder="Ej.: PSAP 28→34 mmHg, TAPSE/PSAP 0.65 mm/mmHg. Acoplamiento VD-AP conservado, sin HTP inducida."></textarea>
+    <div class="proto-narr"><label for="p-narr">📝 Interpretación (editable)</label><textarea id="p-narr" rows="2" placeholder="Ej.: PSAP 28→34 mmHg, TAPSE/PSAP 0.65 mm/mmHg. Acoplamiento VD-AP conservado, sin respuesta de presión pulmonar elevada."></textarea>
       <button type="button" class="btn btn-ghost proto-suggest-btn" onclick="protoSuggest('p')">💡 Sugerir texto</button></div>
-    <div class="note-box">ℹ️ PSAP pico &gt;60mmHg o aumento &gt;20mmHg = HTP inducida. TAPSE/PSAP &lt;0.55 = desacople VD-AP.</div>
+    <div class="note-box">ℹ️ PSAP pico &gt;60mmHg o aumento &gt;20mmHg = respuesta de presión pulmonar elevada al ejercicio (requiere confirmación hemodinámica — ESC/ERS 2022). TAPSE/PSAP &lt;0.55 = desacople VD-AP.</div>
   </div></div>
 
   <!-- ══════════ R — RECUPERACIÓN Y VD ══════════ -->
@@ -1352,6 +1352,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
 <div class="page" id="page-territorio">
   <div class="page-title">🗺️ Territorio vascular</div>
   <div class="page-sub">Distribución de alteraciones segmentarias en pico de estrés por arteria coronaria.</div>
+  <div class="note-box" style="margin-top:6px">ℹ️ La distribución coronaria por segmento es orientativa. Varía según dominancia y anatomía individual.</div>
   <div class="grid2">
     <div class="card"><div class="card-head">🩺 Análisis por arteria — Pico</div><div class="card-body">
       <div class="ter-panel">
@@ -1399,7 +1400,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="page-sub">Reserva de flujo coronario (3 arterias) y strain global longitudinal basal y pico.</div>
   <div class="grid2">
     <div class="card"><div class="card-head">🩸 CFVR — Reserva de Flujo Coronario</div><div class="card-body">
-      <div class="note-box">ℹ️ CFVR = Vel. pico adenosina / Vel. pico basal (Doppler pulsado en DA distal). Normal ≥2.5. Útil en enfermedad microvascular y evaluación de estenosis borderline.</div>
+      <div class="note-box">ℹ️ CFVR = Vel. pico adenosina / Vel. pico basal (Doppler pulsado en DA distal). Normal ≥2.0 · límite 1.5–1.99 · reducida &lt;1.5 (CFVR Doppler de DA — ASE Stress Echo 2020). Útil en enfermedad microvascular y evaluación de estenosis borderline.</div>
       <table style="margin-top:10px">
         <tr><th>Arteria</th><th>Vel. basal (cm/s)</th><th>Vel. pico (cm/s)</th><th>CFVR</th><th>Interpretación</th></tr>
         <tr>
@@ -1432,7 +1433,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
         <div class="fg"><label for="gls-reserva">Reserva de strain (Δ%)</label><input type="number" id="gls-reserva" readonly placeholder="—"></div>
         <div class="fg"><label>Interpretación</label><div id="gls-interp" style="font-size:11px;margin-top:8px;font-weight:600;color:var(--text2)">—</div></div>
       </div>
-      <div class="note-box" style="margin-top:10px">ℹ️ GLS normal ≤−20%. Zona gris: −16% a −20%. Disfunción subclínica: &gt;−16%. Reserva de strain (mejoría &gt;2%) = respuesta normal al estrés.</div>
+      <div class="note-box" style="margin-top:10px">ℹ️ GLS normal ≤−20%. Zona gris: −16% a −20%. Disfunción subclínica: &gt;−16%. Reserva de strain (mejoría &gt;2%) = respuesta normal al estrés. Interpretar según rango de referencia específico de plataforma/vendor y laboratorio (ASE/EACVI Strain 2025).</div>
       <div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">GLS por territorio (opcional)</div>
       <div class="grid3">
         <div class="fg"><label for="gls-lad" style="color:#3B82F6">GLS LAD</label><input type="number" id="gls-lad" step="0.1" placeholder="-20"></div>
@@ -1735,18 +1736,18 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div class="step-body"><div class="ref-body">
       <b>A — Adecuación:</b> % FCM alcanzada (≥85% = adecuada). Prueba submáxima (&lt;85%) limita el valor de un resultado negativo.<br>
       <b>B — ECG/isquemia eléctrica:</b> infradesnivel ST horizontal/descendente ≥1 mm a 80 ms del punto J; no localiza territorio.<br>
-      <b>C — Contractilidad y reserva contráctil:</b> criterio central. Nueva alteración segmentaria ≥2 segmentos adyacentes = isquemia. Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y elastancia (Ea) &gt;1.1.<br>
+      <b>C — Contractilidad y reserva contráctil:</b> criterio central. Nueva o progresiva alteración de motilidad = isquemia; ≥2 segmentos concordantes aumenta la certeza diagnóstica (ASE Stress Echo 2020). Reserva contráctil: ↑FEVI ≥5%, mejoría de SGL/VTI y elastancia (Ea) &gt;1.1.<br>
       <b>D — Dilatación/otros:</b> dilatación transitoria del VI (isquemia multivaso), IM inducida, respuesta presora anómala (hipotensión = signo ominoso).<br>
-      <b>F — Flujo coronario (CFVR):</b> reserva de flujo en DA distal. Normal ≥2.5; reducida &lt;2.0.<br>
+      <b>F — Flujo coronario (CFVR):</b> reserva de flujo en DA distal. Normal ≥2.0 · límite 1.5–1.99 · reducida &lt;1.5 (CFVR Doppler de DA — ASE Stress Echo 2020).<br>
       <b>L — Llenado/reserva diastólica:</b> E/e' pico ≥15, líneas B ≥3/campo, PSAP elevada → eco estrés diastólico positivo (ICFEp inducible). IRC = e' reposo × (e' pico − e' reposo).<br>
-      <b>P — Presiones/pulmonar:</b> PSAP pico &gt;60 mmHg o Δ&gt;20 mmHg = HTP inducida; TAPSE/PSAP &lt;0.55 = desacople VD-AP.<br>
+      <b>P — Presiones/pulmonar:</b> PSAP pico &gt;60 mmHg o Δ&gt;20 mmHg = respuesta de presión pulmonar elevada (requiere confirmación hemodinámica, ESC/ERS 2022); TAPSE/PSAP &lt;0.55 = desacople VD-AP.<br>
       <b>R — Recuperación y VD:</b> normalización de la motilidad (&gt;3 min = isquemia severa); HRR y reserva cronotrópica; función del VD.
     </div></div>
   </div>
 
   <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>⚡ Criterios de positividad</span><span class="arr">▼</span></div>
     <div class="step-body"><div class="ref-body">
-      <b>Isquemia inducible:</b> nueva alteración de la motilidad o empeoramiento en ≥2 segmentos adyacentes en el pico. <i>(Sicari R, EAE consensus, Eur J Echocardiogr 2008; ASE/EACVI 2020.)</i><br>
+      <b>Isquemia inducible:</b> nueva o progresiva alteración de la motilidad inducida por estrés; ≥2 segmentos concordantes aumenta la certeza diagnóstica. <i>(Sicari R, EAE consensus, Eur J Echocardiogr 2008; ASE/EACVI 2020.)</i><br>
       <b>Falta de reserva contráctil:</b> ausencia de ↑FEVI/SGL/VTI con el estrés — marcador de disfunción o isquemia extensa.<br>
       <b>Dilatación transitoria del VI (TID):</b> isquemia multivaso / de tronco.<br>
       <b>Respuesta presora hipotensiva:</b> caída de PAS &gt;10-20 mmHg — suspender; signo de alto riesgo.<br>
@@ -1767,7 +1768,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   <div class="step-card"><div class="step-hdr" onclick="toggleStep(this)"><span>🩸 CFVR — Reserva de flujo coronario</span><span class="arr">▼</span></div>
     <div class="step-body"><div class="ref-body">
       CFVR = velocidad diastólica pico (hiperemia) / velocidad diastólica en reposo, en DA distal con Doppler pulsado.<br>
-      <b>Normal ≥2.5</b> · <b>zona gris 2.0–2.5</b> · <b>reducida &lt;2.0</b> (enfermedad epicárdica significativa o disfunción microvascular).<br>
+      <b>Normal ≥2.0</b> · <b>límite 1.5–1.99</b> · <b>reducida &lt;1.5</b> (enfermedad epicárdica significativa o disfunción microvascular — CFVR Doppler de DA, ASE Stress Echo 2020).<br>
       Agrega valor pronóstico independiente a la motilidad. Útil en estenosis borderline y sospecha de enfermedad microvascular (INOCA).
     </div></div>
   </div>
@@ -1783,7 +1784,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div class="step-body"><div class="ref-body">
       <b>E/e' pico ≥15</b> = presión de llenado elevada (eco estrés diastólico positivo).<br>
       <b>Líneas B ≥3/campo</b> post-estrés = congestión venocapilar inducida.<br>
-      <b>PSAP pico &gt;60 mmHg o Δ&gt;20 mmHg</b> = HTP inducida.<br>
+      <b>PSAP pico &gt;60 mmHg o Δ&gt;20 mmHg</b> = respuesta de presión pulmonar elevada al ejercicio (requiere confirmación hemodinámica, ESC/ERS 2022).<br>
       <b>IRC</b> = e' reposo × (e' pico − e' reposo) — reserva de relajación.<br>
       Un E/e' pico ≥15 con líneas B y PSAP elevadas define ICFEp inducible.
     </div></div>
@@ -2324,15 +2325,15 @@ function calcCFVR(art){
   const vEl=document.getElementById('cfvr-'+art+'-val'),iEl=document.getElementById('cfvr-'+art+'-int');
   if(!bas||!pic){if(vEl)vEl.textContent='—';if(iEl)iEl.textContent='—';return;}
   const cfvr=(pic/bas).toFixed(2);
-  if(vEl){vEl.textContent=cfvr;vEl.style.color=+cfvr>=2.5?'var(--green)':+cfvr>=2?'var(--amber)':'var(--red)';}
-  if(iEl){if(+cfvr>=2.5){iEl.textContent='✅ Normal (≥2.5)';iEl.style.color='var(--green)';}else if(+cfvr>=2){iEl.textContent='⚠️ Borderline';iEl.style.color='var(--amber)';}else{iEl.textContent='❌ Reducida (<2.0)';iEl.style.color='var(--red)';}}
+  if(vEl){vEl.textContent=cfvr;vEl.style.color=+cfvr>=2?'var(--green)':+cfvr>=1.5?'var(--amber)':'var(--red)';}
+  if(iEl){if(+cfvr>=2){iEl.textContent='✅ Normal (≥2.0)';iEl.style.color='var(--green)';}else if(+cfvr>=1.5){iEl.textContent='⚠️ Límite / reducida leve (1.5–1.99)';iEl.style.color='var(--amber)';}else{iEl.textContent='❌ Reducida (<1.5)';iEl.style.color='var(--red)';}}
 }
 function evalCFVRprot(){
   const v=+document.getElementById('f-cfvr-da')?.value||0;const el=document.getElementById('f-cfvr-da-res');if(!el)return;
   if(!v){el.textContent='';return;}
-  if(v>=2.5){el.style.color='var(--green)';el.textContent='✅ Normal (≥2.5)';}
-  else if(v>=2){el.style.color='var(--amber)';el.textContent='⚠️ Borderline';}
-  else{el.style.color='var(--red)';el.textContent='❌ Reducida — enfermedad microvascular';}
+  if(v>=2){el.style.color='var(--green)';el.textContent='✅ Normal (≥2.0)';}
+  else if(v>=1.5){el.style.color='var(--amber)';el.textContent='⚠️ Límite / reducida leve (1.5–1.99)';}
+  else{el.style.color='var(--red)';el.textContent='❌ Reducida (<1.5) — enfermedad microvascular';}
 }
 function evalGLS(){
   const bas=+document.getElementById('gls-bas')?.value||0;const pic=+document.getElementById('gls-pic')?.value||0;
@@ -2350,7 +2351,7 @@ function evalGLS(){
 function evalPSAP(){
   const v=+document.getElementById('p-psap-pic')?.value||0;const el=document.getElementById('p-psap-res');if(!el)return;
   if(!v){el.textContent='';return;}
-  if(v>60){el.style.color='var(--red)';el.textContent='❌ HTP inducida (>60mmHg) — suspender estudio';}
+  if(v>60){el.style.color='var(--red)';el.textContent='⚠️ PSAP pico muy elevada (>60mmHg) — considerar suspender estudio';}
   else if(v>50){el.style.color='var(--amber)';el.textContent='⚠️ Elevación significativa (>50mmHg)';}
   else{el.style.color='var(--green)';el.textContent='✅ Normal (<50mmHg)';}
 }
@@ -2540,7 +2541,8 @@ function eeImportEcoSmart(){
 }
 function eeEcoSmartChooser(matches){
   var ov=document.createElement('div'); ov.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px';
-  var items=matches.map(function(m,i){ var fecha=m.fecha_estudio||m.fecha||''; var nombre=m.nombre||'—'; return '<button class="btn btn-ghost" data-i="'+i+'" style="justify-content:flex-start;width:100%;text-align:left">🫀 '+String(nombre).replace(/</g,'&lt;')+' · '+String(fecha||'sin fecha')+'</button>'; }).join('');
+  function eeEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  var items=matches.map(function(m,i){ var fecha=m.fecha_estudio||m.fecha||''; var nombre=m.nombre||'—'; return '<button class="btn btn-ghost" data-i="'+i+'" style="justify-content:flex-start;width:100%;text-align:left">🫀 '+eeEsc(nombre)+' · '+eeEsc(fecha||'sin fecha')+'</button>'; }).join('');
   ov.innerHTML='<div style="background:var(--bg2,var(--bg3));border:1px solid var(--border);border-radius:12px;max-width:440px;width:100%;padding:18px;max-height:80vh;overflow:auto">'
     +'<div style="font-size:15px;font-weight:800;color:var(--accent2);margin-bottom:4px">📥 Importar eco basal desde EcoSmart</div>'
     +'<div style="font-size:12px;color:var(--text2);margin-bottom:12px">'+matches.length+' estudio(s) de EcoSmart para esta HC/ID. Elegí cuál importar:</div>'
@@ -2600,7 +2602,7 @@ function evalCriterios(){
   const lPost=+(document.getElementById('l-post')?.value||0);
   const ecgP=document.getElementById('b-ecg-estres')?.value||'no';
   const crit=[
-    {txt:'≥2 segmentos nuevos con alteración de motilidad',sub:nuevos.length+' segmento(s) nuevo(s)',met:nuevos.length>=2,nd:nuevos.length===0&&segs.length===0},
+    {txt:'Nueva o progresiva alteración de motilidad inducida por estrés (≥2 segmentos concordantes aumenta la certeza — ASE Stress Echo 2020)',sub:nuevos.length+' segmento(s) nuevo(s)'+(nuevos.length===1?' — baja certeza / indeterminado':''),met:nuevos.length>=1,nd:nuevos.length===0&&segs.length===0},
     {txt:'Caída de FEVI ≥10% con el estrés',sub:dF!==null?'ΔFEVI: '+(dF>0?'+':'')+dF+'%':'FEVI no ingresada',met:dF!==null&&dF<=-10,nd:dF===null},
     {txt:'Dilatación transitoria del VI',sub:'Isquemia multivaso/severa',met:dilat,nd:false},
     {txt:'Hipotensión inducida (↓ PAS >10mmHg)',sub:'Disfunción sistólica grave',met:dPa,nd:false},
@@ -2643,7 +2645,7 @@ function updateTerritorio(){
   set('lad','LAD');set('rca','RCA');set('lcx','LCx');
   const af=Object.entries(ts).filter(([,d])=>d.a>=2).map(([t])=>t);
   const cEl=document.getElementById('ter-conclusion');
-  if(cEl){if(af.length===0)cEl.textContent='Sin territorios con ≥2 segmentos alterados en pico.';else if(af.length===1)cEl.innerHTML='<strong>Sugestivo de compromiso de '+af[0]+'.</strong> Distribución compatible con estenosis en ese territorio.';else cEl.innerHTML='<strong>⚠️ Patrón multivaso:</strong> alteraciones en '+af.join(' + ')+'. Considerar enfermedad coronaria multivaso.';}
+  if(cEl){if(af.length===0){var _uni=Object.values(ts).some(function(d){return d.a>=1;});cEl.textContent=_uni?'1 segmento alterado — hallazgo indeterminado / baja certeza diagnóstica. ≥2 segmentos concordantes aumenta la certeza (ASE Stress Echo 2020).':'Sin alteraciones de motilidad inducidas por estrés.';}else if(af.length===1)cEl.innerHTML='<strong>Territorio probable: '+af[0]+'.</strong> Distribución orientativa compatible con estenosis en ese territorio (varía con dominancia y anatomía individual).';else cEl.innerHTML='<strong>⚠️ Patrón multivaso probable:</strong> alteraciones en '+af.join(' + ')+'. Considerar enfermedad coronaria multivaso.';}
   const lEl=document.getElementById('ter-seg-list');
   if(lEl){const an=[];state.forEach((st,i)=>{if(st>1)an.push({seg:SEGS[i],st});});
     if(an.length===0)lEl.innerHTML='<div style="color:var(--green)">✅ Sin segmentos alterados en pico.</div>';
@@ -2927,8 +2929,8 @@ function generarInforme(){
   if(af.length)p.push('Patrón isquémico sugestivo de compromiso en: '+af.join(', ')+'.');
   p.push('');
   if(glsBas||glsPic){let gl='GLS: basal '+glsBas+'%';if(glsPic){gl+=', pico '+glsPic+'%';const d=Math.abs(+glsPic)-Math.abs(+glsBas);gl+=' (Δ '+(d>0?'+':'')+d.toFixed(1)+'% — reserva '+(d>2?'presente':'reducida')+')';}p.push(gl+'.');}
-  if(cfvrDa)p.push('CFVR DA: '+cfvrDa+' ('+(+cfvrDa>=2.5?'normal':'reducida')+').');
-  if(psapPic)p.push('PSAP pico: '+psapPic+'mmHg ('+(+psapPic>60?'HTP inducida':+psapPic>50?'elevación significativa':'normal')+').');
+  if(cfvrDa)p.push('CFVR DA: '+cfvrDa+' ('+(+cfvrDa>=2?'normal':+cfvrDa>=1.5?'límite':'reducida')+').');
+  if(psapPic)p.push('PSAP pico: '+psapPic+'mmHg ('+(+psapPic>60?'respuesta de presión pulmonar elevada al ejercicio — requiere confirmación hemodinámica (ESC/ERS 2022)':+psapPic>50?'elevación significativa':'normal')+').');
   if(eePic)p.push("E/e' pico: "+eePic+' ('+(+eePic>=15?'eco estrés diastólico positivo':+eePic>=13?'borderline':'normal')+').');
   if(lPost==='2')p.push('Líneas B ≥3/campo post-estrés: presente.');
   p.push('');
@@ -3977,7 +3979,7 @@ function ebTextoInforme(){
         +dist([['Normal ≥55','var(--green)'],['Leve 45-54','var(--yellow)'],['Reducida 35-44','var(--amber)'],['Severa <35','var(--red)'],['Sin dato','var(--text2)']].map(function(e){return {label:e[0],n:A.fevi[e[0]],color:e[1]};}))+'</div>'
         +'<div class="eea-grid" style="align-content:start">'
         +card(pct(A.altPico,T)+'%','Alt. motilidad pico',A.altPico+'/'+T,'var(--amber)')
-        +card(A.terrTop,'Territorio más frecuente','')
+        +card(A.terrTop,'Territorio probable más frecuente','')
         +card(pct(A.psapHi,T)+'%','PSAP basal >40',A.psapHi+'/'+T,A.psapHi>0?'var(--amber)':'var(--green)')
         +'</div></div>';
       // BRECHAS
@@ -4086,7 +4088,7 @@ function ebTextoInforme(){
     bar('Hallazgos');
     dist('FEVI basal', ['Normal ≥55','Leve 45-54','Reducida 35-44','Severa <35','Sin dato'].map(function(k){return {label:k,n:A.fevi[k]};}));
     row('Alt. motilidad pico', pct(A.altPico,T)+'%', A.altPico+'/'+T, 'var(--amber)');
-    row('Territorio más frecuente', A.terrTop);
+    row('Territorio probable más frecuente', A.terrTop);
     row('PSAP basal >40', pct(A.psapHi,T)+'%', A.psapHi+'/'+T, A.psapHi>0?'var(--amber)':'var(--green)');
 
     // ── BRECHAS ──
@@ -5664,7 +5666,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'+nar('d-narr'));
     var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
     abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.'+nar('f-narr'));
-    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(MOD('reservaDiast')&&V('l-irc')?(', IRC '+V('l-irc')):'')+(MOD('reservaDiast')?('; líneas B '+(T('l-post')||'—')):'')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
+    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(MOD('reservaDiast')&&V('l-irc')?(', IRC '+V('l-irc')+' (índice exploratorio, no ASE 2025)'):'')+(MOD('reservaDiast')?('; líneas B '+(T('l-post')||'—')):'')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
     abcd.push('P — Presiones/pulmonar: PSAP '+(V('p-psap-bas')||'—')+' -> '+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?('; TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?('; RVP '+V('p-rvp')):'')+'; patrón diastólico basal '+(T('p-diast')||'—')+'.'+nar('p-narr'));
     abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
     }
@@ -5872,8 +5874,8 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     var rvp=(maxit&&vtiT)?+(maxit/vtiT).toFixed(2):null; setV('p-rvp', rvp!=null?rvp:'');
     var psapBas=N('p-psap-bas');
     var htp=(psapPic!=null&&(psapPic>60||(psapBas!=null&&(psapPic-psapBas)>20)));
-    res('p-psap-res', psapPic==null?'':(psapPic>60?'❌ HTP inducida (PSAP pico >60mmHg)':(psapBas!=null&&(psapPic-psapBas)>20)?'⚠️ Aumento significativo de PSAP (>20mmHg)':'✅ PSAP pico normal'), psapPic==null?'':(htp?'var(--red)':'var(--green)'));
-    res('p-vdap-res', tp==null?'':(tp<0.55?'⚠️ Desacople VD-AP (TAPSE/PSAP <0.55)':'✅ Acoplamiento VD-AP conservado'), tp==null?'':(tp<0.55?'var(--amber)':'var(--green)'));
+    res('p-psap-res', psapPic==null?'':(psapPic>60?'⚠️ Respuesta de presión pulmonar elevada durante ejercicio — PSAP pico elevada (>60 mmHg). Evaluación hemodinámica especializada requerida para confirmación (ESC/ERS 2022)':(psapBas!=null&&(psapPic-psapBas)>20)?'⚠️ Aumento significativo de PSAP (>20mmHg)':'✅ PSAP pico normal'), psapPic==null?'':(htp?'var(--red)':'var(--green)'));
+    res('p-vdap-res', tp==null?'':(tp<0.55?'⚠️ Relación reducida, compatible con menor acoplamiento VD-AP en este contexto clínico (ASE Right Heart 2025)':'✅ Acoplamiento VD-AP conservado'), tp==null?'':(tp<0.55?'var(--amber)':'var(--green)'));
     // R — HRR y recuperación
     var fc3=N('r-fc3'), rfc=N('r-fcmax')||fcmax;
     var hrr=(rfc!=null&&fc3!=null)?Math.round(rfc-fc3):null; setV('r-hrr', hrr!=null?(hrr+' lpm'):'');
@@ -5891,9 +5893,9 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     else if(sec==='c'){ var df=V('c-dfevi'),ds=V('c-dsgl'),ea=V('c-ea'),alt=V('c-alt-nuevas');
       s='WMSI basal '+(V('c-wmsi-bas')||'—')+' → pico '+(V('c-wmsi-pic')||'—')+'. '+(df?('ΔFEVI '+df):'')+(ds?(', ΔSGL '+ds):'')+(ea?(', Ea '+ea):'')+'. '+(alt?(alt+'. '):'')+(/nuevo|empeora/i.test(alt+V('c-mot-pic'))?'Sugiere isquemia inducible.':'Reserva contráctil conservada, sin nuevas alteraciones.'); }
     else if(sec==='d'){ s='IM inducida: '+(T('d-im')||'no').toLowerCase()+'. Dilatación transitoria del VI: '+(V('d-dilat')==='si'?'presente':'ausente')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'; }
-    else if(sec==='f'){ var cf=V('f-cfvr-da'); s='CFVR DA '+(cf||'—')+(V('f-cfvr-vdp')&&V('f-cfvr-vdr')?(' (VDP '+V('f-cfvr-vdp')+' / VDR '+V('f-cfvr-vdr')+')'):'')+' — '+(cf?(parseFloat(cf)>2?'reserva de flujo conservada':parseFloat(cf)>=1.5?'reserva de flujo límite':'reserva de flujo reducida'):'no evaluada')+'.'; }
+    else if(sec==='f'){ var cf=V('f-cfvr-da'); s='CFVR DA '+(cf||'—')+(V('f-cfvr-vdp')&&V('f-cfvr-vdr')?(' (VDP '+V('f-cfvr-vdp')+' / VDR '+V('f-cfvr-vdr')+')'):'')+' — '+(cf?(parseFloat(cf)>=2?'reserva de flujo conservada':parseFloat(cf)>=1.5?'reserva de flujo límite':'reserva de flujo reducida'):'no evaluada')+'.'; }
     else if(sec==='l'){ s="E/e' pico "+(V('p-ee-pic')||'—')+', líneas B '+(T('l-post')||'—').toLowerCase()+', PSAP pico '+(V('p-psap-pic')||'—')+' mmHg. '+(V('l-diast-estres')==='alterado'||parseInt(V('l-post'),10)>=2||(N('p-ee-pic')!=null&&N('p-ee-pic')>=15)?'Disfunción diastólica inducible (eco estrés diastólico positivo).':'Sin disfunción diastólica inducible.'); }
-    else if(sec==='p'){ s='PSAP '+(V('p-psap-bas')||'—')+'→'+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?(', TAPSE/PSAP '+V('p-tapse-psap')+' mm/mmHg'):'')+(V('p-rvp')?(', RVP '+V('p-rvp')):'')+'. '+((N('p-psap-pic')!=null&&N('p-psap-pic')>60)?'HTP inducida.':'Sin HTP inducida; acoplamiento VD-AP '+((N('p-tapse-psap')!=null&&N('p-tapse-psap')<0.55)?'reducido.':'conservado.')); }
+    else if(sec==='p'){ s='PSAP '+(V('p-psap-bas')||'—')+'→'+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?(', TAPSE/PSAP '+V('p-tapse-psap')+' mm/mmHg'):'')+(V('p-rvp')?(', RVP '+V('p-rvp')):'')+'. '+((N('p-psap-pic')!=null&&N('p-psap-pic')>60)?'Respuesta de presión pulmonar elevada al ejercicio (PSAP pico >60 mmHg) — requiere confirmación hemodinámica (ESC/ERS 2022).':'Sin respuesta de presión pulmonar elevada; acoplamiento VD-AP '+((N('p-tapse-psap')!=null&&N('p-tapse-psap')<0.55)?'reducido.':'conservado.')); }
     else if(sec==='r'){ s='Motilidad '+(N('r-trecup')!=null&&N('r-trecup')>3?'normaliza tardíamente ('+V('r-trecup')+' min)':'normaliza a los '+(V('r-trecup')||'—')+' min')+'. HRR '+(V('r-hrr')||'—')+(V('r-hrr')?(' — '+(N('r-fcmax')!=null&&N('r-fc3')!=null&&(N('r-fcmax')-N('r-fc3'))>=22?'reserva cronotrópica normal':(N('r-fcmax')-N('r-fc3'))>=12?'reserva cronotrópica límite':'reserva cronotrópica reducida')):'')+'. VD '+(V('r-mot-vd')==='alterada'?'con motilidad alterada':'normal')+'.'; }
     var tid = sec==='b'?'b-ecg-desc':(sec+'-narr');
     var el=E(tid); if(el){ el.value=s; el.dispatchEvent(new Event('input',{bubbles:true})); }
