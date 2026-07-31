@@ -4254,7 +4254,7 @@ function ebTextoInforme(){
     var m=document.getElementById('ee-guardados'); if(m)m.classList.add('open');
   };
   function F(r,id){ return (r&&r.vals&&r.vals[id]!=null)?r.vals[id]:''; }
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function toast(m){ if(typeof eeToast==='function')eeToast(m); }
   function fmtFecha(iso){ if(!iso)return '—'; var p=String(iso).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; }
   var EST={ejercicio:'Esfuerzo',dobutamina:'Dobutamina',dipiridamol:'Dipiridamol',adenosina:'Adenosina'};
@@ -4723,7 +4723,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     '2c':{t:'2 cámaras', ll:'Anterior', l:[0,6,12], ax:16, rl:'Inferior',       r:[3,9,14]},
     '3c':{t:'3 cámaras', ll:'Anteroseptal', l:[1,7,13], ax:16, rl:'Inferolateral', r:[4,10,15]}
   };
-  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function col(st){ return SEG_COLORS[st||0]; }
   function keyName(){ return (typeof peKeyNames==='function')?peKeyNames():{basal:'Basal',low:'Estrés bajo',pico:'Pico',recup:'Recuperación'}; }
   window.bvStageName=function(st){ if(st==='extra')return bullExtra.name||'Etapa opcional'; return keyName()[st]||st; };
