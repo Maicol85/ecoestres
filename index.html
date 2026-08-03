@@ -19,7 +19,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{height:100%;}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);
-     display:flex;flex-direction:column;height:100%;font-size:13px;-webkit-font-smoothing:antialiased;}
+     display:flex;flex-direction:column;height:100%;font-size:14px;-webkit-font-smoothing:antialiased;}
 header{position:fixed;top:0;left:0;right:0;height:var(--header);
   background:rgba(13,17,23,.95);border-bottom:1px solid var(--border);
   display:flex;align-items:center;padding:0 18px;gap:12px;z-index:200;backdrop-filter:blur(12px);}
@@ -47,7 +47,7 @@ main{margin-top:var(--header);margin-left:var(--sidebar);padding:20px;min-height
 .page{display:none;} .page.active{display:block;}
 .page-title{font-size:18px;font-weight:700;margin-bottom:3px;}
 .page-sub{font-size:12px;color:var(--text2);margin-bottom:18px;}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;}
 .card-head{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;
   letter-spacing:.6px;padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;}
 .card-body{padding:16px;}
@@ -56,9 +56,9 @@ main{margin-top:var(--header);margin-left:var(--sidebar);padding:20px;min-height
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .fg{margin-bottom:11px;}
 .fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);
-  margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
-input,select,textarea{width:100%;padding:7px 10px;background:var(--bg3);border:1px solid var(--border2);
-  border-radius:7px;color:var(--text);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s;}
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
+input,select,textarea{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:7px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;}
 input:focus,select:focus,textarea:focus{border-color:var(--accent2);}
 input[readonly]{opacity:.6;cursor:default;}
 textarea{resize:vertical;min-height:72px;}
@@ -292,7 +292,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   var scr=document.getElementById('ee-login'), inp=document.getElementById('ee-login-pwd'),
       btn=document.getElementById('ee-login-btn'), err=document.getElementById('ee-login-err');
   function tryLogin(){
-    if(inp.value===PWD){ scr.classList.add('hidden'); }
+    if(inp.value===PWD){ scr.classList.add('hidden'); try{ if(window.eeMostrarAvisoDatos) window.eeMostrarAvisoDatos(); }catch(e){} }
     else{ err.textContent='Contraseña incorrecta'; inp.value=''; inp.focus(); setTimeout(function(){err.textContent='';},2000); }
   }
   btn.addEventListener('click',tryLogin);
@@ -309,8 +309,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       <path d="M14 4C10 4 7 7 7 11c0 4 4 6 7 9 3-3 7-5 7-9 0-4-3-7-7-7Z" stroke="#E11D48" stroke-width="1.4" fill="none"/>
       <path d="M14 20v4M8 22l3 0 1.5-3.5L14 26l1.5-4L17 22l3 0" stroke="#0D9488" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    Ceibo<span class="dot">Med</span>
-    <span class="sub">EcoEstrés Smart</span>
+    Eco<span class="dot">Estrés</span> Smart
+    <span class="sub">CeiboMed</span>
     <div class="hdr-logo-edit" id="ee-logo-wrap" onclick="eeLogoClick(event)" title="Logo del centro (click para cargar)">
       <span class="ph" id="ee-logo-ph"><span style="font-size:13px">＋</span>Logo</span>
       <img id="ee-logo-img" alt="logo del centro">
@@ -328,6 +328,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     <label class="hdr-ibtn" title="Importar JSON" style="cursor:pointer">⬆️<span class="lbl">Importar</span><input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
     <button class="hdr-ibtn" onclick="nuevoEstudio()" title="Limpiar estudio">🗑<span class="lbl">Limpiar</span></button>
     <button class="hdr-save-btn" onclick="guardar()">💾 Guardar</button>
+    <button class="hdr-ibtn" onclick="abrirAyudaEcoEstres()" title="Ayuda / Manual">?<span class="lbl">Ayuda</span></button>
+    <button class="hdr-ibtn" onclick="eeCerrarSesion()" title="Cerrar sesión">🔒<span class="lbl">Cerrar</span></button>
   </div>
 </header>
 <nav class="sidebar" id="sidebar">
@@ -386,16 +388,65 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   <div class="page-sub">Evaluación estructural y funcional pre-estrés. Completa antes de iniciar el protocolo.</div>
 
   <div class="tabs" id="ecobasal-tabs">
-    <button class="tab-btn active" onclick="ebTab('ai-ao',this)">AI / AO</button>
-    <button class="tab-btn" onclick="ebTab('vi-vd',this)">VI / VD</button>
-    <button class="tab-btn" onclick="ebTab('ad-vci',this)">AD / VCI</button>
+    <button class="tab-btn active" onclick="ebTab('ai-ao',this)">AI / Ao / VI</button>
+    <button class="tab-btn" onclick="ebTab('vd-advci',this)">VD / AD / VCI</button>
     <button class="tab-btn" onclick="ebTab('doppler',this)">Doppler</button>
     <button class="tab-btn" onclick="ebTab('valvulas',this)">Válvulas</button>
     <button class="tab-btn" onclick="ebTab('pericardio',this)">Pericardio</button>
   </div>
 
-  <!-- VI / SISTÓLICA -->
-  <div class="tab-pane" id="ebtab-vi" data-ebg="vi-vd">
+  <!-- ═══ AI / Ao / VI ═══ -->
+  <!-- FILA SUPERIOR: Aurícula Izquierda + Aorta (lado a lado) -->
+  <div class="tab-pane active" id="ebtab-ai" data-ebg="ai-ao">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head">🫁 Aurícula Izquierda</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label for="eb-ai-diam">Diámetro AP (mm)</label><input type="number" id="eb-ai-diam" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
+            <div class="fg"><label for="eb-area-ai">Área AI (cm²)</label><input type="number" id="eb-area-ai" step="0.1" placeholder="18" oninput="ebEvalAI()"></div>
+          </div>
+          <div id="eb-ai-diam-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+          <div class="grid2">
+            <div class="fg"><label for="eb-ai-vol4c">Vol. AI 4C (ml)</label><input type="number" id="eb-ai-vol4c" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
+            <div class="fg"><label for="eb-ai-vol2c">Vol. AI 2C (ml)</label><input type="number" id="eb-ai-vol2c" step="0.1" placeholder="36" oninput="ebEvalAI()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label for="eb-ai-vol">Vol. AI Promedio (ml)</label><input type="number" id="eb-ai-vol" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-ai-vol-i">Vol. AI indexado (ml/m²)</label><input type="number" id="eb-ai-vol-i" readonly placeholder="—"></div>
+          </div>
+          <div id="eb-ai-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ Vol. AI indexado normal: ≤34 ml/m². &gt;34: leve. &gt;41: moderado. &gt;48: severo.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">🩸 Aorta</div>
+        <div class="card-body">
+          <div class="grid2">
+            <div class="fg"><label for="eb-ao-anillo">Anillo aórtico (mm)</label><input type="number" id="eb-ao-anillo" step="0.1" placeholder="22"></div>
+            <div class="fg"><label for="eb-ao-senos">Senos de Valsalva (mm)</label><input type="number" id="eb-ao-senos" step="0.1" placeholder="33" oninput="ebEvalAorta()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label for="eb-ao-ust">Unión sinotubular (mm)</label><input type="number" id="eb-ao-ust" step="0.1" placeholder="28"></div>
+            <div class="fg"><label for="eb-ao-asc">Aorta ascendente (mm)</label><input type="number" id="eb-ao-asc" step="0.1" placeholder="32" oninput="ebEvalAorta()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label for="eb-ao-arco">Arco aórtico (mm)</label><input type="number" id="eb-ao-arco" step="0.1" placeholder="28"></div>
+            <div class="fg"><label for="eb-ao-desc">Aorta descendente (mm)</label><input type="number" id="eb-ao-desc" step="0.1" placeholder="24"></div>
+          </div>
+          <div id="eb-ao-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+          <div class="note-box" style="margin-top:8px">ℹ️ Senos de Valsalva: ≤40 mm normal (♂), ≤36 mm (♀). Aorta ascendente: ≤38 mm.</div>
+          <div class="fg" style="margin-top:10px"><label>Observaciones aorta</label>
+            <textarea id="eb-ao-obs" placeholder="Ej: Dilatación moderada de senos de Valsalva…" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILA INFERIOR: Ventrículo Izquierdo completo -->
+  <div class="tab-pane active" id="ebtab-vi" data-ebg="ai-ao">
     <div class="grid2">
       <div class="card">
         <div class="card-head">📐 Dimensiones VI (Modo M / 2D)</div>
@@ -440,16 +491,16 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 
           <div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:6px">Simpson biplanar</div>
           <div class="grid2">
-            <div class="fg"><label for="eb-vd4c">Vol. diastólico 4C (mL)</label><input type="number" id="eb-vd4c" placeholder="120" oninput="ebCalcSimpson()"></div>
-            <div class="fg"><label for="eb-vs4c">Vol. sistólico 4C (mL)</label><input type="number" id="eb-vs4c" placeholder="45" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vd4c">Vol. diastólico 4C (ml)</label><input type="number" id="eb-vd4c" placeholder="120" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vs4c">Vol. sistólico 4C (ml)</label><input type="number" id="eb-vs4c" placeholder="45" oninput="ebCalcSimpson()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label for="eb-vd2c">Vol. diastólico 2C (mL)</label><input type="number" id="eb-vd2c" placeholder="115" oninput="ebCalcSimpson()"></div>
-            <div class="fg"><label for="eb-vs2c">Vol. sistólico 2C (mL)</label><input type="number" id="eb-vs2c" placeholder="42" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vd2c">Vol. diastólico 2C (ml)</label><input type="number" id="eb-vd2c" placeholder="115" oninput="ebCalcSimpson()"></div>
+            <div class="fg"><label for="eb-vs2c">Vol. sistólico 2C (ml)</label><input type="number" id="eb-vs2c" placeholder="42" oninput="ebCalcSimpson()"></div>
           </div>
           <div class="grid2">
-            <div class="fg"><label for="eb-vtd">VTDVI biplano (mL)</label><input type="number" id="eb-vtd" readonly placeholder="—"></div>
-            <div class="fg"><label for="eb-vts">VTSVI biplano (mL)</label><input type="number" id="eb-vts" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-vtd">VTDVI Promedio (ml)</label><input type="number" id="eb-vtd" readonly placeholder="—"></div>
+            <div class="fg"><label for="eb-vts">VTSVI Promedio (ml)</label><input type="number" id="eb-vts" readonly placeholder="—"></div>
           </div>
           <div class="fg"><label for="eb-fevi-simpson">FEVI Simpson biplano (%)</label><input type="number" id="eb-fevi-simpson" readonly placeholder="—"></div>
           <div id="eb-fevi-simp-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
@@ -503,7 +554,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     </div>
 
     <div class="card">
-      <div class="card-head">📊 Clasificación disfunción diastólica (ASE/EACVI 2016)</div>
+      <div class="card-head">📊 Clasificación disfunción diastólica (ASE 2025)</div>
       <div class="card-body">
         <div id="eb-diast-class" style="font-size:12px;color:var(--text2);line-height:1.7">Completar Doppler transmitral y TDI para clasificación automática.</div>
         <div style="margin-top:12px">
@@ -522,107 +573,63 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     </div>
   </div>
 
-  <!-- VD -->
-  <div class="tab-pane" id="ebtab-vd" data-ebg="vi-vd">
+  <!-- ═══ VD / AD / VCI ═══ -->
+  <!-- FILA SUPERIOR: VD (izquierda) + Aurícula Derecha (derecha) -->
+  <div class="tab-pane" id="ebtab-vd" data-ebg="vd-advci">
     <div class="grid2">
-      <div class="card">
-        <div class="card-head">📐 Dimensiones VD</div>
-        <div class="card-body">
-          <div class="fg"><label for="eb-vd-bas">DTDVD basal (mm) — apical 4C</label><input type="number" id="eb-vd-bas" step="0.1" placeholder="36" oninput="ebEvalVD()"></div>
-          <div class="fg"><label for="eb-vd-med">DTDVD medio (mm)</label><input type="number" id="eb-vd-med" step="0.1" placeholder="28"></div>
-          <div class="fg"><label for="eb-vd-long">DTDVD longitudinal (mm)</label><input type="number" id="eb-vd-long" step="0.1" placeholder="70"></div>
-          <div class="fg"><label for="eb-vd-pared">Grosor pared libre VD (mm)</label><input type="number" id="eb-vd-pared" step="0.1" placeholder="4" oninput="ebEvalVD()"></div>
-          <div id="eb-vd-dim-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
-          <div class="note-box" style="margin-top:8px">ℹ️ VD basal normal: ≤41 mm (♀) / ≤41 mm (♂). Pared libre &gt;5 mm = hipertrofia VD.</div>
+      <div>
+        <div class="card">
+          <div class="card-head">📐 Dimensiones VD</div>
+          <div class="card-body">
+            <div class="fg"><label for="eb-vd-bas">DTDVD basal (mm) — apical 4C</label><input type="number" id="eb-vd-bas" step="0.1" placeholder="36" oninput="ebEvalVD()"></div>
+            <div class="fg"><label for="eb-vd-med">DTDVD medio (mm)</label><input type="number" id="eb-vd-med" step="0.1" placeholder="28"></div>
+            <div class="fg"><label for="eb-vd-long">DTDVD longitudinal (mm)</label><input type="number" id="eb-vd-long" step="0.1" placeholder="70"></div>
+            <div class="fg"><label for="eb-vd-pared">Grosor pared libre VD (mm)</label><input type="number" id="eb-vd-pared" step="0.1" placeholder="4" oninput="ebEvalVD()"></div>
+            <div id="eb-vd-dim-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
+            <div class="note-box" style="margin-top:8px">ℹ️ VD basal normal: ≤41 mm (♀) / ≤41 mm (♂). Pared libre &gt;5 mm = hipertrofia VD.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-head">💓 Función sistólica VD</div>
+          <div class="card-body">
+            <div class="fg"><label for="eb-tapse">TAPSE (mm)</label><input type="number" id="eb-tapse" step="0.1" placeholder="22" oninput="ebEvalVD()"></div>
+            <div id="eb-tapse-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+            <div class="fg"><label for="eb-s-tric">S' tricuspídea TDI (cm/s)</label><input type="number" id="eb-s-tric" step="0.1" placeholder="12" oninput="ebEvalVD()"></div>
+            <div id="eb-stric-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
+            <div class="grid2">
+              <div class="fg"><label for="eb-vd-ad">Área diastólica VD (cm²)</label><input type="number" id="eb-vd-ad" step="0.1" placeholder="16" oninput="ebCalcFAC_VD()"></div>
+              <div class="fg"><label for="eb-vd-as">Área sistólica VD (cm²)</label><input type="number" id="eb-vd-as" step="0.1" placeholder="8" oninput="ebCalcFAC_VD()"></div>
+            </div>
+            <div class="fg"><label for="eb-fac-vd">FAC VD (%)</label><input type="number" id="eb-fac-vd" readonly placeholder="—"></div>
+            <div id="eb-fac-vd-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
+            <div class="note-box" style="margin-top:8px">ℹ️ TAPSE normal: ≥17 mm. S' normal: ≥9.5 cm/s. FAC normal: ≥35%.</div>
+          </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-head">💓 Función sistólica VD</div>
+        <div class="card-head">🫁 Aurícula Derecha + VCI</div>
         <div class="card-body">
-          <div class="fg"><label for="eb-tapse">TAPSE (mm)</label><input type="number" id="eb-tapse" step="0.1" placeholder="22" oninput="ebEvalVD()"></div>
-          <div id="eb-tapse-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
-          <div class="fg"><label for="eb-s-tric">S' tricuspídea TDI (cm/s)</label><input type="number" id="eb-s-tric" step="0.1" placeholder="12" oninput="ebEvalVD()"></div>
-          <div id="eb-stric-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
           <div class="grid2">
-            <div class="fg"><label for="eb-vd-ad">Área diastólica VD (cm²)</label><input type="number" id="eb-vd-ad" step="0.1" placeholder="16" oninput="ebCalcFAC_VD()"></div>
-            <div class="fg"><label for="eb-vd-as">Área sistólica VD (cm²)</label><input type="number" id="eb-vd-as" step="0.1" placeholder="8" oninput="ebCalcFAC_VD()"></div>
+            <div class="fg"><label for="eb-ad-area">Área AD (cm²)</label><input type="number" id="eb-ad-area" step="0.1" placeholder="14" oninput="ebEvalAD()"></div>
+            <div class="fg"><label for="eb-ad-diam">Diám. AD (mm)</label><input type="number" id="eb-ad-diam" step="0.1" placeholder="38"></div>
           </div>
-          <div class="fg"><label for="eb-fac-vd">FAC VD (%)</label><input type="number" id="eb-fac-vd" readonly placeholder="—"></div>
-          <div id="eb-fac-vd-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
-          <div class="note-box" style="margin-top:8px">ℹ️ TAPSE normal: ≥17 mm. S' normal: ≥9.5 cm/s. FAC normal: ≥35%.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI / AD -->
-  <div class="tab-pane active" id="ebtab-ai" data-ebg="ai-ao">
-    <div class="grid2">
-      <div class="card">
-        <div class="card-head">🫁 Aurícula Izquierda</div>
-        <div class="card-body">
-          <div class="fg"><label for="eb-ai-diam">Diámetro AI — paraesternal (mm)</label><input type="number" id="eb-ai-diam" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
-          <div id="eb-ai-diam-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
-          <div class="grid2">
-            <div class="fg"><label for="eb-ai-vol4c">Vol. AI 4C (mL)</label><input type="number" id="eb-ai-vol4c" step="0.1" placeholder="38" oninput="ebEvalAI()"></div>
-            <div class="fg"><label for="eb-ai-vol2c">Vol. AI 2C (mL)</label><input type="number" id="eb-ai-vol2c" step="0.1" placeholder="36" oninput="ebEvalAI()"></div>
-          </div>
-          <div class="grid2">
-            <div class="fg"><label for="eb-ai-vol">Vol. AI biplano (mL)</label><input type="number" id="eb-ai-vol" readonly placeholder="—"></div>
-            <div class="fg"><label for="eb-ai-vol-i">Vol. AI indexado (mL/m²)</label><input type="number" id="eb-ai-vol-i" readonly placeholder="—"></div>
-          </div>
-          <div id="eb-ai-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
-          <div class="note-box" style="margin-top:8px">ℹ️ Vol. AI indexado normal: ≤34 mL/m². &gt;34: leve. &gt;41: moderado. &gt;48: severo.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AD / VCI -->
-  <div class="tab-pane" id="ebtab-ad" data-ebg="ad-vci">
-    <div class="grid2">
-      <div class="card">
-        <div class="card-head">🫁 Aurícula Derecha</div>
-        <div class="card-body">
-          <div class="fg"><label for="eb-ad-area">Área AD (cm²)</label><input type="number" id="eb-ad-area" step="0.1" placeholder="14" oninput="ebEvalAD()"></div>
           <div id="eb-ad-res" style="font-size:11px;font-weight:600;margin-top:2px;margin-bottom:8px"></div>
-          <div class="fg"><label for="eb-vci">VCI (mm)</label><input type="number" id="eb-vci" step="0.1" placeholder="18" oninput="ebCalcPAD()"></div>
-          <div class="fg"><label>Colapso VCI con inspiración</label>
-            <select id="eb-vci-colapso" onchange="ebCalcPAD()">
-              <option value="">—</option>
-              <option value=">50">Normal &gt;50%</option>
-              <option value="<50">Reducido &lt;50%</option>
-              <option value="no">Sin colapso</option>
-            </select>
+          <div style="height:1px;background:var(--border);margin:2px 0 10px"></div>
+          <div class="grid2">
+            <div class="fg"><label for="eb-vci">VCI (mm)</label><input type="number" id="eb-vci" step="0.1" placeholder="18" oninput="ebCalcPAD()"></div>
+            <div class="fg"><label>Colapso VCI con inspiración</label>
+              <select id="eb-vci-colapso" onchange="ebCalcPAD()">
+                <option value="">—</option>
+                <option value=">50">Normal &gt;50%</option>
+                <option value="<50">Reducido &lt;50%</option>
+                <option value="no">Sin colapso</option>
+              </select>
+            </div>
           </div>
           <div class="fg"><label for="eb-pad">PAD estimada (mmHg)</label><input type="number" id="eb-pad" readonly placeholder="—"></div>
           <div id="eb-pad-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
           <div class="note-box" style="margin-top:8px">ℹ️ Área AD normal: ≤18 cm². VCI &lt;21 mm + colapso &gt;50% → PAD 3 mmHg. VCI &gt;21 mm o colapso &lt;50% → PAD 8 mmHg. Ambos patológicos → PAD 15 mmHg.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AORTA -->
-  <div class="tab-pane active" id="ebtab-aorta" data-ebg="ai-ao">
-    <div class="card">
-      <div class="card-head">🩸 Aorta</div>
-      <div class="card-body">
-        <div class="grid3">
-          <div class="fg"><label for="eb-ao-anillo">Anillo aórtico (mm)</label><input type="number" id="eb-ao-anillo" step="0.1" placeholder="22"></div>
-          <div class="fg"><label for="eb-ao-senos">Senos de Valsalva (mm)</label><input type="number" id="eb-ao-senos" step="0.1" placeholder="33" oninput="ebEvalAorta()"></div>
-          <div class="fg"><label for="eb-ao-ust">Unión sinotubular (mm)</label><input type="number" id="eb-ao-ust" step="0.1" placeholder="28"></div>
-        </div>
-        <div class="grid3">
-          <div class="fg"><label for="eb-ao-asc">Aorta ascendente (mm)</label><input type="number" id="eb-ao-asc" step="0.1" placeholder="32" oninput="ebEvalAorta()"></div>
-          <div class="fg"><label for="eb-ao-arco">Arco aórtico (mm)</label><input type="number" id="eb-ao-arco" step="0.1" placeholder="28"></div>
-          <div class="fg"><label for="eb-ao-desc">Aorta descendente (mm)</label><input type="number" id="eb-ao-desc" step="0.1" placeholder="24"></div>
-        </div>
-        <div id="eb-ao-res" style="font-size:11px;font-weight:600;margin-top:4px"></div>
-        <div class="note-box" style="margin-top:8px">ℹ️ Senos de Valsalva: ≤40 mm normal (♂), ≤36 mm (♀). Aorta ascendente: ≤38 mm. Indexar en pacientes con SC muy diferente a 1.7 m².</div>
-        <div class="fg" style="margin-top:10px"><label>Observaciones aorta</label>
-          <textarea id="eb-ao-obs" placeholder="Ej: Dilatación moderada de senos de Valsalva. Sin elongación ni calcificación…" rows="2"></textarea>
         </div>
       </div>
     </div>
@@ -716,7 +723,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
               <option value="reumatica">Reumática</option>
             </select>
           </div>
-          <div class="fg"><label for="eb-it-vmax">Velocidad máx. IT (m/s)</label><input type="number" id="eb-it-vmax" step="0.1" placeholder="2.5" oninput="ebCalcPSAP()"></div>
+          <div class="fg"><label for="eb-it-vmax">Velocidad máx. IT (m/s)</label><input type="number" id="eb-it-vmax" step="0.1" placeholder="2.5" oninput="ebCalcPSAP();if(window.ebClasDiastASE2025)ebClasDiastASE2025()"></div>
           <div class="fg"><label for="eb-it-grad">Gradiente IT (mmHg)</label><input type="number" id="eb-it-grad" readonly placeholder="—"></div>
           <div class="fg"><label for="eb-psap">PSAP estimada (mmHg)</label><input type="number" id="eb-psap" readonly placeholder="—"></div>
           <div id="eb-psap-res" style="font-size:11px;font-weight:600;margin-top:2px"></div>
@@ -832,16 +839,25 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         <div style="margin:2px 0 10px"><button type="button" class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="eeImportEcoSmart()">📥 Importar eco basal desde EcoSmart</button></div>
         <div class="grid3">
           <div class="fg"><label>Fecha de nacimiento</label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="p-fnac-dia" min="1" max="31" placeholder="Día" oninput="calcEdad()" style="width:72px">
-              <select id="p-fnac-mes" onchange="calcEdad()" style="flex:1">
-                <option value="">Mes</option>
-                <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-                <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-                <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-                <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-              </select>
-              <input type="number" id="p-fnac-anio" min="1900" max="2100" placeholder="Año" oninput="calcEdad()" style="width:92px">
+            <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;margin-top:2px">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <label for="p-fnac-dia" style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text2)">Día</label>
+                <input type="number" id="p-fnac-dia" min="1" max="31" placeholder="15" style="width:56px" oninput="calcEdadEE()">
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <label for="p-fnac-mes" style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text2)">Mes</label>
+                <select id="p-fnac-mes" onchange="calcEdadEE()" style="width:120px">
+                  <option value="">— Mes —</option>
+                  <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+                  <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+                  <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+                  <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <label for="p-fnac-anio" style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text2)">Año</label>
+                <input type="number" id="p-fnac-anio" min="1920" max="2010" placeholder="1975" style="width:76px" oninput="calcEdadEE()">
+              </div>
             </div>
           </div>
           <div class="fg"><label for="p-edad">Edad (años)</label><input type="number" id="p-edad" placeholder="55" oninput="onEdadChange()"></div>
@@ -891,31 +907,17 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
       .ci-group{margin-top:2px}
       </style>
       <div class="card" id="contraindic-card" style="margin-top:14px">
-        <div class="card-head">⚠️ Contraindicaciones según protocolo</div>
+        <div class="card-head">⚠️ Precauciones para uso de atropina</div>
         <div class="card-body">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:9px">Contraindicaciones del agente de estrés seleccionado (<b><span id="ci-proto-name">—</span></b>). Marcá las presentes en el paciente.</div>
-          <div class="ci-group" id="ci-group-dipiridamol" style="display:none">
-            <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
-              <label class="ci-lbl"><input type="checkbox" id="ci-dip-asma" onchange="updateContraindic()"> Asma / EPOC</label>
-              <label class="ci-lbl"><input type="checkbox" id="ci-dip-bav" onchange="updateContraindic()"> Bloqueo AV avanzado</label>
-              <label class="ci-lbl"><input type="checkbox" id="ci-dip-hipo" onchange="updateContraindic()"> Hipotensión severa</label>
-            </div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
+            <label class="ci-lbl"><input type="checkbox" id="atr-glaucoma"> Glaucoma de ángulo cerrado</label>
+            <label class="ci-lbl"><input type="checkbox" id="atr-prostata"> Hipertrofia prostática / retención urinaria</label>
+            <label class="ci-lbl"><input type="checkbox" id="atr-taquiarr"> Taquiarritmia activa (FA rápida, TSV)</label>
+            <label class="ci-lbl"><input type="checkbox" id="atr-ileo"> Íleo paralítico</label>
+            <label class="ci-lbl"><input type="checkbox" id="atr-miastenia"> Miastenia gravis</label>
+            <label class="ci-lbl"><input type="checkbox" id="atr-alergia"> Alergia conocida a atropina</label>
           </div>
-          <div class="ci-group" id="ci-group-dobutamina" style="display:none">
-            <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
-              <label class="ci-lbl"><input type="checkbox" id="ci-dob-glauc" onchange="updateContraindic()"> Glaucoma</label>
-              <label class="ci-lbl"><input type="checkbox" id="ci-dob-hbp" onchange="updateContraindic()"> HBP / RAO</label>
-              <label class="ci-lbl"><input type="checkbox" id="ci-dob-taq" onchange="updateContraindic()"> Taquiarritmias</label>
-            </div>
-          </div>
-          <div class="ci-group" id="ci-group-ejercicio" style="display:none">
-            <div style="display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center">
-              <label class="ci-lbl"><input type="checkbox" id="ci-ej-eao" onchange="updateContraindic()"> Estenosis aórtica severa</label>
-              <label class="ci-lbl"><input type="checkbox" id="ci-ej-hta" onchange="updateContraindic()"> HTA no controlada</label>
-              <label class="ci-lbl"><input type="checkbox" id="ci-ej-ic" onchange="updateContraindic()"> IC descompensada</label>
-            </div>
-          </div>
-          <div id="ci-alert" style="display:none;margin-top:11px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:600;line-height:1.5"></div>
+          <div class="note-box" style="margin-top:11px">Estas condiciones pueden requerir evitar o usar con precaución la atropina como medicación de rescate durante el protocolo de dobutamina o dipiridamol.</div>
         </div>
       </div>
 
@@ -1151,8 +1153,8 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
     <div data-mod="elastancia">
     <div style="margin:10px 0 4px;font-size:11px;font-weight:700;color:var(--accent2)">Elastancia telesistólica (reserva contráctil hemodinámica)</div>
     <div class="grid2">
-      <div class="fg"><label for="c-vsf-bas">VSF basal (mL) — vol. sistólico final</label><input type="number" id="c-vsf-bas" step="0.1" placeholder="45 (o VTSVI eco basal)" oninput="protoCalc()"></div>
-      <div class="fg"><label for="c-vsf-pic">VSF pico (mL)</label><input type="number" id="c-vsf-pic" step="0.1" placeholder="30" oninput="protoCalc()"></div>
+      <div class="fg"><label for="c-vsf-bas">VSF basal (ml) — vol. sistólico final</label><input type="number" id="c-vsf-bas" step="0.1" placeholder="45 (o VTSVI eco basal)" oninput="protoCalc()"></div>
+      <div class="fg"><label for="c-vsf-pic">VSF pico (ml)</label><input type="number" id="c-vsf-pic" step="0.1" placeholder="30" oninput="protoCalc()"></div>
     </div>
     <div class="grid2">
       <div class="fg"><label for="c-pas-rep">PAS reposo (mmHg)</label><input id="c-pas-rep" readonly placeholder="— (desde tabla etapas)"></div>
@@ -1215,7 +1217,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <div class="fg"><label for="p-psap-pic">PSAP pico (mmHg)</label><input type="number" id="p-psap-pic" placeholder="35" oninput="evalPSAP();protoCalc()"></div>
     </div>
     <div class="grid2">
-      <div class="fg"><label for="l-vol-ai">Volumen AI (mL)</label><input id="l-vol-ai" readonly placeholder="— (desde eco basal)"></div>
+      <div class="fg"><label for="l-vol-ai">Volumen AI (ml)</label><input id="l-vol-ai" readonly placeholder="— (desde eco basal)"></div>
       <div class="fg"><label for="l-strain-ai">Strain AI (%) — si disponible</label><input type="number" id="l-strain-ai" step="0.1" placeholder="Ej. 28"></div>
     </div>
     <div class="fg"><label for="l-diast-estres">Patrón diastólico con estrés</label><select id="l-diast-estres" onchange="protoCalc()"><option value="normal">Normal</option><option value="alterado">Alterado (presiones de llenado elevadas)</option></select></div>
@@ -1624,10 +1626,6 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
         <button class="btn btn-ghost" onclick="eeLab()">🔬 Abrir Laboratorio</button>
         <div class="note-box" style="margin-top:6px">Disponible en perfil Avanzado.</div>
       </div>
-      <div style="margin-top:16px">
-        <div style="font-size:11px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📄 PDF</div>
-        <label class="ee-mod-lbl" style="max-width:280px"><input type="checkbox" id="ee-qr-enabled" onchange="eeQrToggle()"> Incluir QR en PDF</label>
-      </div>
     </div>
   </div>
 </div>
@@ -1683,9 +1681,9 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <div class="calc-formula">(PAS pico / VSF pico) / (PAS reposo / VSF reposo). Normal &gt;1.1 · límite 0.9–1.1 · reducida &lt;0.9.</div>
       <div class="calc-inputs">
         <div class="fg"><label for="calc-ea-paspic">PAS pico (mmHg)</label><input type="number" id="calc-ea-paspic" oninput="calcEA()"></div>
-        <div class="fg"><label for="calc-ea-vsfpic">VSF pico (mL)</label><input type="number" id="calc-ea-vsfpic" step="0.1" oninput="calcEA()"></div>
+        <div class="fg"><label for="calc-ea-vsfpic">VSF pico (ml)</label><input type="number" id="calc-ea-vsfpic" step="0.1" oninput="calcEA()"></div>
         <div class="fg"><label for="calc-ea-pasrep">PAS reposo (mmHg)</label><input type="number" id="calc-ea-pasrep" oninput="calcEA()"></div>
-        <div class="fg"><label for="calc-ea-vsfrep">VSF reposo (mL)</label><input type="number" id="calc-ea-vsfrep" step="0.1" oninput="calcEA()"></div>
+        <div class="fg"><label for="calc-ea-vsfrep">VSF reposo (ml)</label><input type="number" id="calc-ea-vsfrep" step="0.1" oninput="calcEA()"></div>
       </div>
       <div class="calc-res" id="calc-ea-res">Ingresá los valores.</div>
     </div>
@@ -1797,7 +1795,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
         <tr><td>FEVI (Simpson)</td><td>54–74%</td><td>52–72%</td></tr>
         <tr><td>DDVI</td><td>38–52 mm</td><td>42–58 mm</td></tr>
         <tr><td>Masa VI indexada</td><td>≤95 g/m²</td><td>≤115 g/m²</td></tr>
-        <tr><td>Vol. AI indexado</td><td>≤34 mL/m²</td><td>≤34 mL/m²</td></tr>
+        <tr><td>Vol. AI indexado</td><td>≤34 ml/m²</td><td>≤34 ml/m²</td></tr>
         <tr><td>TAPSE</td><td>≥17 mm</td><td>≥17 mm</td></tr>
         <tr><td>e' septal / lateral</td><td>≥7 / ≥10 cm/s</td><td>≥7 / ≥10 cm/s</td></tr>
         <tr><td>GLS</td><td>≤ −20% (más negativo)</td><td>≤ −20%</td></tr>
@@ -1889,6 +1887,48 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
         <tr><td>EA bajo flujo-bajo gradiente (Monin/TOPAS)</td><td>2003–09</td><td>cohortes</td><td>Prospectivo</td><td>La dobutamina a dosis bajas diferencia EA severa verdadera de pseudo-severa y evalúa la reserva de flujo.</td></tr>
       </table>
       <div class="ref-body" style="margin-top:6px"><i>Lancellotti P et al. EACVI recommendations for stress echocardiography in valvular heart disease.</i></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LABORATORIO — pantalla completa con 7 tabs ═══ -->
+<div class="page" id="page-lab">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px">
+    <div>
+      <div class="page-title">🔬 Laboratorio de EcoEstrés</div>
+      <div class="page-sub" style="margin-bottom:0">Estadísticas y auditoría de los estudios guardados en este equipo.</div>
+    </div>
+    <button class="btn btn-ghost" onclick="eeLabVolver()" style="flex-shrink:0">← Volver</button>
+  </div>
+  <div class="tabs" id="ee-lab-tabs" style="margin-top:12px">
+    <button class="tab-btn active" onclick="eeLabTab('general',this)">📊 General</button>
+    <button class="tab-btn" onclick="eeLabTab('resultados',this)">📈 Resultados</button>
+    <button class="tab-btn" onclick="eeLabTab('calidad',this)">✅ Calidad</button>
+    <button class="tab-btn" onclick="eeLabTab('abcd',this)">🔠 ABCD-FLPR</button>
+    <button class="tab-btn" onclick="eeLabTab('hallazgos',this)">🔍 Hallazgos</button>
+    <button class="tab-btn" onclick="eeLabTab('brechas',this)">⚠️ Brechas</button>
+    <button class="tab-btn" onclick="eeLabTab('pdf',this)">📄 Informe PDF</button>
+  </div>
+  <div id="ee-lab-content"></div>
+  <div id="ee-lab-pdf" style="display:none">
+    <div class="eea-sec" style="margin-top:4px">📄 Informe de Auditoría — Export PDF</div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label for="ee-pdf-titulo" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Título del informe</label><input type="text" id="ee-pdf-titulo" value="Informe de Auditoría — Laboratorio de Ecoestrés" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-inst" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Institución</label><input type="text" id="ee-pdf-inst" placeholder="Hospital / Centro médico" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-periodo" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Período cubierto</label><input type="text" id="ee-pdf-periodo" placeholder="Enero–Diciembre 2025" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+        <div><label for="ee-pdf-responsable" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Responsable / Jefe de servicio</label><input type="text" id="ee-pdf-responsable" placeholder="Dr./Dra. Nombre Apellido" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
+      </div>
+      <div style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">Secciones a incluir</label>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-volumen" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Volumen</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-resultados" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Resultados</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-calidad" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Calidad</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-hallazgos" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Hallazgos</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-brechas" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Brechas</label>
+        </div>
+      </div>
+      <button class="btn btn-teal" onclick="eeAuditGenerarPDF()">📄 Generar PDF de Auditoría</button>
     </div>
   </div>
 </div>
@@ -2042,6 +2082,7 @@ function goTo(page){
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+page+"'"))n.classList.add('active');});
+  if(page==='ecobasal'&&typeof sincronizarSC==='function')sincronizarSC();   // FIX 1: SC desde Paciente → eb-sc
   if(page==='bullo')initBulls();
   if(page==='criterios'){evalCriterios();updateWMSIresumen();}
   if(page==='territorio')updateTerritorio();
@@ -2142,6 +2183,20 @@ function calcEdad(){
   const age=Math.floor((Date.now()-fnac.getTime())/(365.25*24*3600*1000));
   if(age>0&&age<130){document.getElementById('p-edad').value=age;onEdadChange();}
 }
+// Calcula la edad desde los 3 campos de fecha de nacimiento (día / mes 1-12 / año).
+function calcEdadEE(){
+  const dia=parseInt(document.getElementById('p-fnac-dia')?.value)||0;
+  const mesSel=document.getElementById('p-fnac-mes')?.value;
+  const mes=(mesSel==null||mesSel==='')?NaN:(parseInt(mesSel)-1);   // select 1-12 → base 0 (getMonth)
+  const anio=parseInt(document.getElementById('p-fnac-anio')?.value)||0;
+  if(!dia||isNaN(mes)||!anio)return;
+  const hoy=new Date();
+  let edad=hoy.getFullYear()-anio;
+  if(hoy.getMonth()<mes||(hoy.getMonth()===mes&&hoy.getDate()<dia))edad--;
+  const edadEl=document.getElementById('p-edad')||document.getElementById('ee-edad');
+  if(edadEl&&edad>0&&edad<120){ edadEl.value=edad; edadEl.dispatchEvent(new Event('input',{bubbles:true})); }
+}
+window.calcEdadEE=calcEdadEE;
 function onEdadChange(){
   const age=+document.getElementById('p-edad')?.value||0;if(!age)return;
   const teo=220-age;
@@ -2289,12 +2344,25 @@ function calcAntro(){
   if(p&&t){
     const m=t/100; const imc=+(p/(m*m)).toFixed(1);
     if(imcEl)imcEl.value=imc;
-    // SC (Mosteller): autocompleta eb-sc si está vacío
-    const sc=+Math.sqrt(p*t/3600).toFixed(2);
-    const scEl=document.getElementById('eb-sc');
-    if(scEl&&!scEl.value){scEl.value=sc;if(typeof ebCalcMasa==='function')ebCalcMasa();}
+    sincronizarSC();
   } else if(imcEl){imcEl.value='';}
 }
+// FIX 1: sincroniza la SC (Mosteller) desde peso/talla hacia eb-sc en la tab VI.
+// Sobrescribe si está vacío o si tiene un valor implausible (<0.5, p.ej. el bug histórico
+// eb-sc=0.14 que hacía dar masa indexada >1000 g/m²). No pisa una SC manual válida (0.5–3).
+function sincronizarSC(){
+  const peso=parseFloat((document.getElementById('p-peso')?.value||'').replace(',','.'))||0;
+  const talla=parseFloat((document.getElementById('p-talla')?.value||'').replace(',','.'))||0;
+  if(!peso||!talla)return;
+  const sc=Math.sqrt(peso*talla/3600);   // Mosteller: √(peso × talla / 3600)
+  const ebSc=document.getElementById('eb-sc');
+  if(ebSc && (!ebSc.value || parseFloat(ebSc.value)<0.5)){
+    ebSc.value=sc.toFixed(2);
+    if(typeof ebCalcMasa==='function')ebCalcMasa();     // recalcula masa VI indexada
+    if(typeof ebEvalAI==='function')ebEvalAI();          // recalcula Vol. AI indexado
+  }
+}
+window.sincronizarSC=sincronizarSC;
 function onFeviChange(){evalCriterios();updateWMSIresumen();}
 
 function ptpCad(){
@@ -3319,18 +3387,10 @@ function ebCalcDiast(){
   if(e&&esep){const eesep=+(e/esep).toFixed(1);const el=document.getElementById('eb-ee-sep');if(el)el.value=eesep;}
   if(e&&elat){const eelat=+(e/elat).toFixed(1);const el=document.getElementById('eb-ee-lat');if(el)el.value=eelat;}
 
-  // ASE/EACVI 2016 classification (simplified)
+  // Clasificación de disfunción diastólica — ASE 2025 (misma lógica que EcoSmart)
   const ea=+document.getElementById('eb-ea')?.value||0;
   const eeprom=+document.getElementById('eb-eeprom')?.value||0;
-  const classEl=document.getElementById('eb-diast-class');
-  if(classEl&&ea){
-    let cls='', txt='';
-    if(ea<0.8&&td>200){cls='tag-yellow';txt='Grado I — Relajación alterada (E/A &lt;0.8, TD &gt;200ms)';}
-    else if(ea>=0.8&&ea<=1.5&&eeprom&&eeprom>=10&&eeprom<=14){cls='tag-yellow';txt='Grado II — Pseudonormal (E/A 0.8-1.5, E/e prom 10-14)';}
-    else if((ea>=2||(eeprom&&eeprom>14))||(td<160&&ea>1.5)){cls='tag-red';txt='Grado III — Patrón restrictivo (E/A ≥2 o E/e &gt;14)';}
-    else if(ea>=0.8&&ea<=2&&td>=160&&td<=200){cls='tag-green';txt='Normal (E/A 0.8–2, TD 160–200ms)';}
-    if(txt) classEl.innerHTML=`<span class="tag ${cls}" style="font-size:12px;padding:4px 12px">${txt}</span>`;
-  }
+  ebClasDiastASE2025();
   // Interpretación en tiempo real bajo cada variable
   var eaRes=document.getElementById('eb-ea-res');
   if(eaRes){ if(!ea){eaRes.textContent='';}
@@ -3346,6 +3406,47 @@ function ebCalcDiast(){
     else{eepRes.style.color='var(--red)';eepRes.textContent="❌ E/e' >14 — presiones de llenado elevadas";}
   }
   ebSyncDerived();
+}
+
+// ── Clasificación función diastólica ASE 2025 (misma lógica que EcoSmart calcDiastolASE2025) ──
+function ebClasDiastASE2025(){
+  const classEl=document.getElementById('eb-diast-class');
+  if(!classEl) return;
+  const esep=+document.getElementById('eb-e-sep')?.value||0;
+  const elat=+document.getElementById('eb-e-lat')?.value||0;
+  const E=+document.getElementById('eb-e')?.value||0;
+  const A=+document.getElementById('eb-a')?.value||0;
+  const ee=(esep&&elat)?((esep+elat)/2):(esep||elat||0);   // e' promedio (cm/s)
+  const eeprom=+document.getElementById('eb-eeprom')?.value||0;   // E/e' promedio
+  const lavi=+document.getElementById('eb-ai-vol-i')?.value||0;   // LAVI = Vol. AI indexado (mL/m²)
+  const tr=+document.getElementById('eb-it-vmax')?.value||0;      // velocidad TR (m/s)
+  // Sin e' → no se puede clasificar
+  if(!ee&&!esep&&!elat){ classEl.innerHTML='Completar e\' septal y/o lateral para clasificar con ASE 2025.'; return; }
+  // PASO 1 — e' reducida (promedio ≤6.5 · septal ≤6 · lateral ≤7)
+  let ePrimReducida=false;
+  if(ee&&ee<=6.5)ePrimReducida=true;
+  else if(esep&&esep<=6)ePrimReducida=true;
+  else if(elat&&elat<=7)ePrimReducida=true;
+  // PASO 2 — parámetros de presión de llenado elevada (E/e'>14 · LAVI>34 · TR>2.8 m/s)
+  let pos=0,tot=0;
+  if(eeprom){ tot++; if(eeprom>14)pos++; }
+  if(lavi){ tot++; if(lavi>34)pos++; }
+  if(tr){ tot++; if(tr>2.8)pos++; }
+  if(tot===0){ classEl.innerHTML='Datos insuficientes para clasificar presión de llenado (ASE 2025). Completar E/e\', LAVI y/o velocidad TR.'; return; }
+  // PASO 3 — umbral según e' (reducida → 1 positivo · conservada → ≥2)
+  const umbral=ePrimReducida?1:2;
+  const presionAlta=pos>=umbral;
+  let cls,txt;
+  if(!presionAlta){
+    cls='tag-green';
+    txt='DD Grado I — relajación alterada, presión de llenado normal ('+(ePrimReducida?"e' reducida":"e' conservada")+', '+pos+'/'+tot+') · ASE 2025';
+  } else {
+    const ea=(E&&A)?+(E/A):0;
+    if(!ea){ cls='tag-yellow'; txt='Presión de llenado elevada ('+pos+'/'+tot+') — completar cociente E/A para el grado · ASE 2025'; }
+    else if(ea>=2){ cls='tag-red'; txt='DD Grado III — patrón restrictivo (E/A ≥2, presión elevada '+pos+'/'+tot+') · ASE 2025'; }
+    else { cls='tag-yellow'; txt='DD Grado II — pseudonormal (E/A '+ea.toFixed(1)+', presión elevada '+pos+'/'+tot+') · ASE 2025'; }
+  }
+  classEl.innerHTML=`<span class="tag ${cls}" style="font-size:13px;padding:4px 12px">${txt}</span>`;
 }
 
 function ebEvalVD(){
@@ -3384,12 +3485,13 @@ function ebEvalAI(){
     const volEl=document.getElementById('eb-ai-vol');if(volEl)volEl.value=vol;
     if(sc){const vi=+(vol/sc).toFixed(1);const viEl=document.getElementById('eb-ai-vol-i');if(viEl)viEl.value=vi;
       const res=document.getElementById('eb-ai-res');
-      if(res){if(vi<=34){res.style.color='var(--green)';res.textContent='✅ Vol. AI normal (≤34 mL/m²)';}
-      else if(vi<=41){res.style.color='var(--amber)';res.textContent='⚠️ AI levemente dilatada (35–41 mL/m²)';}
-      else if(vi<=48){res.style.color='var(--amber)';res.textContent='⚠️ AI moderadamente dilatada (42–48 mL/m²)';}
-      else{res.style.color='var(--red)';res.textContent='❌ AI severamente dilatada (>48 mL/m²)';}}
+      if(res){if(vi<=34){res.style.color='var(--green)';res.textContent='✅ Vol. AI normal (≤34 ml/m²)';}
+      else if(vi<=41){res.style.color='var(--amber)';res.textContent='⚠️ AI levemente dilatada (35–41 ml/m²)';}
+      else if(vi<=48){res.style.color='var(--amber)';res.textContent='⚠️ AI moderadamente dilatada (42–48 ml/m²)';}
+      else{res.style.color='var(--red)';res.textContent='❌ AI severamente dilatada (>48 ml/m²)';}}
     }
   }
+  if(window.ebClasDiastASE2025)ebClasDiastASE2025();   // LAVI alimenta la clasificación diastólica (ASE 2025)
 }
 
 function ebEvalAD(){
@@ -3588,7 +3690,7 @@ function ebTextoInforme(){
   // AI/AD
   const aiDiam=gv('eb-ai-diam'),aiVoli=gv('eb-ai-vol-i');
   const psap=gv('eb-psap'),psapRes=document.getElementById('eb-psap-res')?.textContent||'';
-  if(aiDiam||aiVoli) lines.push(`AI: diámetro ${aiDiam||'—'} mm, volumen indexado ${aiVoli||'—'} mL/m².`);
+  if(aiDiam||aiVoli) lines.push(`AI: diámetro ${aiDiam||'—'} mm, volumen indexado ${aiVoli||'—'} ml/m².`);
   if(psap) lines.push(`PSAP estimada ${psap} mmHg. ${psapRes}`);
 
   // Aorta
@@ -3727,31 +3829,6 @@ function ebTextoInforme(){
 .eea-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 @media(max-width:560px){.eea-cols{grid-template-columns:1fr;}}
 </style>
-<div class="ee-modal" id="ee-audit" onclick="if(event.target===this)eeAuditClose()">
-  <div class="ee-modal-box">
-    <h3>🔬 Auditoría individual <span style="display:flex;gap:8px;align-items:center"><button class="x" aria-label="Cerrar" onclick="eeAuditClose()">✕</button></span></h3>
-    <div id="ee-audit-body"></div>
-    <div class="eea-sec" style="margin-top:20px">📄 Informe de Auditoría — Export PDF</div>
-    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div><label for="ee-pdf-titulo" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Título del informe</label><input type="text" id="ee-pdf-titulo" value="Informe de Auditoría — Laboratorio de Ecoestrés" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-        <div><label for="ee-pdf-inst" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Institución</label><input type="text" id="ee-pdf-inst" placeholder="Hospital / Centro médico" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-        <div><label for="ee-pdf-periodo" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Período cubierto</label><input type="text" id="ee-pdf-periodo" placeholder="Enero–Diciembre 2025" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-        <div><label for="ee-pdf-responsable" style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Responsable / Jefe de servicio</label><input type="text" id="ee-pdf-responsable" placeholder="Dr./Dra. Nombre Apellido" style="width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-family:inherit;box-sizing:border-box"></div>
-      </div>
-      <div style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">Secciones a incluir</label>
-        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-volumen" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Volumen</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-resultados" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Resultados</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-calidad" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Calidad</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-hallazgos" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Hallazgos</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:var(--text)"><input type="checkbox" id="ee-pdf-brechas" checked style="flex:0 0 auto;width:15px;height:15px;padding:0;margin:0;accent-color:var(--accent2)"> Brechas</label>
-        </div>
-      </div>
-      <button class="btn btn-teal" onclick="eeAuditGenerarPDF()">📄 Generar PDF de Auditoría</button>
-    </div>
-  </div>
-</div>
 <script>
 /* ═══ Laboratorio: panel de auditoría individual (lee 'ecoestres_informes') ═══ */
 (function(){
@@ -3890,8 +3967,104 @@ function ebTextoInforme(){
       if(sc){ scSum+=sc.count; scN++; if(scDist[sc.riesgo]!=null)scDist[sc.riesgo]++; }
     });
     A.abcdScoreAvg=scN?(scSum/scN):null; A.abcdScoreDist=scDist; A.abcdScoreN=scN;
+    // COMPLETITUD extra — protocolo definido / eco basal (Calidad y Brechas)
+    var protDef=0, sinEco=0, feviBasArr=[];
+    R.forEach(function(r){
+      if(String(F(r,'p-estres')||'').trim())protDef++;
+      var fv=num(F(r,'c-fevi-bas')); if(fv==null)sinEco++; else feviBasArr.push(fv);
+    });
+    A.protDef=protDef; A.sinProto=T-protDef; A.sinEco=sinEco;
+    A.feviBasalAvg=feviBasArr.length?(feviBasArr.reduce(function(a,b){return a+b;},0)/feviBasArr.length):null;
     return A;
   }
+
+  // ═══ LABORATORIO — vista de pantalla completa con 7 tabs (usa compute/card/dist) ═══
+  var LAB_PREV='ecobasal';
+  function labNote(T){ return '<div class="eea-note">Auditoría calculada en este equipo desde <code>localStorage[\'ecoestres_informes\']</code>. '+(T?('<strong>'+T+'</strong> estudio(s) guardado(s).'):'No hay estudios guardados aún en esa clave — los indicadores aparecerán cuando existan.')+' Los indicadores se calculan según los módulos activos en tu perfil.</div>'; }
+  function labCol(t){ return '<div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">'+t+'</div>'; }
+  function labRenderTab(key,A){
+    var T=A.T, h='';
+    if(key==='general'){
+      var sum6=0; A.months.forEach(function(m){sum6+=m.n;});
+      h+='<div class="eea-sec">Volumen</div>';
+      h+='<div class="eea-grid" style="margin-bottom:10px">'+card(T,'Estudios totales','')+card(sum6,'Últimos 6 meses','')+'</div>';
+      h+='<div class="eea-cols"><div>'+labCol('Estudios por mes')+dist(A.months.map(function(m){return {label:m.label,n:m.n,color:'var(--accent2)'};}))+'</div>';
+      h+='<div>'+labCol('Tipo de estrés')+dist([['Esfuerzo','var(--green)'],['Dobutamina','var(--accent)'],['Dipiridamol','var(--amber)'],['Adenosina','var(--lad)'],['Sin dato','var(--text2)']].map(function(e){return {label:e[0],n:A.est[e[0]],color:e[1]};}))+'</div></div>';
+    }
+    else if(key==='resultados'){
+      h+='<div class="eea-sec">Distribución de resultados</div>';
+      h+='<div class="eea-grid">'+card(pct(A.res.pos,T)+'%','Positivos isquemia',A.res.pos+'/'+T,'var(--red)')+card(pct(A.res.neg,T)+'%','Negativos',A.res.neg+'/'+T,'var(--green)')+card(pct(A.res.inc,T)+'%','Indeterminados',A.res.inc+'/'+T,'var(--yellow)')+card(pct(A.res.via,T)+'%','Viabilidad presente',A.res.via+'/'+T,'var(--accent2)')+card(pct(A.sint,T)+'%','Con síntomas',A.sint+'/'+T,'var(--amber)')+'</div>';
+      var wm=A.wmsi, wmColor=wm==null?'var(--text2)':wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)';
+      h+='<div class="eea-sec">Motilidad / WMSI</div>';
+      h+='<div class="eea-grid">'+card(wm!=null?wm.toFixed(2):'—','WMSI promedio (pico)','',wmColor)+card(pct(A.altPico,T)+'%','Alt. motilidad en pico',A.altPico+'/'+T,'var(--amber)')+card(A.terrTop,'Territorio más frecuente','')+'</div>';
+      h+='<div class="eea-grid" style="margin-top:8px">'+card(pct(A.lbHi,T)+'%','Líneas B ≥3/campo post',A.lbHi+'/'+T,'var(--amber)')+card(pct(A.imInd,T)+'%','IM inducible mod-sev',A.imInd+'/'+T,'var(--amber)')+card(pct(A.sglDet,T)+'%','Deterioro SGL en pico',A.sglDet+'/'+T,'var(--amber)')+'</div>';
+      h+='<div class="eea-sec">Reserva contráctil</div>';
+      h+='<div class="eea-grid">'+card(pct(A.eaCalc,T)+'%','Elastancia calculada',A.eaCalc+'/'+T,semHigh(pct(A.eaCalc,T),70,40))+card(pct(A.eaRed,T)+'%','Reserva reducida (Ea<0.9)',A.eaRed+'/'+T,A.eaRed>0?'var(--red)':'var(--green)')+card(A.dFevi!=null?((A.dFevi>0?'+':'')+A.dFevi.toFixed(1)):'—','ΔFEVI promedio','',A.dFevi!=null?(A.dFevi>=5?'var(--green)':'var(--amber)'):'var(--text2)')+'</div>';
+      var _savg=A.abcdScoreAvg,_scol=_savg==null?'var(--text2)':(_savg<=1?'var(--green)':_savg<=3?'var(--yellow)':'var(--red)');
+      h+='<div class="eea-sec">Score ABCD-FLPR</div>';
+      h+='<div class="eea-grid">'+card(_savg!=null?(_savg.toFixed(1)+'/8'):'—','Score ABCD-FLPR promedio',(A.abcdScoreN||0)+' estudio(s)',_scol)+'</div>';
+    }
+    else if(key==='calidad'){
+      var pMax=pct(A.maxTest,T),pImg=pct(A.imgs,T),pBull=pct(A.bulls,T),pInf=pct(A.infs,T),pDp=pct(A.dp,T),pProto=pct(A.protDef,T),pEco=pct(T-A.sinEco,T);
+      var wm=A.wmsi,wmColor=wm==null?'var(--text2)':wm<=1.0?'var(--green)':wm<=1.5?'var(--yellow)':'var(--red)';
+      var qc=function(mk,q,lbl){ if(typeof eeModActive==='function'&&!eeModActive(mk)) return card('—',lbl,'desactivado en tu perfil','var(--text2)'); return card(pct(q,T)+'%',lbl,q+'/'+T,semHigh(pct(q,T),70,40)); };
+      h+='<div class="eea-sec">Calidad y completitud</div>';
+      h+='<div class="eea-grid">'
+        +card(pBull+'%','Con Bull’s Eye completo',A.bulls+'/'+T,semHigh(pBull,85,60))
+        +card(pInf+'%','Con informe narrativo',A.infs+'/'+T,semHigh(pInf,85,60))
+        +card(pMax+'%','Con FC objetivo alcanzada',A.maxTest+'/'+T,semHigh(pMax,85,70))
+        +card(pEco+'%','Con eco basal (FEVI/GLS)',(T-A.sinEco)+'/'+T,semHigh(pEco,85,60))
+        +card(pProto+'%','Con protocolo definido',A.protDef+'/'+T,semHigh(pProto,85,60))
+        +card(pImg+'%','Con imágenes',A.imgs+'/'+T,semHigh(pImg,85,60))
+        +card(pDp+'%','Doble producto reg.',A.dp+'/'+T,semHigh(pDp,85,60))
+        +card(A.mets!=null?A.mets.toFixed(1):'—','METs promedio','')
+        +card(wm!=null?wm.toFixed(2):'—','WMSI prom. pico','',wmColor)
+        +qc('elastancia',A.qEa,'Elastancia completada')
+        +qc('cfvr',A.qCfvr,'CFVR completada')
+        +qc('ecoetapas',A.qEte,'Tabla eco por etapas')
+        +qc('strainBull',A.qStrain,'Bull’s Eye strain')
+        +'</div>';
+    }
+    else if(key==='abcd'){
+      h+='<div class="eea-sec">Positivos por letra</div>';
+      h+='<div class="eea-cols"><div>'+dist([['B · ECG','var(--amber)'],['C · Contractilidad','var(--red)'],['D · Dilat/IM/PA','var(--amber)'],['F · CFVR','var(--lad)'],['L · Llenado diast.','var(--accent)'],['P · Presiones pulm.','var(--amber)'],['R · Recuper/VD','var(--green)']].map(function(e,i){var K=['B','C','D','F','L','P','R'];return {label:e[0],n:A.posLetras[K[i]],color:e[1]};}))+'</div>';
+      h+='<div class="eea-grid" style="align-content:start">'+card(pct(A.diastAlt,T)+'%',"Reserva diast. alterada (E/e' pico >14)",A.diastAlt+'/'+T,'var(--amber)')+card(pct(A.cfvrRed15,T)+'%','CFVR reducida (<1.5)',A.cfvrRed15+'/'+T,'var(--red)')+card((A.cronoTot?pct(A.cronoRed,A.cronoTot):0)+'%','Reserva cronotrópica reducida',A.cronoRed+'/'+(A.cronoTot||0),'var(--amber)')+card(pct(A.vdInd,T)+'%','Compromiso VD inducible',A.vdInd+'/'+T,'var(--amber)')+'</div></div>';
+      var _savg=A.abcdScoreAvg,_scol=_savg==null?'var(--text2)':(_savg<=1?'var(--green)':_savg<=3?'var(--yellow)':'var(--red)');
+      h+='<div class="eea-sec">Score promedio y tendencia</div>';
+      h+='<div class="eea-grid" style="margin-bottom:8px">'+card(_savg!=null?(_savg.toFixed(1)+'/8'):'—','Score ABCD-FLPR promedio',(A.abcdScoreN||0)+' estudio(s) con resultado',_scol)+'</div>';
+      h+=labCol('Distribución por riesgo (score)')+dist([{label:'Bajo (0-1)',n:A.abcdScoreDist.bajo,color:'var(--green)'},{label:'Intermedio (2-3)',n:A.abcdScoreDist.inter,color:'var(--yellow)'},{label:'Alto (4-8)',n:A.abcdScoreDist.alto,color:'var(--red)'}]);
+      h+='<div style="margin-top:12px"></div>'+labCol('Tendencia temporal (estudios por mes)')+dist(A.months.map(function(m){return {label:m.label,n:m.n,color:'var(--accent2)'};}));
+    }
+    else if(key==='hallazgos'){
+      h+='<div class="eea-sec">Hallazgos del eco basal</div>';
+      h+='<div class="eea-cols"><div>'+labCol('FEVI basal')+dist([['Normal ≥55','var(--green)'],['Leve 45-54','var(--yellow)'],['Reducida 35-44','var(--amber)'],['Severa <35','var(--red)'],['Sin dato','var(--text2)']].map(function(e){return {label:e[0],n:A.fevi[e[0]],color:e[1]};}))+'</div>';
+      h+='<div class="eea-grid" style="align-content:start">'+card(A.feviBasalAvg!=null?A.feviBasalAvg.toFixed(0)+'%':'—','FEVI basal promedio','')+card(pct(A.altPico,T)+'%','Alt. motilidad pico',A.altPico+'/'+T,'var(--amber)')+card(A.terrTop,'Territorio más frecuente','')+card(pct(A.psapHi,T)+'%','PSAP basal >40 mmHg',A.psapHi+'/'+T,A.psapHi>0?'var(--amber)':'var(--green)')+'</div></div>';
+    }
+    else if(key==='brechas'){
+      var pSinInf=pct(A.sinInf,T),pSinBull=pct(A.sinBull,T),pSinProto=pct(A.sinProto,T),pSinEco=pct(A.sinEco,T),pSinSeg=pct(A.sinSeg,A.pacTotal);
+      h+='<div class="eea-sec">Brechas de documentación</div>';
+      h+='<div class="eea-grid">'+card(A.sinInf,'Sin informe narrativo',pSinInf+'%',semLow(pSinInf,10,30))+card(A.sinBull,'Sin Bull’s Eye en pico',pSinBull+'%',semLow(pSinBull,10,30))+card(A.sinProto,'Sin protocolo definido',pSinProto+'%',semLow(pSinProto,10,30))+card(A.sinEco,'Sin eco basal (FEVI)',pSinEco+'%',semLow(pSinEco,10,30))+card(A.sinSeg,'Pacientes sin seguim. 6m',(A.pacTotal?pSinSeg+'% de '+A.pacTotal:'—'),semLow(pSinSeg,10,30))+'</div>';
+    }
+    return h;
+  }
+  function eeLabRenderContent(key){
+    var content=document.getElementById('ee-lab-content'), pdf=document.getElementById('ee-lab-pdf');
+    if(!content) return;
+    if(key==='pdf'){ content.style.display='none'; if(pdf)pdf.style.display=''; return; }
+    if(pdf)pdf.style.display='none'; content.style.display='';
+    var A; try{A=compute();}catch(e){A=null;}
+    if(!A){ content.innerHTML='<div class="eea-note">No se pudo calcular la auditoría.</div>'; return; }
+    content.innerHTML=labNote(A.T)+labRenderTab(key,A);
+  }
+  window.eeLabTab=function(key,el){ document.querySelectorAll('#ee-lab-tabs .tab-btn').forEach(function(b){b.classList.remove('active');}); if(el)el.classList.add('active'); eeLabRenderContent(key); };
+  window.eeLabVolver=function(){ if(typeof goTo==='function')goTo(LAB_PREV||'ecobasal'); };
+  window.eeLabAbrir=function(){
+    var cur=document.querySelector('.page.active');
+    if(cur&&cur.id&&cur.id!=='page-lab')LAB_PREV=cur.id.replace('page-','');
+    if(typeof goTo==='function')goTo('lab');
+    document.querySelectorAll('#ee-lab-tabs .tab-btn').forEach(function(b,i){ b.classList.toggle('active',i===0); });
+    eeLabRenderContent('general');
+  };
 
   window.eeAuditClose=function(){ var m=document.getElementById('ee-audit'); if(m)m.classList.remove('open'); };
   window.eeAuditOpen=function(){
@@ -4163,8 +4336,8 @@ function ebTextoInforme(){
     doc.save(fname);
     if(typeof eeToast==='function') eeToast('📄 PDF de auditoría generado');
   };
-  /* El botón Laboratorio (fijo, borde derecho, var(--accent2)) abre esta auditoría */
-  window.eeLab=function(){ eeAuditOpen(); };
+  /* El botón Laboratorio (fijo, borde derecho, var(--accent2)) abre la vista full-screen */
+  window.eeLab=function(){ if(typeof eeLabAbrir==='function')eeLabAbrir(); };
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-audit'); if(m&&m.classList.contains('open'))eeAuditClose(); } });
 })();
 </script>
@@ -5472,12 +5645,9 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     function footer(){
       var tot=doc.internal.getNumberOfPages();
       var inst=V('cfg-inst')||'CeiboMed';
-      var _qrOn=(function(){ try{ return localStorage.getItem('ee_qr_enabled')!=='0'; }catch(e){ return true; } })();   // toggle Config (ee_qr_enabled), ON por defecto
-      var qr=(_qrOn&&typeof eeQrDataURL==='function')?eeQrDataURL('https://ecoestres.ceibomed.com'):null;   // QR a ecoestres.ceibomed.com
       for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
         doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'});
         doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,294.5,{align:'center'}); fn(6.3); tc(150,150,150);
-        if(qr){ try{ doc.addImage(qr,'PNG',192,274,14,14); fn(5); tc(170,170,170); doc.text('ecoestres.ceibomed.com',199,290,{align:'center'}); }catch(e){} }
       }
     }
 
@@ -5571,8 +5741,8 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
         {lbl:'FEVI',val:(V('eb-fevi')||V('eb-fevi-simpson'))?((V('eb-fevi')||V('eb-fevi-simpson'))+' %'):''},
         {lbl:'Método',val:T('eb-fevi-metodo')},
         {lbl:'GLS',val:V('eb-gls')?V('eb-gls')+' %':''},
-        {lbl:'VTD',val:V('eb-vtd')?V('eb-vtd')+' mL':''},
-        {lbl:'VTS',val:V('eb-vts')?V('eb-vts')+' mL':''}
+        {lbl:'VTD',val:V('eb-vtd')?V('eb-vtd')+' ml':''},
+        {lbl:'VTS',val:V('eb-vts')?V('eb-vts')+' ml':''}
       ]},
       {titulo:'Función diastólica',items:[
         {lbl:'E',val:V('eb-e')?V('eb-e')+' cm/s':''},
@@ -5594,7 +5764,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       ]},
       {titulo:'AI / Aorta',items:[
         {lbl:'AI diám',val:V('eb-ai-diam')?V('eb-ai-diam')+' mm':''},
-        {lbl:'AI vol i',val:V('eb-ai-vol-i')?V('eb-ai-vol-i')+' mL/m²':''},
+        {lbl:'AI vol i',val:V('eb-ai-vol-i')?V('eb-ai-vol-i')+' ml/m²':''},
         {lbl:'Ao senos',val:V('eb-ao-senos')?V('eb-ao-senos')+' mm':''},
         {lbl:'Ao asc',val:V('eb-ao-asc')?V('eb-ao-asc')+' mm':''}
       ]},
@@ -5666,7 +5836,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     abcd.push('D — Dilatación/otros: '+(T('d-dilat')||'—')+'. IM inducida: '+(T('d-im')||'—')+'. Respuesta presora: '+(T('d-pa')||'—')+'.'+nar('d-narr'));
     var cfvr=(V('cfvr-da-bas')&&V('cfvr-da-pic'))?(+V('cfvr-da-pic')/+V('cfvr-da-bas')).toFixed(2):(V('f-cfvr-da')||null);
     abcd.push('F — Flujo coronario (CFVR DA): '+(cfvr!=null?cfvr:'no evaluado')+'.'+nar('f-narr'));
-    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(MOD('reservaDiast')&&V('l-irc')?(', IRC '+V('l-irc')+' (índice exploratorio, no ASE 2025)'):'')+(MOD('reservaDiast')?('; líneas B '+(T('l-post')||'—')):'')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' mL'):'')+'.'+nar('l-narr'));
+    abcd.push("L — Llenado/reserva diastólica: E/e' pico "+(V('p-ee-pic')||'—')+(V('l-eprima-pic')?(", e' pico "+V('l-eprima-pic')):'')+(MOD('reservaDiast')&&V('l-irc')?(', IRC '+V('l-irc')+' (índice exploratorio, no ASE 2025)'):'')+(MOD('reservaDiast')?('; líneas B '+(T('l-post')||'—')):'')+'; PSAP pico '+(V('p-psap-pic')||'—')+' mmHg'+(V('l-vol-ai')?('; vol. AI '+V('l-vol-ai')+' ml'):'')+'.'+nar('l-narr'));
     abcd.push('P — Presiones/pulmonar: PSAP '+(V('p-psap-bas')||'—')+' -> '+(V('p-psap-pic')||'—')+' mmHg'+(V('p-tapse-psap')?('; TAPSE/PSAP '+V('p-tapse-psap')):'')+(V('p-rvp')?('; RVP '+V('p-rvp')):'')+'; patrón diastólico basal '+(T('p-diast')||'—')+'.'+nar('p-narr'));
     abcd.push('R — Recuperación y VD: '+(V('r-trecup')?('motilidad en '+V('r-trecup')+' min. '):'')+(V('r-fc3')?('FC 3 min '+V('r-fc3')+' lpm. '):'')+(V('r-hrr')?('HRR '+V('r-hrr')+'. '):'')+(V('r-mot-vd')?('VD: '+T('r-mot-vd')+'. '):'')+(T('r-sint')?('Síntomas: '+T('r-sint')+'.'):'')+nar('r-narr'));
     }
@@ -6035,8 +6205,466 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     box.appendChild(btn); ov.appendChild(box); document.body.appendChild(ov);
     setTimeout(function(){ try{btn.focus();}catch(e){} },40);
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',show); else show();
+  /* CAMBIO 2: el aviso se dispara DESPUÉS del login exitoso (no en la carga). */
+  window.eeMostrarAvisoDatos=show;
 })();
+/* CAMBIO 1: cerrar sesión → vuelve a mostrar el login. */
+function eeCerrarSesion(){
+  var l=document.getElementById('ee-login'); if(l) l.classList.remove('hidden');
+  var p=document.getElementById('ee-login-pwd'); if(p){ p.value=''; setTimeout(function(){ try{p.focus();}catch(e){} },40); }
+}
+window.eeCerrarSesion=eeCerrarSesion;
+</script>
+
+<!-- ═══ CAMBIO 3: Manual interactivo (8 tabs) ═══ -->
+<div id="modalAyudaEcoEstres" style="display:none;
+  position:fixed;inset:0;background:rgba(0,0,0,0.8);
+  z-index:9999;align-items:center;
+  justify-content:center;padding:20px;">
+  <div style="background:#1E293B;
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:16px;width:100%;max-width:620px;
+    max-height:88vh;overflow:hidden;
+    display:flex;flex-direction:column;">
+    <div style="padding:18px 22px 0;display:flex;
+      justify-content:space-between;
+      align-items:center;flex-shrink:0;">
+      <div>
+        <div style="font-size:16px;font-weight:700;
+          color:#7C3AED;">
+          📖 Manual de EcoEstrés Smart
+        </div>
+        <div style="font-size:11px;color:#64748B;
+          margin-top:2px;">
+          Ecocardiografía de Estrés · Guía completa
+        </div>
+      </div>
+      <button onclick="cerrarAyudaEcoEstres()"
+        style="background:none;border:none;
+        color:#64748B;font-size:20px;
+        cursor:pointer;">✕</button>
+    </div>
+    <div id="ecoEstresAyudaTabs"
+      style="display:flex;gap:0;
+      padding:10px 22px 0;overflow-x:auto;
+      scrollbar-width:none;flex-shrink:0;
+      border-bottom:1px solid rgba(255,255,255,0.07);">
+    </div>
+    <div id="ecoEstresAyudaContenido"
+      style="padding:18px 22px;overflow-y:auto;
+      flex:1;font-size:13px;color:#CBD5E1;
+      line-height:1.7;">
+    </div>
+  </div>
+</div>
+<script>
+const ECOESTRES_AYUDA = [
+  { tab: '📋 ¿Qué es?', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Protocolo completo de ecocardiografía
+        de estrés
+      </strong>
+    </p>
+    <p style="margin:0 0 12px">EcoEstrés Smart
+    centraliza datos clínicos, ecocardiograma
+    basal, protocolo, respuesta hemodinámica y
+    electrocardiográfica, contractilidad
+    segmentaria, parámetros avanzados e informe
+    en un único flujo.</p>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:6px;
+      margin:0 0 12px">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Estrés con ejercicio, dobutamina
+        o dipiridamol
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Evaluación de isquemia inducible
+        mediante motilidad regional y WMSI
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Viabilidad miocárdica con respuesta
+        bifásica
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>FEVI, strain, CFVR, función
+        diastólica, PSAP y líneas B integrados
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Protocolo ABCD-FLPR calculado
+        automáticamente
+      </li>
+    </ul>
+    <div style="padding:9px 12px;border-radius:8px;
+      background:rgba(124,58,237,0.1);
+      border-left:3px solid #7C3AED;
+      font-size:12px;color:#94A3B8;
+      font-style:italic">
+      No sustituye la indicación médica,
+      supervisión del estrés, protocolos de
+      seguridad ni interpretación experta.
+    </div>` },
+
+  { tab: '🏃 Protocolos', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Esfuerzo, dobutamina o dipiridamol
+      </strong>
+    </p>
+    <div style="display:flex;flex-direction:column;
+      gap:10px">
+      <div style="padding:10px 12px;border-radius:8px;
+        background:rgba(124,58,237,0.08);
+        border-left:3px solid #7C3AED">
+        <strong>Ejercicio físico</strong><br>
+        <span style="font-size:12px;color:#94A3B8">
+        Bruce, Bruce modificado, Naughton o
+        Åstrand — METs, duración, motivo de
+        suspensión</span>
+      </div>
+      <div style="padding:10px 12px;border-radius:8px;
+        background:rgba(124,58,237,0.08);
+        border-left:3px solid #7C3AED">
+        <strong>Dobutamina</strong><br>
+        <span style="font-size:12px;color:#94A3B8">
+        Etapas escalonadas + atropina — dosis,
+        respuesta, medicación de rescate</span>
+      </div>
+      <div style="padding:10px 12px;border-radius:8px;
+        background:rgba(124,58,237,0.08);
+        border-left:3px solid #7C3AED">
+        <strong>Dipiridamol</strong><br>
+        <span style="font-size:12px;color:#94A3B8">
+        Esquema de administración y
+        contraindicaciones integradas</span>
+      </div>
+    </div>` },
+
+  { tab: '🎯 Bull\'s Eye', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Modelo de 17 segmentos por etapa
+      </strong>
+    </p>
+    <ol style="padding-left:18px;margin:0 0 12px;
+      display:flex;flex-direction:column;gap:7px">
+      <li>Seleccioná la etapa: basal, pico u
+        otra disponible</li>
+      <li>Asigná el patrón de motilidad a cada
+        segmento evaluable</li>
+      <li>Revisá el Bull\'s Eye completo</li>
+      <li>Confirmá el WMSI calculado</li>
+      <li>Comparás WMSI basal, pico y recuperación
+        con la FEVI</li>
+    </ol>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:6px;
+      margin:0 0 12px">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Nueva alteración → apoya isquemia
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Mejoría a dosis bajas + deterioro
+        a dosis altas → respuesta bifásica
+      </li>
+    </ul>
+    <div style="padding:9px 12px;border-radius:8px;
+      background:rgba(124,58,237,0.1);
+      border-left:3px solid #7C3AED;
+      font-size:12px;color:#94A3B8;font-style:italic">
+      No clasificar segmentos no evaluables
+      como normales.
+    </div>` },
+
+  { tab: '📋 Planillas', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Plantillas seleccionables o informe
+        automático
+      </strong>
+    </p>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:7px;
+      margin:0 0 12px">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Informe automático desde todos
+        los datos cargados
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Negativo para isquemia
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Positivo para isquemia (con
+        territorio vascular)
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Indeterminado / no concluyente
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Viabilidad miocárdica (bifásica)
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Eco estrés diastólico
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Valvulopatía dinámica
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Reserva contráctil
+      </li>
+    </ul>
+    <div style="padding:9px 12px;border-radius:8px;
+      background:rgba(124,58,237,0.1);
+      border-left:3px solid #7C3AED;
+      font-size:12px;color:#94A3B8;font-style:italic">
+      El médico valida, modifica o reescribe
+      según el caso.
+    </div>` },
+
+  { tab: '🔠 ABCD-FLPR', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Score calculado automáticamente
+      </strong>
+    </p>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:7px;
+      margin:0 0 12px">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>A — Adecuación: FC máxima vs
+        predicha, METs, duración
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>B — Líneas B: congestión pulmonar
+        inducible
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>C — Contractilidad: WMSI, FEVI,
+        reserva contráctil
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>D — Dilatación VI, IM inducida,
+        respuesta tensional
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>F — Flujo: CFVR calculado
+        automáticamente
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>L — Llenado: E/e' basal vs pico,
+        presiones de llenado
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>P — Presiones: PSAP basal vs pico,
+        acoplamiento VD-AP
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>R — Reserva funcional integrada
+      </li>
+    </ul>
+    <div style="padding:9px 12px;border-radius:8px;
+      background:rgba(124,58,237,0.1);
+      border-left:3px solid #7C3AED;
+      font-size:12px;color:#94A3B8;font-style:italic">
+      La conducta clínica no debe basarse
+      exclusivamente en el puntaje.
+    </div>` },
+
+  { tab: '🧬 Avanzado', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Más allá de la isquemia convencional
+      </strong>
+    </p>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:7px;
+      margin:0">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Eco estrés diastólico: E/e',
+        PSAP y líneas B
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Valvulopatía dinámica: IM,
+        gradientes, respuesta pulmonar
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Estenosis aórtica bajo flujo/
+        bajo gradiente: reserva contráctil
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>HTP inducible y respuesta del VD
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Seguimiento post-revascularización
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Cardio-oncología y reserva
+        contráctil
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Enfermedad microvascular:
+        motilidad + CFVR
+      </li>
+    </ul>` },
+
+  { tab: '🔬 Laboratorio', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Estadísticas continuas del laboratorio
+      </strong>
+    </p>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:7px;
+      margin:0 0 12px">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Volumen en tiempo real — día,
+        semana y mes
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Distribución por tipo de estrés
+        con tendencia
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Indicadores de seguridad:
+        atropina, rescate, eventos
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Resultados: negativos / positivos
+        / indeterminados
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Brechas: sin Bull\'s Eye, sin
+        informe, sin protocolo
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>PDF de auditoría exportable
+      </li>
+    </ul>` },
+
+  { tab: '📚 Referencias', html: `
+    <p style="margin:0 0 10px">
+      <strong style="color:#7C3AED">
+        Recursos académicos
+      </strong>
+    </p>
+    <ul style="padding-left:0;list-style:none;
+      display:flex;flex-direction:column;gap:7px;
+      margin:0 0 12px">
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Probabilidad pre-test — tablas
+        por edad, sexo y síntoma
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Criterios de positividad —
+        motilidad, WMSI, FEVI, ECG
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Protocolos dobutamina y dipiridamol
+        — dosis, atropina, suspensión
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Respuesta bifásica —
+        sensibilidad/especificidad viabilidad
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>CFVR — valores de referencia,
+        técnica Doppler en DA
+      </li>
+      <li style="display:flex;gap:8px">
+        <span style="color:#7C3AED;flex-shrink:0">
+        →</span>Score ABCD-FLPR — cada dimensión
+        con valores de referencia
+      </li>
+    </ul>
+    <div style="padding:9px 12px;border-radius:8px;
+      background:rgba(124,58,237,0.1);
+      border-left:3px solid #7C3AED;
+      font-size:12px;color:#94A3B8;font-style:italic">
+      Verificá la fuente primaria ante decisiones
+      diagnósticas o terapéuticas.
+    </div>` },
+];
+
+function abrirAyudaEcoEstres() {
+  const m=document.getElementById(
+    'modalAyudaEcoEstres');
+  if(m){m.style.display='flex';
+    renderAyudaEcoEstres(0);}
+}
+function cerrarAyudaEcoEstres() {
+  const m=document.getElementById(
+    'modalAyudaEcoEstres');
+  if(m) m.style.display='none';
+}
+function renderAyudaEcoEstres(activo) {
+  const tabs=document.getElementById(
+    'ecoEstresAyudaTabs');
+  const cont=document.getElementById(
+    'ecoEstresAyudaContenido');
+  if(!tabs||!cont) return;
+  tabs.innerHTML=ECOESTRES_AYUDA.map((s,i)=>
+    `<button onclick="renderAyudaEcoEstres(${i})"
+      style="background:none;border:none;
+      padding:8px 13px;cursor:pointer;
+      font-size:12px;white-space:nowrap;
+      color:${i===activo?'#7C3AED':'#94A3B8'};
+      font-weight:${i===activo?'600':'400'};
+      border-bottom:2px solid ${i===activo?
+        '#7C3AED':'transparent'};
+      transition:all 0.15s;font-family:inherit;">
+      ${s.tab}
+    </button>`
+  ).join('');
+  cont.innerHTML=ECOESTRES_AYUDA[activo].html;
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') cerrarAyudaEcoEstres();
+});
+window.abrirAyudaEcoEstres=abrirAyudaEcoEstres;
+window.cerrarAyudaEcoEstres=cerrarAyudaEcoEstres;
+window.renderAyudaEcoEstres=renderAyudaEcoEstres;
 </script>
 </body>
 </html>
