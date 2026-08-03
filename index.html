@@ -2354,9 +2354,11 @@ function sincronizarSC(){
   const peso=parseFloat((document.getElementById('p-peso')?.value||'').replace(',','.'))||0;
   const talla=parseFloat((document.getElementById('p-talla')?.value||'').replace(',','.'))||0;
   if(!peso||!talla)return;
-  const sc=Math.sqrt(peso*talla/3600);   // Mosteller: √(peso × talla / 3600)
+  // Mosteller: √(peso × talla / 3600)
+  const sc=Math.sqrt(peso*talla/3600);
   const ebSc=document.getElementById('eb-sc');
-  if(ebSc && (!ebSc.value || parseFloat(ebSc.value)<0.5)){
+  if(ebSc){
+    // Siempre actualizar — no depender del valor anterior que puede ser incorrecto
     ebSc.value=sc.toFixed(2);
     if(typeof ebCalcMasa==='function')ebCalcMasa();     // recalcula masa VI indexada
     if(typeof ebEvalAI==='function')ebEvalAI();          // recalcula Vol. AI indexado
