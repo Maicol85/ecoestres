@@ -337,6 +337,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     <span class="hdr-med" id="hdr-med" onclick="medOpen()" title="Datos del médico (click para editar)"></span>
     <span class="hdr-inst" id="hdr-inst">GREMEDA · Artigas</span>
     <button class="hdr-ibtn" onclick="medOpen()" title="Datos del médico">👤<span class="lbl">Médico</span></button>
+    <button class="hdr-ibtn" onclick="centerOpen()" title="Centro / Institución (membrete del PDF)">🏥<span class="lbl">Centro</span></button>
     <button class="hdr-ibtn" id="ee-theme-btn" onclick="eeToggleTheme()" title="Modo día / noche">🌙<span class="lbl">Tema</span></button>
     <button class="hdr-ibtn" onclick="exportarDatos()" title="Exportar JSON">⬇️<span class="lbl">Exportar</span></button>
     <label class="hdr-ibtn" title="Importar JSON" style="cursor:pointer">⬆️<span class="lbl">Importar</span><input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
@@ -350,6 +351,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 <!-- Menú de acciones ⋮ (solo móvil ≤768px) -->
 <div class="ee-actions-menu" id="eeActionsMenu">
   <button onclick="eeKebabClose();medOpen()">👤 Médico</button>
+  <button onclick="eeKebabClose();centerOpen()">🏥 Centro</button>
   <button onclick="eeKebabClose();eeToggleTheme()">🌙 Tema día / noche</button>
   <button onclick="eeKebabClose();generarPDFCompleto()">📄 PDF</button>
   <button onclick="eeKebabClose();exportarDatos()">⬇️ Exportar</button>
@@ -902,7 +904,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         <div class="grid3">
           <div class="fg"><label for="p-fecha">Fecha del estudio</label><input type="date" id="p-fecha"></div>
           <div class="fg"><label for="p-fecha-sol">Fecha de solicitud</label><input type="date" id="p-fecha-sol"></div>
-          <div class="fg"><label for="p-medico">Médico solicitante</label><input id="p-medico" placeholder="Dr. Pérez"></div>
+          <div class="fg"><label for="p-medico">Médico solicitante</label><input id="p-medico" placeholder="Dr./Dra. Nombre Apellido"></div>
+          <div class="fg"><label for="p-centro">Centro / Institución</label><input id="p-centro" placeholder="Ej: Hospital Regional de Artigas"></div>
         </div>
         <div class="fg"><label>Factores de riesgo</label>
           <div style="display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px;align-items:center">
@@ -1611,6 +1614,10 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
       <div class="fg"><label for="cfg-medico">Médico informante (por defecto)</label><input id="cfg-medico" placeholder="Dr. Maicol Dos Santos" oninput="guardarConfig()"></div>
       <div class="fg"><label for="cfg-matricula">Matrícula</label><input id="cfg-matricula" placeholder="CJPP ..." oninput="guardarConfig()"></div>
       <div class="fg"><label for="cfg-firma">Firma (pie del informe)</label><input id="cfg-firma" placeholder="Firma / aclaración" oninput="guardarConfig()"></div>
+      <label style="display:flex;align-items:center;gap:9px;cursor:pointer;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)">
+        <input type="checkbox" id="cfg-modo-institucional" onchange="eeModoInstToggle(this.checked)" style="width:16px;height:16px;cursor:pointer">
+        <span style="font-size:12.5px"><b>🏛️ Modo institucional</b> — el PDF muestra sólo la institución en el encabezado (sin CeiboMed)</span>
+      </label>
     </div></div>
     <div class="card"><div class="card-head">💾 Datos</div><div class="card-body">
       <div class="btn-row" style="flex-direction:column;gap:8px">
@@ -3773,6 +3780,31 @@ function ebTextoInforme(){
   </div>
 </div>
 
+<!-- CORR 5 — Modal Centro / Institución -->
+<div class="ee-modal" id="ee-centro-modal" onclick="if(event.target===this)centerClose()">
+  <div class="ee-modal-box">
+    <h3>🏥 Centro / Institución <button class="x" aria-label="Cerrar" onclick="centerClose()">✕</button></h3>
+    <label for="pm-centro">Nombre de la institución</label><input id="pm-centro" placeholder="Ej: Hospital Regional de Artigas">
+    <div class="note-box" style="margin-top:6px">Se usa como membrete del PDF cuando el <b>Modo institucional</b> está activo (Configuración).</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="centerClose()">Cerrar</button>
+      <button class="btn btn-primary" onclick="centerSave()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CORR 3 — Modal opciones de PDF de un estudio guardado -->
+<div class="ee-modal" id="ee-pdfopts-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="ee-modal-box">
+    <h3>📄 Generar PDF del estudio <button class="x" aria-label="Cerrar" onclick="document.getElementById('ee-pdfopts-modal').classList.remove('open')">✕</button></h3>
+    <div class="note-box" style="margin-bottom:12px">Las imágenes del estudio no siempre quedan guardadas. Elegí cómo generar el PDF:</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="eePdfConImagenes()">🖼️ Subir imágenes primero</button>
+      <button class="btn btn-ghost" onclick="eePdfSinImagenes()">📄 Generar sin imágenes</button>
+    </div>
+  </div>
+</div>
+
 <!-- Botones de acción reubicados al pie del contenido principal (dentro de <main>) -->
 
 <script>
@@ -3832,6 +3864,18 @@ function ebTextoInforme(){
     var inst=val('cfg-inst'), ciu=val('cfg-ciudad'); var hi=document.getElementById('hdr-inst');
     if(hi){ var t=[inst,ciu].filter(Boolean).join(' · '); if(t)hi.textContent=t; }
   };
+  /* CORR 5 — Botón "🏥 Centro": edita el nombre de la institución (cfg-inst) */
+  window.centerOpen=function(){ setVal('pm-centro',val('cfg-inst')); var m=document.getElementById('ee-centro-modal'); if(m)m.classList.add('open'); };
+  window.centerClose=function(){ var m=document.getElementById('ee-centro-modal'); if(m)m.classList.remove('open'); };
+  window.centerSave=function(){
+    setVal('cfg-inst',val('pm-centro'));
+    if(typeof guardarConfig==='function')guardarConfig();
+    if(typeof medRefreshHeader==='function')medRefreshHeader();
+    centerClose();
+  };
+  /* CORR 6 — Toggle "Modo institucional" (Configuración) */
+  window.eeModoInstToggle=function(on){ try{ localStorage.setItem('ecoestres_modo_institucional', on?'1':'0'); }catch(e){} if(typeof eeToast==='function')eeToast(on?'🏛️ Modo institucional activado':'Modo estándar (CeiboMed)'); };
+  window.eeModoInstRestore=function(){ var c=document.getElementById('cfg-modo-institucional'); if(c){ try{ c.checked=(localStorage.getItem('ecoestres_modo_institucional')==='1'); }catch(e){} } };
 
   /* Toast liviano */
   window.eeToast=function(msg,type){
@@ -3847,7 +3891,7 @@ function ebTextoInforme(){
   window.eeLab=function(){ eeToast('🔬 Laboratorio — módulo en preparación'); };
 
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('ee-med-modal'); if(m&&m.classList.contains('open'))medClose(); } });
-  document.addEventListener('DOMContentLoaded',function(){ loadTheme(); loadLogo(); medRefreshHeader(); });
+  document.addEventListener('DOMContentLoaded',function(){ loadTheme(); loadLogo(); medRefreshHeader(); if(typeof eeModoInstRestore==='function')eeModoInstRestore(); });
 })();
 </script>
 <!-- ═══ Auditoría individual (Laboratorio) ═══ -->
@@ -4465,6 +4509,46 @@ function ebTextoInforme(){
     var body=document.getElementById('ee-guardados-body'); if(body)body.innerHTML=html;
     var m=document.getElementById('ee-guardados'); if(m)m.classList.add('open');
   };
+  /* CORR 1 — Ver: vista de solo lectura de un estudio guardado, sin tocar el formulario activo. */
+  window.eeVer=function(id){
+    var r=recs().find(function(x){return x.id===id;});
+    if(!r){ toast('Estudio no encontrado'); return; }
+    function rowT(lbl,v){ return (v!=null&&String(v).trim()!=='')?('<tr><td style="color:var(--text2);padding:3px 14px 3px 0;white-space:nowrap;vertical-align:top">'+esc(lbl)+'</td><td style="font-weight:600;color:var(--text);padding:3px 0">'+esc(String(v))+'</td></tr>'):''; }
+    function wm(state){ if(!Array.isArray(state))return null; var s=0,c=0; state.forEach(function(st){ if(st>0){s+=st;c++;} }); return c?(s/c).toFixed(2):null; }
+    var sexo={M:'Masculino',F:'Femenino'}[F(r,'p-sexo')]||'';
+    var pac='<table style="border-collapse:collapse;font-size:13px">'+rowT('Nombre',F(r,'p-nombre'))+rowT('Documento / HC',F(r,'p-hc'))+rowT('Edad',F(r,'p-edad')?(F(r,'p-edad')+' años'):'')+rowT('Sexo',sexo)+rowT('Fecha del estudio',fmtFecha(F(r,'p-fecha')))+rowT('Centro / Institución',F(r,'p-centro'))+rowT('Médico solicitante',F(r,'p-medico'))+'</table>';
+    var params='<table style="border-collapse:collapse;font-size:13px">'+rowT('WMSI basal',wm((r.bull||{}).basal))+rowT('WMSI pico',wm((r.bull||{}).pico))+rowT('FEVI basal (%)',F(r,'c-fevi-bas')||F(r,'eb-fevi'))+rowT('FEVI pico (%)',F(r,'c-fevi-pic'))+rowT('FC máxima',F(r,'b-fc-max'))+rowT('PA pico',F(r,'b-pa-pico'))+rowT('METs',F(r,'b-mets'))+rowT('CFVR DA',F(r,'f-cfvr-da'))+rowT('Resultado',F(r,'res-global')||F(r,'abcd-result'))+'</table>';
+    var concl=F(r,'informe-result')||F(r,'informe-texto')||F(r,'inf-conclusion')||'';
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">'
+      +'<div style="font-size:15px;font-weight:800;color:var(--text)">👁️ '+esc(F(r,'p-nombre')||'(sin nombre)')+' <span style="font-size:12px;font-weight:500;color:var(--text2)">· modo lectura</span></div>'
+      +'<button class="btn btn-ghost" onclick="eeGuardadosOpen()">← Volver a la lista</button></div>'
+      +'<div style="font-size:11.5px;color:var(--text2);margin-bottom:12px">Vista de solo lectura. No modifica el estudio que estás editando.</div>'
+      +'<div class="card" style="margin-bottom:12px"><div class="card-head">🧾 Datos del paciente</div><div class="card-body">'+pac+'</div></div>'
+      +'<div class="card" style="margin-bottom:12px"><div class="card-head">📊 Parámetros clave</div><div class="card-body">'+params+'</div></div>'
+      +(concl?('<div class="card"><div class="card-head">📝 Conclusión</div><div class="card-body" style="font-size:13px;line-height:1.6;color:var(--text)">'+esc(concl)+'</div></div>'):'');
+    var body=document.getElementById('ee-guardados-body'); if(body)body.innerHTML=html;
+    var m=document.getElementById('ee-guardados'); if(m)m.classList.add('open');
+  };
+  /* CORR 3 — PDF de un estudio guardado: modal con opción de subir imágenes o generar sin ellas. */
+  var _eePdfId=null;
+  window.eePdfGuardado=function(id){ _eePdfId=id; var m=document.getElementById('ee-pdfopts-modal'); if(m)m.classList.add('open'); };
+  window.eePdfConImagenes=function(){
+    var m=document.getElementById('ee-pdfopts-modal'); if(m)m.classList.remove('open');
+    var r=recs().find(function(x){return x.id===_eePdfId;}); if(!r){ toast('Estudio no encontrado'); return; }
+    if(typeof applyEstado==='function')applyEstado(r); if(typeof _editId!=='undefined')_editId=_eePdfId;
+    if(typeof eeGuardadosClose==='function')eeGuardadosClose();
+    if(typeof goTo==='function')goTo('imagenes');
+    toast('📎 Adjuntá las imágenes y generá el PDF con «Generar informe».');
+  };
+  window.eePdfSinImagenes=function(){
+    var m=document.getElementById('ee-pdfopts-modal'); if(m)m.classList.remove('open');
+    var r=recs().find(function(x){return x.id===_eePdfId;}); if(!r){ toast('Estudio no encontrado'); return; }
+    if(typeof applyEstado==='function')applyEstado(r); if(typeof _editId!=='undefined')_editId=_eePdfId;
+    try{ if(typeof ecgSlots!=='undefined'&&ecgSlots.length)ecgSlots.length=0; if(typeof ettSlots!=='undefined'&&ettSlots.length)ettSlots.length=0; }catch(e){}
+    window._eePdfSinImg=true;
+    if(typeof eeGuardadosClose==='function')eeGuardadosClose();
+    if(typeof generarPDFCompleto==='function')generarPDFCompleto();
+  };
   function F(r,id){ return (r&&r.vals&&r.vals[id]!=null)?r.vals[id]:''; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   function toast(m){ if(typeof eeToast==='function')eeToast(m); }
@@ -4743,7 +4827,7 @@ function ebTextoInforme(){
           +'<label class="eeg-chk"><input type="checkbox" '+(_sel.indexOf(r.id)>=0?'checked':'')+' onchange="eeCompareToggle(\''+r.id+'\',this.checked)"></label>'
           +'<button class="eeg-star" title="'+((String(r.caso_interes||'')==='1')?'Quitar de casos de interés':'Marcar como caso de interés')+'" onclick="eeToggleStar(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;font-size:19px;line-height:1;padding:0 3px;flex:0 0 auto;color:'+((String(r.caso_interes||'')==='1')?'#F59E0B':'var(--text2)')+'">'+((String(r.caso_interes||'')==='1')?'⭐':'☆')+'</button>'
           +'<div class="eeg-info"><div class="eeg-name">'+esc(F(r,'p-nombre')||'(sin nombre)')+(_editId===r.id?' <span class="eeg-editing">· en edición</span>':'')+'</div><div class="eeg-meta">'+esc(meta)+'</div></div>'
-          +'<div class="eeg-acts">'+(_evo?('<button class="btn btn-ghost" onclick="eeEvolucion(\''+_ci.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')" title="Comparar estudios del mismo paciente">📈 Ver evolución</button>'):'')+'<button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" aria-label="Eliminar" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
+          +'<div class="eeg-acts">'+(_evo?('<button class="btn btn-ghost" onclick="eeEvolucion(\''+_ci.replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')" title="Comparar estudios del mismo paciente">📈 Ver evolución</button>'):'')+'<button class="btn btn-ghost" onclick="eeVer(\''+r.id+'\')" title="Ver en modo lectura, sin tocar el estudio actual">👁️ Ver</button><button class="btn btn-ghost" onclick="eePdfGuardado(\''+r.id+'\')" title="Generar PDF de este estudio guardado">📄 PDF</button><button class="btn btn-ghost" onclick="eeGuardadoEdit(\''+r.id+'\')">✏️ Editar</button><button class="btn btn-ghost" aria-label="Eliminar" onclick="eeGuardadoDelete(\''+r.id+'\')">🗑</button></div>'
           +'</div>';
       }).join('');
     }
@@ -5506,7 +5590,10 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       var pts=[[0,13],[24,13],[30,7],[34,17],[38,13],[60,13],[66,7],[70,17],[74,13],[110,13],[116,7],[120,17],[124,13],[150,13],[156,7],[160,17],[164,13],[210,13]];
       for(var i=1;i<pts.length;i++)doc.line(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1]);
       fb(14); tc(255,255,255); doc.text('Informe de Ecocardiograma de Estrés',105,10,{align:'center'});
-      var med=[V('cfg-medico'),V('cfg-matricula')?('Mat. '+V('cfg-matricula')):'',V('cfg-inst'),V('cfg-ciudad')].filter(Boolean).join('  ·  ');
+      var _modoInst=(function(){try{return localStorage.getItem('ecoestres_modo_institucional')==='1';}catch(e){return false;}})();
+      var med=_modoInst
+        ? (V('cfg-inst')||V('p-centro')||'')
+        : ('CeiboMed'+(function(){var m=[V('cfg-medico'),V('cfg-matricula')?('Mat. '+V('cfg-matricula')):'',V('cfg-inst'),V('cfg-ciudad')].filter(Boolean).join('  ·  ');return m?('  ·  '+m):'';})());
       fn(8.5); tc(220,232,248); if(med)doc.text(med,105,17,{align:'center'});
       // logo
       if(assets.logo){ try{ var lh=17, lw=lh*(assets.logoDims.w/assets.logoDims.h); if(lw>44){lw=44;lh=lw*(assets.logoDims.h/assets.logoDims.w);} doc.addImage(assets.logo,undefined,210-lw-6,3,lw,lh); }catch(e){} }
@@ -5672,6 +5759,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     function firma(){
       checkPage(26); y+=6;
       dc(180,180,180); doc.setLineWidth(0.4); doc.line(mL,y,mR,y); y+=5;
+      if(window._eePdfSinImg){ fn(7.5); tc(120,120,120); doc.text('Imágenes del estudio no incluidas.',mL,y); window._eePdfSinImg=false; }
       var nom=V('cfg-medico'); var mat=V('cfg-matricula'); var fir=V('cfg-firma');
       if(assets.firmaImg){ try{ var fh=16, fw=fh*(assets.firmaImgDims.w/assets.firmaImgDims.h); doc.addImage(assets.firmaImg,undefined,mR-fw,y-2,fw,fh); y+=fh; }catch(e){} }
       fb(9.5); tc(0,0,0); if(nom)doc.text(nom+'.',mR,y,{align:'right'}); y+=5;
@@ -5719,7 +5807,9 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       ['Peso', V('p-peso')?(V('p-peso')+' kg'):''],
       ['Talla', V('p-talla')?(V('p-talla')+' cm'):''],
       ['IMC', V('p-imc')?(V('p-imc')+' kg/m²'):''],
-      ['SC', V('eb-sc')?(V('eb-sc')+' m²'):'']
+      ['SC', V('eb-sc')?(V('eb-sc')+' m²'):''],
+      ['Centro / Institución', V('p-centro')],
+      ['Médico solicitante', V('p-medico')]
     ]);
 
     // 3 · Indicación y contexto
