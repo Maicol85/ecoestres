@@ -256,8 +256,8 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 .ee-modal-box label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px;}
 .ee-modal-box input{width:100%;padding:8px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;}
 .ee-modal-box input:focus{border-color:var(--accent);}
-/* ═══ Botones fijos derecha ═══ */
-.ee-float{position:fixed;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:190;}
+/* ═══ Botones de acción al pie del contenido (patrón UltraSmart) ═══ */
+.ee-float{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:540px;margin:30px auto 10px;padding-top:20px;border-top:1px solid var(--border);}
 .ee-float-btn{border:none;cursor:pointer;color:#fff;border-radius:10px;padding:12px 14px;font-size:11px;font-weight:700;box-shadow:0 3px 14px rgba(0,0,0,.4);background:var(--accent);transition:filter .15s;white-space:nowrap;}
 .ee-float-btn:hover{filter:brightness(1.1);}
 .ee-float-lab{background:var(--accent2);}
@@ -1933,6 +1933,12 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
   </div>
 </div>
 
+  <!-- Botones de acción al pie del contenido (patrón UltraSmart) -->
+  <div class="ee-float">
+    <button class="ee-float-btn" onclick="eeGenerar()">📄 Generar informe</button>
+    <button class="ee-float-btn" onclick="eeGuardados()">🗂 Guardados</button>
+    <button class="ee-float-btn ee-float-lab" onclick="eeLab()">🔬 Laboratorio</button>
+  </div>
 </main>
 
 <!-- BULL POP -->
@@ -3731,12 +3737,7 @@ function ebTextoInforme(){
   </div>
 </div>
 
-<!-- ═══ Botones fijos derecha ═══ -->
-<div class="ee-float">
-  <button class="ee-float-btn" onclick="eeGenerar()">📄 Generar informe</button>
-  <button class="ee-float-btn" onclick="eeGuardados()">🗂 Guardados</button>
-  <button class="ee-float-btn ee-float-lab" onclick="eeLab()">🔬 Laboratorio</button>
-</div>
+<!-- Botones de acción reubicados al pie del contenido principal (dentro de <main>) -->
 
 <script>
 /* ═══ Header CeiboMed: tema, logo, datos del médico, botones fijos ═══ */
