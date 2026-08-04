@@ -247,6 +247,20 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 @media(max-width:640px){.hdr-ibtn .lbl{display:none;}}
 .hdr-ibtn:hover{background:var(--bg3);color:var(--text);}
 .hdr-med{font-size:11px;color:var(--text2);white-space:nowrap;max-width:230px;overflow:hidden;text-overflow:ellipsis;}
+/* ── Menú de acciones ⋮ (solo móvil) ── */
+.ee-kebab{display:none;background:transparent;border:none;color:var(--text2);font-size:22px;line-height:1;padding:2px 9px;cursor:pointer;border-radius:6px;flex-shrink:0}
+.ee-actions-menu{display:none}
+@media(max-width:768px){
+  .hdr-right .hdr-ibtn,.hdr-right .hdr-save-btn,#hdr-inst,#hdr-status{display:none!important}
+  .hdr-logo .sub{display:none}
+  #ee-logo-wrap{display:none}
+  .hdr-med{max-width:130px}
+  .ee-kebab{display:inline-flex;align-items:center}
+  .ee-actions-menu{display:none;position:fixed;top:var(--header);right:8px;flex-direction:column;align-items:stretch;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.5);z-index:250;min-width:212px;max-height:80vh;overflow:auto}
+  .ee-actions-menu.open{display:flex}
+  .ee-actions-menu button,.ee-actions-menu label{background:transparent;border:none;color:var(--text);text-align:left;font-size:13px;padding:9px 12px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:9px;white-space:nowrap;width:100%;box-sizing:border-box}
+  .ee-actions-menu button:hover,.ee-actions-menu label:hover{background:var(--bg3)}
+}
 /* ═══ Panel médico (modal) ═══ */
 .ee-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;}
 .ee-modal.open{display:flex;}
@@ -330,8 +344,25 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
     <button class="hdr-save-btn" onclick="guardar()">💾 Guardar</button>
     <button class="hdr-ibtn" onclick="abrirAyudaEcoEstres()" title="Ayuda / Manual">?<span class="lbl">Ayuda</span></button>
     <button class="hdr-ibtn" onclick="eeCerrarSesion()" title="Cerrar sesión">🔒<span class="lbl">Cerrar</span></button>
+    <button class="ee-kebab" aria-label="Más acciones" onclick="eeKebabToggle(event)">⋮</button>
   </div>
 </header>
+<!-- Menú de acciones ⋮ (solo móvil ≤768px) -->
+<div class="ee-actions-menu" id="eeActionsMenu">
+  <button onclick="eeKebabClose();medOpen()">👤 Médico</button>
+  <button onclick="eeKebabClose();eeToggleTheme()">🌙 Tema día / noche</button>
+  <button onclick="eeKebabClose();generarPDFCompleto()">📄 PDF</button>
+  <button onclick="eeKebabClose();exportarDatos()">⬇️ Exportar</button>
+  <label onclick="eeKebabClose()">⬆️ Importar<input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
+  <button onclick="eeKebabClose();nuevoEstudio()">🗑 Limpiar</button>
+  <button onclick="eeKebabClose();guardar()">💾 Guardar</button>
+  <button onclick="eeKebabClose();goTo('calc')">🧮 Calculadoras</button>
+  <button onclick="eeKebabClose();goTo('ref')">📚 Referencias</button>
+  <button onclick="eeKebabClose();goTo('trials')">🧪 Trials</button>
+  <button onclick="eeKebabClose();document.getElementById('ee-logo-file').click()">🖼️ Logo del centro</button>
+  <button onclick="eeKebabClose();abrirAyudaEcoEstres()">❓ Ayuda</button>
+  <button onclick="eeKebabClose();eeCerrarSesion()">🔒 Cerrar sesión</button>
+</div>
 <nav class="sidebar" id="sidebar">
   <div class="nav-item" onclick="goTo('paciente')"><span class="ni">👤</span> Paciente</div>
   <div class="nav-item active" onclick="goTo('ecobasal')"><span class="ni">🫀</span> Eco Basal</div>
@@ -2158,6 +2189,11 @@ window.eeQrToggle=eeQrToggle;
 function eeResetPerfilStudy(){ var perfil=eeLoadPerfil(), map=eeLoadModulos(); eeSyncUI(perfil,map); applyModules(map); }
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+/* Menú de acciones ⋮ (solo móvil) */
+function eeKebabToggle(e){if(e){e.stopPropagation();e.preventDefault();}var m=document.getElementById('eeActionsMenu');if(m)m.classList.toggle('open');}
+function eeKebabClose(){var m=document.getElementById('eeActionsMenu');if(m)m.classList.remove('open');}
+window.eeKebabToggle=eeKebabToggle;window.eeKebabClose=eeKebabClose;
+document.addEventListener('click',function(e){var m=document.getElementById('eeActionsMenu');if(!m||!m.classList.contains('open'))return;if(!m.contains(e.target)&&!(e.target.closest&&e.target.closest('.ee-kebab')))eeKebabClose();});
 function toggleStep(hdr){const body=hdr.nextElementSibling;const open=body.classList.contains('open');body.classList.toggle('open',!open);hdr.classList.toggle('open',!open);hdr.querySelector('.arr').textContent=open?'▼':'▲';}
 function switchBullTab(id,el){
   document.querySelectorAll('#page-bullo .tab-pane').forEach(p=>p.classList.remove('active'));
