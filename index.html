@@ -359,6 +359,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
   <button onclick="eeKebabClose();eeToggleTheme()">🌙 Tema día / noche</button>
   <button onclick="eeKebabClose();generarPDFCompleto()">📄 PDF</button>
   <button onclick="eeKebabClose();exportarDatos()">⬇️ Exportar</button>
+  <button onclick="eeKebabClose();exportarEcoEstresAnalytics()">📤 Exportar para Analytics</button>
   <label onclick="eeKebabClose()">⬆️ Importar<input type="file" accept=".json" style="display:none" onchange="importarDatos(event)"></label>
   <button onclick="eeKebabClose();nuevoEstudio()">🗑 Limpiar</button>
   <button onclick="eeKebabClose();guardar()">💾 Guardar</button>
@@ -2101,6 +2102,17 @@ function nuevoEstudio(){
   // Los módulos vuelven al perfil guardado (nuevo estudio)
   if(typeof eeResetPerfilStudy==='function')eeResetPerfilStudy();
   actualizarUI();
+}
+/* ── Exportar para CeiboAnalytics ── */
+function exportarEcoEstresAnalytics(){
+  var estudios; try{ estudios=JSON.parse(localStorage.getItem('ecoestres_informes')||'[]'); }catch(e){ estudios=[]; }
+  if(!Array.isArray(estudios)) estudios=[];
+  if(!estudios.length){ if(typeof eeToast==='function')eeToast('⚠️ No hay estudios para exportar','err'); else alert('No hay estudios para exportar'); return; }
+  var payload={app:'ecoestres',version:'1.0',exportado:new Date().toISOString(),estudios:estudios};
+  var fecha=new Date().toISOString().slice(0,10);
+  var b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='ecoestres_analytics_'+fecha+'.json'; a.click(); URL.revokeObjectURL(a.href);
+  if(typeof eeToast==='function')eeToast('✅ '+estudios.length+' estudios exportados para Analytics','ok');
 }
 function exportarDatos(){
   const b=new Blob([JSON.stringify(recolectarEstado(),null,2)],{type:'application/json'});
