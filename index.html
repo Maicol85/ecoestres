@@ -56,7 +56,7 @@ main{margin-top:var(--header);margin-left:var(--sidebar);padding:20px;min-height
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 .fg{margin-bottom:11px;}
 .fg label{display:block;font-size:11px;font-weight:600;color:var(--text2);
-  margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;}
+  margin-bottom:4px;text-transform:none;letter-spacing:0.02em;}
 input,select,textarea{width:100%;padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);
   border-radius:7px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;}
 input:focus,select:focus,textarea:focus{border-color:var(--accent2);}
@@ -250,16 +250,20 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
 /* ── Menú de acciones ⋮ (solo móvil) ── */
 .ee-kebab{display:none;background:transparent;border:none;color:var(--text2);font-size:22px;line-height:1;padding:2px 9px;cursor:pointer;border-radius:6px;flex-shrink:0}
 .ee-actions-menu{display:none}
-@media(max-width:768px){
-  .hdr-right .hdr-ibtn,.hdr-right .hdr-save-btn,#hdr-inst,#hdr-status{display:none!important}
-  .hdr-logo .sub{display:none}
-  #ee-logo-wrap{display:none}
-  .hdr-med{max-width:130px}
+/* Botones secundarios → menú ⋮ cuando la barra no entra; el botón principal (Guardar) queda siempre visible. */
+@media(max-width:1280px){
+  .hdr-right .hdr-ibtn,#hdr-inst,#hdr-status{display:none!important}
+  .hdr-save-btn{display:flex!important}
   .ee-kebab{display:inline-flex;align-items:center}
   .ee-actions-menu{display:none;position:fixed;top:var(--header);right:8px;flex-direction:column;align-items:stretch;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.5);z-index:250;min-width:212px;max-height:80vh;overflow:auto}
   .ee-actions-menu.open{display:flex}
   .ee-actions-menu button,.ee-actions-menu label{background:transparent;border:none;color:var(--text);text-align:left;font-size:13px;padding:9px 12px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:9px;white-space:nowrap;width:100%;box-sizing:border-box}
   .ee-actions-menu button:hover,.ee-actions-menu label:hover{background:var(--bg3)}
+}
+@media(max-width:768px){
+  .hdr-logo .sub{display:none}
+  #ee-logo-wrap{display:none}
+  .hdr-med{max-width:130px}
 }
 /* ═══ Panel médico (modal) ═══ */
 .ee-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;}
@@ -485,7 +489,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
         <div class="card-head">📐 Dimensiones VI (Modo M / 2D)</div>
         <div class="card-body">
           <div class="grid2">
-            <div class="fg"><label for="eb-divi">DIVI (mm)</label><input type="number" id="eb-divi" step="0.1" placeholder="48" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label for="eb-ddvi">DDVI (mm)</label><input type="number" id="eb-ddvi" step="0.1" placeholder="48" oninput="ebCalcMasa()"></div>
             <div class="fg"><label for="eb-dsvi">DSVI (mm)</label><input type="number" id="eb-dsvi" step="0.1" placeholder="30" oninput="ebCalcFAC()"></div>
           </div>
           <div class="grid2">
@@ -498,7 +502,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           </div>
           <div class="grid2">
             <div class="fg"><label for="eb-masa-i">Masa VI indexada (g/m²)</label><input type="number" id="eb-masa-i" readonly placeholder="—"></div>
-            <div class="fg"><label for="eb-sc">SC (m²)</label><input type="number" id="eb-sc" step="0.01" placeholder="1.80" oninput="ebCalcMasa()"></div>
+            <div class="fg"><label>SC (m²) — desde Paciente</label><input type="number" id="eb-sc-ref" readonly placeholder="—" title="Superficie corporal: se calcula en la tab Paciente (peso y talla)"></div>
           </div>
           <div class="grid2">
             <div class="fg"><label for="eb-rwt">RWT (grosor relativo pared)</label><input type="number" id="eb-rwt" readonly placeholder="—"></div>
@@ -900,6 +904,7 @@ html[data-theme="light"] header{background:rgba(255,255,255,.95);}
           <div class="fg"><label for="p-peso">Peso (kg)</label><input type="number" id="p-peso" step="0.1" placeholder="70" oninput="calcAntro();if(typeof calcDobuDosis==='function')calcDobuDosis()"></div>
           <div class="fg"><label for="p-talla">Talla (cm)</label><input type="number" id="p-talla" step="0.1" placeholder="170" oninput="calcAntro()"></div>
           <div class="fg"><label for="p-imc">IMC (kg/m²)</label><input type="number" id="p-imc" readonly placeholder="—"></div>
+          <div class="fg"><label for="p-sc">SC (m²)</label><input type="number" id="p-sc" readonly placeholder="—" title="Superficie corporal (Mosteller) — calculada con peso y talla"></div>
         </div>
         <div class="grid3">
           <div class="fg"><label for="p-fecha">Fecha del estudio</label><input type="date" id="p-fecha"></div>
@@ -1346,7 +1351,7 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
 <!-- ═══ BULL'S EYE ═══ -->
 <div class="page" id="page-bullo">
   <div class="page-title">🎯 Bull's Eye — vistas por etapa</div>
-  <div class="page-sub">4 cámaras · 2 cámaras · 3 cámaras · eje corto (papilar) · Bull's Eye 17 seg — por etapa. Click en cualquier segmento para ciclar el estado; click derecho = selección directa.</div>
+  <div class="page-sub">4 cámaras · 2 cámaras · PEL · eje corto (papilar) · Bull's Eye 17 seg — por etapa. Click en cualquier segmento para ciclar el estado; click derecho = selección directa.</div>
   <div class="tabs" id="bull-tabs" style="flex-wrap:wrap"></div>
   <div id="bull-panes"></div>
 </div>
@@ -2396,19 +2401,18 @@ function calcAntro(){
     sincronizarSC();
   } else if(imcEl){imcEl.value='';}
 }
-// FIX 1: sincroniza la SC (Mosteller) desde peso/talla hacia eb-sc en la tab VI.
-// Sobrescribe si está vacío o si tiene un valor implausible (<0.5, p.ej. el bug histórico
-// eb-sc=0.14 que hacía dar masa indexada >1000 g/m²). No pisa una SC manual válida (0.5–3).
+// SC (Mosteller) calculada desde peso/talla del paciente y mostrada en la tab Paciente (p-sc).
+// El resto de la app (masa VI indexada, RWT, export) la toma de ahí — no la recalcula ni la pide de nuevo.
 function sincronizarSC(){
   const peso=parseFloat((document.getElementById('p-peso')?.value||'').replace(',','.'))||0;
   const talla=parseFloat((document.getElementById('p-talla')?.value||'').replace(',','.'))||0;
-  if(!peso||!talla)return;
+  const scEl=document.getElementById('p-sc');
+  if(!peso||!talla){ if(scEl)scEl.value=''; return; }
   // Mosteller: √(peso × talla / 3600)
   const sc=Math.sqrt(peso*talla/3600);
-  const ebSc=document.getElementById('eb-sc');
-  if(ebSc){
-    // Siempre actualizar — no depender del valor anterior que puede ser incorrecto
-    ebSc.value=sc.toFixed(2);
+  const refEl=document.getElementById('eb-sc-ref'); if(refEl)refEl.value=sc.toFixed(2);
+  if(scEl){
+    scEl.value=sc.toFixed(2);
     if(typeof ebCalcMasa==='function')ebCalcMasa();     // recalcula masa VI indexada
     if(typeof ebEvalAI==='function')ebEvalAI();          // recalcula Vol. AI indexado
   }
@@ -2675,7 +2679,7 @@ function eeEcoSmartChooser(matches){
 function eeApplyEcoSmartBasal(rec){
   var c=(rec&&rec.campos)||{};
   function setV(id,v){ var e=document.getElementById(id); if(e&&v!=null&&String(v)!==''){ e.value=v; e.dispatchEvent(new Event('input',{bubbles:true})); e.dispatchEvent(new Event('change',{bubbles:true})); } }
-  setV('eb-divi',c.ddfvi); setV('eb-dsvi',c.dsfvi); setV('eb-sivd',c.siv); setV('eb-ppvid',c.ppvi);
+  setV('eb-ddvi',c.ddfvi); setV('eb-dsvi',c.dsfvi); setV('eb-sivd',c.siv); setV('eb-ppvid',c.ppvi);
   if(c.fevi){ var m=document.getElementById('eb-fevi-metodo'); if(m){ m.value='simpson'; m.dispatchEvent(new Event('change',{bubbles:true})); } setV('eb-fevi',c.fevi); setV('eb-fevi-simpson',c.fevi); }
   setV('eb-gls',c.sgl);
   setV('eb-e',c.onda_e); setV('eb-a',c.onda_a); setV('eb-e-sep',c.e_sep); setV('eb-e-lat',c.e_lat);
@@ -3290,8 +3294,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   listeners.forEach(([id,ev,fn])=>document.getElementById(id)?.addEventListener(ev,fn));
   // Eco basal listeners
   const ebListeners=[
-    ['eb-divi','input',ebCalcMasa],['eb-dsvi','input',ebCalcMasa],
-    ['eb-sivd','input',ebCalcMasa],['eb-ppvid','input',ebCalcMasa],['eb-sc','input',ebCalcMasa],
+    ['eb-ddvi','input',ebCalcMasa],['eb-dsvi','input',ebCalcMasa],
+    ['eb-sivd','input',ebCalcMasa],['eb-ppvid','input',ebCalcMasa],
     ['eb-fevi','input',ebEvalFEVI],
     ['eb-vd4c','input',ebCalcSimpson],['eb-vs4c','input',ebCalcSimpson],
     ['eb-vd2c','input',ebCalcSimpson],['eb-vs2c','input',ebCalcSimpson],
@@ -3330,14 +3334,14 @@ function ebTab(group, el){
 }
 
 function ebCalcMasa(){
-  const divi=+document.getElementById('eb-divi')?.value||0;
+  const ddvi=+document.getElementById('eb-ddvi')?.value||0;
   const sivd=+document.getElementById('eb-sivd')?.value||0;
   const ppvid=+document.getElementById('eb-ppvid')?.value||0;
-  const sc=+document.getElementById('eb-sc')?.value||0;
+  const sc=+document.getElementById('p-sc')?.value||0;
   const dsvi=+document.getElementById('eb-dsvi')?.value||0;
-  // Devereux: 0.8 × 1.04 × ((SIV+DIVI+PPVI)³ − DIVI³) + 0.6 — diámetros en CM (los campos están en mm → /10)
-  if(divi&&sivd&&ppvid){
-    const dCm=divi/10, sCm=sivd/10, pCm=ppvid/10;
+  // Devereux: 0.8 × 1.04 × ((SIV+DDVI+PPVI)³ − DDVI³) + 0.6 — diámetros en cm (los campos están en mm → /10)
+  if(ddvi&&sivd&&ppvid){
+    const dCm=ddvi/10, sCm=sivd/10, pCm=ppvid/10;
     const masa=+(0.8*1.04*(Math.pow(sCm+dCm+pCm,3)-Math.pow(dCm,3))+0.6).toFixed(1);
     const el=document.getElementById('eb-masa');if(el)el.value=masa;
     if(sc){const mi=+(masa/sc).toFixed(1);const miEl=document.getElementById('eb-masa-i');if(miEl)miEl.value=mi;
@@ -3345,9 +3349,9 @@ function ebCalcMasa(){
       if(res){if(mi>115&&document.getElementById('p-sexo')?.value==='F'||mi>131&&document.getElementById('p-sexo')?.value!=='F'){res.textContent='⚠️ HVI (masa indexada elevada)';res.style.color='var(--amber)';}else{res.textContent='✅ Masa VI normal';res.style.color='var(--green)';}}
     }
   }
-  // RWT = 2×PPVId / DIVId
-  if(divi&&ppvid){
-    const rwt=+(2*ppvid/divi).toFixed(2);
+  // RWT = 2×PPVId / DDVId
+  if(ddvi&&ppvid){
+    const rwt=+(2*ppvid/ddvi).toFixed(2);
     const el=document.getElementById('eb-rwt');if(el)el.value=rwt;
     const geom=document.getElementById('eb-geom-vi');
     if(geom){
@@ -3360,8 +3364,8 @@ function ebCalcMasa(){
       else{geom.textContent='Hipertrofia concéntrica';geom.style.color='var(--red)';}
     }
   }
-  if(divi&&dsvi){
-    const fac=+((divi-dsvi)/divi*100).toFixed(1);
+  if(ddvi&&dsvi){
+    const fac=+((ddvi-dsvi)/ddvi*100).toFixed(1);
     const facEl=document.getElementById('eb-fac');if(facEl)facEl.value=fac;
   }
 }
@@ -3469,7 +3473,7 @@ function ebClasDiastASE2025(){
   const A=+document.getElementById('eb-a')?.value||0;
   const ee=(esep&&elat)?((esep+elat)/2):(esep||elat||0);   // e' promedio (cm/s)
   const eeprom=+document.getElementById('eb-eeprom')?.value||0;   // E/e' promedio
-  const lavi=+document.getElementById('eb-ai-vol-i')?.value||0;   // LAVI = Vol. AI indexado (mL/m²)
+  const lavi=+document.getElementById('eb-ai-vol-i')?.value||0;   // LAVI = Vol. AI indexado (ml/m²)
   const tr=+document.getElementById('eb-it-vmax')?.value||0;      // velocidad TR (m/s)
   // Sin e' → no se puede clasificar
   if(!ee&&!esep&&!elat){ classEl.innerHTML='Completar e\' septal y/o lateral para clasificar con ASE 2025.'; return; }
@@ -3528,7 +3532,7 @@ function ebEvalAI(){
   const diam=+document.getElementById('eb-ai-diam')?.value||0;
   const v4c=+document.getElementById('eb-ai-vol4c')?.value||0;
   const v2c=+document.getElementById('eb-ai-vol2c')?.value||0;
-  const sc=+document.getElementById('eb-sc')?.value||0;
+  const sc=+document.getElementById('p-sc')?.value||0;
   const diamRes=document.getElementById('eb-ai-diam-res');
   if(diamRes&&diam){if(diam>40){diamRes.style.color='var(--amber)';diamRes.textContent='⚠️ AI dilatada (>40mm)';}else{diamRes.style.color='var(--green)';diamRes.textContent='✅ Diámetro AI normal';}}
   if(v4c&&v2c){
@@ -3722,11 +3726,11 @@ function ebTextoInforme(){
   const lines=[];
 
   // VI sistólica
-  const divi=gv('eb-divi'),dsvi=gv('eb-dsvi'),sivd=gv('eb-sivd'),ppvid=gv('eb-ppvid');
+  const ddvi=gv('eb-ddvi'),dsvi=gv('eb-dsvi'),sivd=gv('eb-sivd'),ppvid=gv('eb-ppvid');
   const fevi=gv('eb-fevi')||gv('eb-fevi-simpson');
   const feviMet=gst('eb-fevi-metodo');
   const fac=gv('eb-fac'),masa=gv('eb-masa-i'),rwt=gv('eb-rwt'),geom=document.getElementById('eb-geom-vi')?.textContent||'';
-  if(divi) lines.push(`VI: DIVI ${divi}mm, DSVI ${dsvi||'—'}mm, SIVd ${sivd||'—'}mm, PPVId ${ppvid||'—'}mm. FA ${fac||'—'}%.`+(masa?` Masa VI indexada ${masa} g/m² (${geom}).`:''));
+  if(ddvi) lines.push(`VI: DDVI ${ddvi}mm, DSVI ${dsvi||'—'}mm, SIVd ${sivd||'—'}mm, PPVId ${ppvid||'—'}mm. FA ${fac||'—'}%.`+(masa?` Masa VI indexada ${masa} g/m² (${geom}).`:''));
   if(fevi) lines.push(`FEVI ${fevi}% (${feviMet}).`);
   const gls=gv('eb-gls');if(gls) lines.push(`GLS basal: ${gls}%.`);
 
@@ -5283,7 +5287,6 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     host.innerHTML=
       bvApical(stage,'A4C','inferoseptal','anterolateral',{lado:"izq", tContacto:0.80, largo:160, curvatura:55},{ izq:[3,9,14], der:[6,12,16], apex:17 })
      +bvApical(stage,'A2C','inferior','anterior',null,{ izq:[4,10,15], der:[1,7,13], apex:17 })
-     +bvApical(stage,'A3C','inferolateral','anteroseptal',{lado:"der", tContacto:0.38, largo:130, curvatura:65},{ izq:[5,11,16], der:[2,8,14], apex:17 })
      +bvPel(stage)
      +shortAxis(stage);
   };
@@ -5820,7 +5823,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
       ['Peso', V('p-peso')?(V('p-peso')+' kg'):''],
       ['Talla', V('p-talla')?(V('p-talla')+' cm'):''],
       ['IMC', V('p-imc')?(V('p-imc')+' kg/m²'):''],
-      ['SC', V('eb-sc')?(V('eb-sc')+' m²'):''],
+      ['SC', V('p-sc')?(V('p-sc')+' m²'):''],
       ['Centro / Institución', V('p-centro')],
       ['Médico solicitante', V('p-medico')]
     ]);
@@ -5871,7 +5874,7 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
     drawBar('ECOCARDIOGRAMA BASAL — MEDICIONES', 40);
     tablaCompacta([
       {titulo:'Dimensiones VI',items:[
-        {lbl:'DIVI',val:V('eb-divi')?V('eb-divi')+' mm':''},
+        {lbl:'DDVI',val:V('eb-ddvi')?V('eb-ddvi')+' mm':''},
         {lbl:'DSVI',val:V('eb-dsvi')?V('eb-dsvi')+' mm':''},
         {lbl:'SIVd',val:V('eb-sivd')?V('eb-sivd')+' mm':''},
         {lbl:'PPVId',val:V('eb-ppvid')?V('eb-ppvid')+' mm':''},
