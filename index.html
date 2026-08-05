@@ -4356,7 +4356,7 @@ function ebTextoInforme(){
 
     // ── Pie de página ──
     var np=doc.internal.getNumberOfPages();
-    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,295,{align:'center'}); }
+    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica.'+((function(){try{return localStorage.getItem('ecoestres_modo_institucional')==='1';}catch(e){return false;}})()?'':' CeiboMed © 2026'),105,295,{align:'center'}); }
 
     var fname='Auditoria_Laboratorio_'+(inst.replace(/[^a-zA-Z0-9]+/g,'_'))+'_'+fmtToday().replace(/\//g,'-')+'.pdf';
     doc.save(fname);
@@ -4414,7 +4414,7 @@ function ebTextoInforme(){
     fn(8.5); tc(30,30,30); doc.text('Responsable: '+(respF||'___________________________'),mL,y); y+=6;
     doc.text('Fecha de emisión: '+fmtToday(),mL,y);
     var np=doc.internal.getNumberOfPages();
-    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,295,{align:'center'}); }
+    for(var pi=1;pi<=np;pi++){ doc.setPage(pi); fn(6.8); tc(150,150,150); doc.text(inst+' · Auditoría Laboratorio · '+fmtToday(),mL,292); doc.text('Pág. '+pi+'/'+np,196,292,{align:'right'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica.'+((function(){try{return localStorage.getItem('ecoestres_modo_institucional')==='1';}catch(e){return false;}})()?'':' CeiboMed © 2026'),105,295,{align:'center'}); }
     var fname='Auditoria_Laboratorio_'+(inst.replace(/[^a-zA-Z0-9]+/g,'_'))+'_'+fmtToday().replace(/\//g,'-')+'.pdf';
     doc.save(fname);
     if(typeof eeToast==='function') eeToast('📄 PDF de auditoría generado');
@@ -4546,6 +4546,7 @@ function ebTextoInforme(){
     if(typeof applyEstado==='function')applyEstado(r); if(typeof _editId!=='undefined')_editId=_eePdfId;
     try{ if(typeof ecgSlots!=='undefined'&&ecgSlots.length)ecgSlots.length=0; if(typeof ettSlots!=='undefined'&&ettSlots.length)ettSlots.length=0; }catch(e){}
     window._eePdfSinImg=true;
+    window._eeSkipResGuard=true;   // reimpresión de estudio guardado: no re-exigir el resultado
     if(typeof eeGuardadosClose==='function')eeGuardadosClose();
     if(typeof generarPDFCompleto==='function')generarPDFCompleto();
   };
@@ -4779,7 +4780,7 @@ function ebTextoInforme(){
     }
     // pie
     var tot=doc.internal.getNumberOfPages();
-    for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); doc.setTextColor(150,150,150); doc.text('EcoEstrés Smart · CeiboMed · Comparativo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,294.5,{align:'center'}); }
+    for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); doc.setTextColor(150,150,150); var _mi=(function(){try{return localStorage.getItem('ecoestres_modo_institucional')==='1';}catch(e){return false;}})(); var _in=(typeof V==='function'?(V('cfg-inst')||''):''); doc.text(((_mi&&_in)?_in:'EcoEstrés Smart · CeiboMed')+' · Comparativo · Pág. '+p+'/'+tot,105,291.5,{align:'center'}); doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica.'+(_mi?'':' CeiboMed © 2026'),105,294.5,{align:'center'}); }
     return doc;
   }
 
@@ -5779,10 +5780,14 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
 
     function footer(){
       var tot=doc.internal.getNumberOfPages();
-      var inst=V('cfg-inst')||'CeiboMed';
+      var _modoI=(function(){try{return localStorage.getItem('ecoestres_modo_institucional')==='1';}catch(e){return false;}})();
+      var _inst=V('cfg-inst')||'';
       for(var p=1;p<=tot;p++){ doc.setPage(p); fn(6.3); tc(150,150,150);
-        doc.text('EcoEstrés Smart · '+inst+'  —  Uso clínico exclusivo · Pág. '+p+'/'+tot,105,291.5,{align:'center'});
-        doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica. CeiboMed © 2026',105,294.5,{align:'center'}); fn(6.3); tc(150,150,150);
+        var _cop=(_modoI&&_inst)
+          ? ('© 2026 '+_inst+' · Todos los derechos reservados · Uso clínico exclusivo · Pág. '+p+'/'+tot)
+          : ('© 2026 Dr. M. D. S. y col. · EcoEstrés Smart · Todos los derechos reservados · Uso clínico exclusivo · Pág. '+p+'/'+tot);
+        doc.text(_cop,105,291.5,{align:'center'});
+        doc.setFontSize(5); doc.setTextColor(165,165,165); doc.text('Esta herramienta es de apoyo clínico. No reemplaza el juicio médico ni constituye una recomendación diagnóstica o terapéutica.'+(_modoI?'':' CeiboMed © 2026'),105,294.5,{align:'center'}); fn(6.3); tc(150,150,150);
       }
     }
 
@@ -6044,7 +6049,8 @@ document.addEventListener('DOMContentLoaded',function(){ peInit(); });
   window.generarPDFCompleto=async function(){
     // Conclusión obligatoria: no permitir generar el PDF sin resultado del estudio (CAMBIO 1)
     var _rg=(document.getElementById('res-global')||{}).value||(document.getElementById('abcd-result')||{}).value||'';
-    if(!_rg){
+    var _skipResGuard=!!window._eeSkipResGuard; window._eeSkipResGuard=false;
+    if(!_rg && !_skipResGuard){
       if(typeof eeToast==='function')eeToast('⚠️ Seleccioná el resultado del estudio antes de generar el PDF','err'); else alert('⚠️ Seleccioná el resultado del estudio antes de generar el PDF');
       if(typeof goTo==='function')goTo('informe');
       var _s=document.getElementById('informe-result'); if(_s){ _s.focus(); }
