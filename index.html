@@ -2053,12 +2053,21 @@ const CeiboStore = (function () {
     _db=null; _lista=true; return {modo:'localStorage',motivo:'migración fallida'};
   })();
 
+  // Devuelve una PROMESA con el resultado REAL. Antes devolvía true en el acto
+  // porque la escritura a IndexedDB es asíncrona, y el llamador daba el guardado
+  // por bueno sin saberlo. Si nada se pudo persistir, el error lo avisa la
+  // propia capa: ninguna ruta puede fallar en silencio.
   function _persistir(){
     var a=_cache;
-    if(!_db) return _lsSet(a);
-    _escribir(a).then(function(ok){ if(!ok){ console.error('IndexedDB rechazó la escritura; respaldo en localStorage'); _lsSet(a); } });
-    return true;
+    if(!_db) return Promise.resolve(_avisar(_lsSet(a)));
+    return _escribir(a).then(function(ok){
+      if(ok) return true;
+      console.error('IndexedDB rechazó la escritura; se intenta el respaldo en localStorage');
+      var back=_lsSet(a);
+      return _avisar(back);
+    });
   }
+  function _avisar(ok){ if(!ok){ if(typeof eeToast==='function') eeToast('❌ Error al guardar','err'); else alert('❌ Error al guardar'); } return ok; }
   return { ready: ready, modo:function(){return _db?'indexedDB':'localStorage';},
            getAll:function(){return _cache;},
            setAll:function(a){ _cache=Array.isArray(a)?a.slice():[]; return _persistir(); },
@@ -2111,7 +2120,7 @@ const KEY='ecoestres_smart_v1';
 function autoGuardarDraft(){   // autosave silencioso del borrador (usado por el intervalo)
   try{ localStorage.setItem(KEY,JSON.stringify(recolectarEstado())); }catch(e){}
 }
-function guardar(){
+async function guardar(){
   // 1) Validar nombre del paciente
   var nombre=(document.getElementById('p-nombre')||{}).value||'';
   if(!String(nombre).trim()){
@@ -2122,12 +2131,14 @@ function guardar(){
   var okDraft=true;
   try{ localStorage.setItem(KEY,JSON.stringify(recolectarEstado())); }catch(e){ okDraft=false; }
   // 3) Guardar/actualizar en el módulo Guardados ('ecoestres_informes')
-  var res=(typeof eeSaveCurrentStudy==='function')?eeSaveCurrentStudy():{ok:okDraft};
+  var res=(typeof eeSaveCurrentStudy==='function')? await eeSaveCurrentStudy() : {ok:okDraft};
   if(res&&res.ok){
     var el=document.getElementById('hdr-status'); if(el){ el.style.opacity='1'; setTimeout(function(){el.style.opacity='0';},1800); }
     if(typeof eeToast==='function')eeToast('✅ Estudio guardado correctamente','ok');
-  } else {
-    if(typeof eeToast==='function')eeToast('❌ Error al guardar — revisá el nombre del paciente','err');
+  } else if(!res || res.error!=='no-persistido'){
+    // Si falló la persistencia, el error ya lo avisó CeiboStore con el motivo
+    // concreto (cuota, IndexedDB caído); no se repite el mismo toast.
+    if(typeof eeToast==='function')eeToast('❌ Error al guardar','err');
   }
 }
 function recolectarEstado(){
@@ -4578,7 +4589,7 @@ function ebTextoInforme(){
   var LSKEY='ecoestres_informes';
   var _editId=null, _sel=[], _cmpDoc=null;
   function recs(){ return CeiboStore.getAll().slice(); }
-  function save(a){ if(!CeiboStore.setAll(a)) alert('No se pudo guardar (¿espacio de almacenamiento lleno?)'); }
+  function save(a){ return CeiboStore.setAll(a); }   // si falla, CeiboStore avisa el error
   /* Marca/desmarca "caso de interés" directo en localStorage, sin reabrir el estudio */
   window.eeToggleStar=function(id){
     var arr=recs(); var i=arr.findIndex(function(x){return x.id===id;}); if(i<0)return;
@@ -4707,11 +4718,15 @@ function ebTextoInforme(){
       } else {
         rec.id='rep_'+Date.now()+'_'+Math.floor(Math.random()*1000); rec.ts=Date.now(); arr.push(rec); _editId=rec.id;
       }
-      if(!CeiboStore.setAll(arr)) throw new Error('almacenamiento lleno');
-      var m=document.getElementById('ee-guardados');
-      if(m&&m.classList.contains('open')&&typeof eeGuardadosList==='function')eeGuardadosList();
-      return {ok:true, id:rec.id};
-    }catch(e){ return {ok:false, error:e&&e.message}; }
+      // PROMESA con el resultado real: la escritura a IndexedDB es asíncrona y
+      // devolver {ok:true} en el acto hacía que el llamador cantara éxito
+      // aunque el guardado hubiese fallado.
+      return CeiboStore.setAll(arr).then(function(ok){
+        var m=document.getElementById('ee-guardados');
+        if(m&&m.classList.contains('open')&&typeof eeGuardadosList==='function')eeGuardadosList();
+        return ok ? {ok:true, id:rec.id} : {ok:false, error:'no-persistido'};
+      });
+    }catch(e){ return Promise.resolve({ok:false, error:e&&e.message}); }
   };
 
   window.eeSaveStudy=function(asNew){
