@@ -1993,6 +1993,92 @@ input.proto-out,select.proto-out{border-color:var(--accent)!important;box-shadow
 </div>
 <script>
 'use strict';
+// ══════════════════════════════════════════════════════════════════════
+// ALMACENAMIENTO — IndexedDB con respaldo automático a localStorage
+// ══════════════════════════════════════════════════════════════════════
+// Base `ceibomed` COMPARTIDA con el resto de la suite: cada registro lleva su
+// `app`, y así CeiboMed Analytics lee los estudios de todas, y esta app puede
+// leer los de EcoSmart para importar el eco basal (ver eeImportEcoSmart).
+// Híbrido y no IndexedDB a secas porque la app también se abre con doble clic
+// sobre el archivo (file://), donde Chrome y Safari pueden negar IndexedDB.
+// La caché en memoria mantiene las lecturas SÍNCRONAS (recs() no cambia).
+// Se declara acá arriba, antes que nada, para que ningún consumidor la
+// encuentre en zona muerta temporal.
+const CeiboStore = (function () {
+  const DB_NAME='ceibomed', DB_VER=1, STORE='informes', APP='ecoestres', LSKEY='ecoestres_informes';
+  let _db=null, _cache=[], _lista=false;
+
+  function _ls(){ try{ var r=localStorage.getItem(LSKEY); var p=r?JSON.parse(r):[]; return Array.isArray(p)?p:[]; }catch(e){ return []; } }
+  function _lsSet(a){ try{ localStorage.setItem(LSKEY, JSON.stringify(a)); return true; }catch(e){ console.error(e); return false; } }
+  function _abrir(){ return new Promise(function(res){ var f=false; function fin(v){ if(!f){f=true;res(v);} } var q;
+    try{ if(!window.indexedDB) return fin(null); q=indexedDB.open(DB_NAME,DB_VER); }catch(e){ return fin(null); }
+    q.onupgradeneeded=function(ev){ var db=ev.target.result;
+      if(!db.objectStoreNames.contains(STORE)){ var os=db.createObjectStore(STORE,{keyPath:'_pk'}); os.createIndex('app','app',{unique:false}); } };
+    q.onsuccess=function(){fin(q.result);}; q.onerror=function(){fin(null);}; q.onblocked=function(){fin(null);};
+    setTimeout(function(){fin(null);},3000); }); }
+  function _leerApp(app){ return new Promise(function(res){ if(!_db) return res(null);
+    try{ var tx=_db.transaction(STORE,'readonly'); var r=tx.objectStore(STORE).index('app').getAll(app);
+      r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){res(null);}; }catch(e){ res(null); } }); }
+  function _pk(d,i){ return APP+':'+(d && d.id!=null ? d.id : 'i'+i); }
+  function _escribir(arr){ return new Promise(function(res){ if(!_db) return res(false);
+    var nuevos=arr.map(function(d,i){ return {_pk:_pk(d,i),app:APP,data:d}; });
+    var vivas=new Set(nuevos.map(function(r){return r._pk;}));
+    try{ var txR=_db.transaction(STORE,'readonly'); var kr=txR.objectStore(STORE).index('app').getAllKeys(APP);
+      kr.onerror=function(){res(false);};
+      kr.onsuccess=function(){ var borrar=(kr.result||[]).filter(function(k){return !vivas.has(k);});
+        try{ var tx=_db.transaction(STORE,'readwrite'); var os=tx.objectStore(STORE);
+          borrar.forEach(function(k){os.delete(k);}); nuevos.forEach(function(r){os.put(r);});
+          tx.oncomplete=function(){res(true);}; tx.onerror=function(){res(false);}; tx.onabort=function(){res(false);};
+        }catch(e){ res(false); } };
+    }catch(e){ res(false); } }); }
+
+  _cache = _ls();   // arranque síncrono: nunca hay una ventana con la caché vacía
+
+  const ready = (async function(){
+    _db = await _abrir();
+    if(!_db){ _lista=true; return {modo:'localStorage'}; }
+    var enIDB = await _leerApp(APP);
+    if(enIDB===null){ _db=null; _lista=true; return {modo:'localStorage'}; }
+    if(enIDB.length){ _cache=enIDB.map(function(r){return r.data;}); if(_ls().length) localStorage.removeItem(LSKEY); _lista=true; return {modo:'indexedDB',estudios:_cache.length}; }
+    var ls=_ls();
+    if(!ls.length){ _lista=true; return {modo:'indexedDB',estudios:0}; }
+    // MIGRACIÓN: escribir, RELEER y verificar; recién ahí limpiar localStorage
+    var ok = await _escribir(ls);
+    var ver = ok ? await _leerApp(APP) : null;
+    var esp = new Set(ls.map(function(d,i){return _pk(d,i);}));
+    if(ok && ver && ver.length===esp.size && ver.every(function(r){return esp.has(r._pk);})){
+      localStorage.removeItem(LSKEY); _lista=true; return {modo:'indexedDB',migrados:esp.size};
+    }
+    console.error('Migración a IndexedDB fallida; se conserva localStorage');
+    _db=null; _lista=true; return {modo:'localStorage',motivo:'migración fallida'};
+  })();
+
+  function _persistir(){
+    var a=_cache;
+    if(!_db) return _lsSet(a);
+    _escribir(a).then(function(ok){ if(!ok){ console.error('IndexedDB rechazó la escritura; respaldo en localStorage'); _lsSet(a); } });
+    return true;
+  }
+  return { ready: ready, modo:function(){return _db?'indexedDB':'localStorage';},
+           getAll:function(){return _cache;},
+           setAll:function(a){ _cache=Array.isArray(a)?a.slice():[]; return _persistir(); },
+           // Lectura CRUZADA: estudios de otra app de la suite (p.ej. 'eco').
+           // Cae a la clave vieja de localStorage si esa app todavía no migró.
+           // Se deduplica por id: EcoSmart guarda dos baldes (propios e
+           // importados) y su lista fusionada queda repetida en la base.
+           getOtraApp: async function(app, lsKeyFallback){
+             await ready;
+             var r = await _leerApp(app);
+             if (r && r.length) {
+               var m = new Map();
+               r.forEach(function(x, i){ var d = x.data; if (d) m.set(d.id != null ? d.id : ('_'+i), d); });
+               return Array.from(m.values());
+             }
+             try{ var raw=localStorage.getItem(lsKeyFallback); var p=raw?JSON.parse(raw):[]; return Array.isArray(p)?p:[]; }catch(e){ return []; }
+           } };
+})();
+window.CeiboStore = CeiboStore;
+
 const SEGS=[
   {id:1,name:'Anterior basal',ter:'LAD'},{id:2,name:'Anteroseptal basal',ter:'LAD'},
   {id:3,name:'Inferoseptal basal',ter:'RCA'},{id:4,name:'Inferior basal',ter:'RCA'},
@@ -2105,7 +2191,7 @@ function nuevoEstudio(){
 }
 /* ── Exportar para CeiboAnalytics ── */
 function exportarEcoEstresAnalytics(){
-  var estudios; try{ estudios=JSON.parse(localStorage.getItem('ecoestres_informes')||'[]'); }catch(e){ estudios=[]; }
+  var estudios = CeiboStore.getAll().slice();
   if(!Array.isArray(estudios)) estudios=[];
   if(!estudios.length){ if(typeof eeToast==='function')eeToast('⚠️ No hay estudios para exportar','err'); else alert('No hay estudios para exportar'); return; }
   var payload={app:'ecoestres',version:'1.0',exportado:new Date().toISOString(),estudios:estudios};
@@ -2664,11 +2750,13 @@ function eeQrDataURL(text){
   }catch(e){ return null; }
 }
 window.eeQrDataURL=eeQrDataURL;
-/* ═══ Importar eco basal desde EcoSmart (localStorage 'ett_informes', match por CI) ═══ */
-function eeImportEcoSmart(){
+/* ═══ Importar eco basal desde EcoSmart (IndexedDB compartida, match por CI) ═══ */
+async function eeImportEcoSmart(){
   var ci=String((document.getElementById('p-hc')||{}).value||'').trim();
   if(!ci){ alert('Ingresá primero la HC / ID del paciente para buscar el estudio en EcoSmart.'); return; }
-  var arr; try{ arr=JSON.parse(localStorage.getItem('ett_informes')||'[]'); }catch(e){ arr=[]; }
+  // EcoSmart migró a la base compartida; el fallback cubre el caso de que en
+  // este equipo todavía queden sus datos en la clave vieja de localStorage.
+  var arr = await CeiboStore.getOtraApp('eco','ett_informes');
   if(!Array.isArray(arr))arr=[];
   var matches=arr.filter(function(x){ return String((x&&x.ci!=null)?x.ci:'').trim()===ci; });
   if(!matches.length){ alert('No se encontraron estudios de EcoSmart con HC/ID «'+ci+'».'); return; }
@@ -3929,9 +4017,9 @@ function ebTextoInforme(){
 @media(max-width:560px){.eea-cols{grid-template-columns:1fr;}}
 </style>
 <script>
-/* ═══ Laboratorio: panel de auditoría individual (lee 'ecoestres_informes') ═══ */
+/* ═══ Laboratorio: panel de auditoría individual (lee los estudios vía CeiboStore) ═══ */
 (function(){
-  function recs(){ try{ var a=JSON.parse(localStorage.getItem('ecoestres_informes')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function recs(){ return CeiboStore.getAll().slice(); }
   function F(r,id){ if(!r)return ''; if(r.vals&&r.vals[id]!=null)return r.vals[id]; if(r[id]!=null)return r[id]; if(r.campos&&r.campos[id]!=null)return r.campos[id]; return ''; }
   function num(x){ var n=parseFloat(String(x).replace(',','.')); return isNaN(n)?null:n; }
   function BULL(r){ return (r&&(r.bull||(r.vals&&r.vals.bull)))||null; }
@@ -4489,8 +4577,8 @@ function ebTextoInforme(){
 (function(){
   var LSKEY='ecoestres_informes';
   var _editId=null, _sel=[], _cmpDoc=null;
-  function recs(){ try{ var a=JSON.parse(localStorage.getItem(LSKEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
-  function save(a){ try{ localStorage.setItem(LSKEY, JSON.stringify(a)); }catch(e){ alert('No se pudo guardar (¿espacio de almacenamiento lleno?): '+e.message); } }
+  function recs(){ return CeiboStore.getAll().slice(); }
+  function save(a){ if(!CeiboStore.setAll(a)) alert('No se pudo guardar (¿espacio de almacenamiento lleno?)'); }
   /* Marca/desmarca "caso de interés" directo en localStorage, sin reabrir el estudio */
   window.eeToggleStar=function(id){
     var arr=recs(); var i=arr.findIndex(function(x){return x.id===id;}); if(i<0)return;
@@ -4619,7 +4707,7 @@ function ebTextoInforme(){
       } else {
         rec.id='rep_'+Date.now()+'_'+Math.floor(Math.random()*1000); rec.ts=Date.now(); arr.push(rec); _editId=rec.id;
       }
-      localStorage.setItem(LSKEY, JSON.stringify(arr));   // lanza si el almacenamiento está lleno
+      if(!CeiboStore.setAll(arr)) throw new Error('almacenamiento lleno');
       var m=document.getElementById('ee-guardados');
       if(m&&m.classList.contains('open')&&typeof eeGuardadosList==='function')eeGuardadosList();
       return {ok:true, id:rec.id};
