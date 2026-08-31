@@ -6,6 +6,15 @@
 <title>EcoEstrés Smart — CeiboMed</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- SheetJS para la plantilla y la importación por Excel. Va con hash SRI: sin él el
+     navegador ejecuta lo que devuelva el CDN, y ese script corre con acceso total a los
+     datos de pacientes de esta app. El hash es el que publica la API de cdnjs y coincide
+     con el recalculado sobre el archivo descargado y con el que ya usa EcoSmart.
+     Al subir de versión hay que regenerarlo:
+       curl -s "https://api.cdnjs.com/libraries/xlsx/<ver>?fields=sri" -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+        integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 :root {
   --bg:#0D1117; --bg2:#161B22; --bg3:#1C2333; --bg4:#212840;
@@ -2141,12 +2150,39 @@ async function guardar(){
     if(typeof eeToast==='function')eeToast('❌ Error al guardar','err');
   }
 }
+/* Copia de los contenedores mutables del estado.
+
+   `recolectarEstado()` devolvía los globales TAL CUAL, y eeSaveStudy hace un
+   Object.assign de un nivel: cada estudio guardado terminaba apuntando al MISMO objeto
+   `bull` que el formulario en vivo, y por lo tanto todos entre sí. Guardar el estudio A
+   con akinesia, seguir trabajando y guardar el B como normal dejaba al A guardado —y
+   persistido— diciendo «normal». applyEstado hace `bull[k]=…slice()`, o sea escribe
+   sobre ese objeto compartido, así que abrir un estudio para editarlo reescribía la
+   motilidad de todos los demás. Se pierde el hallazgo central del estudio, sin aviso y
+   sin forma de notarlo hasta releer el informe.
+
+   No alcanza con clonar en quien guarda: son cuatro (autoguardado, backup JSON, el botón
+   del encabezado y Guardados). Se clona en el único punto por donde salen todos. */
+function _eeClonEstado(v){
+  if(Array.isArray(v))return v.map(_eeClonEstado);
+  if(v&&typeof v==='object'){ var o={}; Object.keys(v).forEach(function(k){ o[k]=_eeClonEstado(v[k]); }); return o; }
+  return v;   // las imágenes son cadenas base64: inmutables, no hace falta copiarlas
+}
 function recolectarEstado(){
   const vals={};
   document.querySelectorAll('input:not([type=file]):not([type=checkbox]),select,textarea').forEach(el=>{if(el.id)vals[el.id]=el.value;});
   document.querySelectorAll('input[type=checkbox]').forEach(el=>{if(el.id)vals[el.id]=el.checked;});
   var _ci=document.getElementById('inf-caso-interes');
-  return{vals,bull,strainBull,ecgSlots,ecgSlotsAuto,ecgRows,ecgRowsAuto,ettSlots,ettPerPage,dobuData,caso_interes:((_ci&&_ci.checked)?'1':''),peState:(typeof peState!=='undefined'?peState:null),bvInclude:(typeof bvInclude!=='undefined'?bvInclude:{}),bullExtra:(typeof bullExtra!=='undefined'?bullExtra:null)};
+  return{vals,
+    bull:_eeClonEstado(bull), strainBull:_eeClonEstado(strainBull),
+    ecgSlots:_eeClonEstado(ecgSlots), ecgSlotsAuto,
+    ecgRows:_eeClonEstado(ecgRows), ecgRowsAuto,
+    ettSlots:_eeClonEstado(ettSlots), ettPerPage,
+    dobuData:_eeClonEstado(dobuData),
+    caso_interes:((_ci&&_ci.checked)?'1':''),
+    peState:(typeof peState!=='undefined'?_eeClonEstado(peState):null),
+    bvInclude:(typeof bvInclude!=='undefined'?_eeClonEstado(bvInclude):{}),
+    bullExtra:(typeof bullExtra!=='undefined'?_eeClonEstado(bullExtra):null)};
 }
 function cargarEstado(){
   let raw;try{raw=localStorage.getItem(KEY);}catch(e){return;}
@@ -4040,7 +4076,13 @@ function ebTextoInforme(){
   function semLow(p,g,w){ return p<=g?'var(--green)':p<=w?'var(--yellow)':'var(--red)'; }
   var SEGT=(typeof SEGS!=='undefined')?SEGS:null;
   function wmsiPico(r){ var b=BULL(r); if(!b||!b.pico)return null; var s=0,c=0; b.pico.forEach(function(st){ if(st>0){s+=st;c++;} }); return c?s/c:null; }
-  function bullEdited(r){ var b=BULL(r); if(!b)return false; return ['basal','pico','recup'].some(function(ph){ return Array.isArray(b[ph])&&b[ph].some(function(st){return st!==1;}); }); }
+  /* «Editado» es tener al menos un segmento EVALUADO y distinto de normal. Antes era
+     `st!==1`, y 0 significa «No eval.»: los estudios importados desde Excel entran con los
+     85 segmentos en 0 y contaban como bull's eye cargado. Quedaban sumando en «Con Bull's
+     Eye completo» y —peor— salían de «Sin Bull's Eye en pico», que es justamente el
+     indicador de brecha que existe para encontrarlos. La auditoría afirmaba que la
+     motilidad estaba hecha en los estudios donde con seguridad no lo está. */
+  function bullEdited(r){ var b=BULL(r); if(!b)return false; return ['basal','pico','recup'].some(function(ph){ return Array.isArray(b[ph])&&b[ph].some(function(st){return st>0&&st!==1;}); }); }
   function pasPico(r){ var v=String(F(r,'b-pa-pico')||''); var m=v.match(/\d+/); return m?parseInt(m[0],10):null; }
 
   function card(v,l,s,color){ return '<div class="eea-card">'+(color?'<span class="eea-dot" style="background:'+color+'"></span>':'')+'<div class="v" style="color:'+(color||'var(--text)')+'">'+v+'</div><div class="l">'+l+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>'; }
@@ -4545,6 +4587,18 @@ function ebTextoInforme(){
 #ee-guardados .ee-modal-box{max-width:840px;max-height:92vh;overflow:auto;}
 .eeg-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
 .eeg-editing{font-size:11px;color:var(--amber);font-weight:700;}
+.eeg-io{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.eeg-cont{font-size:12px;color:var(--text2);margin-right:auto;}
+.eeio-wrap{position:relative;}
+.eeio-btn{padding:7px 12px;font-size:12px;white-space:nowrap;min-height:36px;}
+.eeio-menu{display:none;position:absolute;top:calc(100% + 5px);left:0;z-index:9000;
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:6px;
+  box-shadow:0 12px 34px rgba(0,0,0,.5);min-width:214px;}
+.eeio-menu.open{display:block;}
+.eeio-menu button{display:block;width:100%;text-align:left;background:none;border:none;
+  color:var(--text);font:inherit;font-size:13px;padding:10px 11px;border-radius:7px;
+  cursor:pointer;white-space:nowrap;min-height:44px;}
+.eeio-menu button:hover,.eeio-menu button:focus-visible{background:var(--bg3);}
 .eeg-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .eeg-filters input{flex:1;min-width:130px;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-family:inherit;outline:none;}
 .eeg-filters input:focus{border-color:var(--accent2);}
@@ -4687,16 +4741,58 @@ function ebTextoInforme(){
     if(s.peState&&typeof peState!=='undefined'){ Object.keys(peState).forEach(function(k){delete peState[k];}); Object.assign(peState,s.peState); }   // protocolo primero
     if(Array.isArray(s.ecgRows)){ ecgRows=s.ecgRows.map(function(x){return {key:x.key,name:x.name,auto:(x.auto!==false)};}); ecgRowsAuto=(typeof s.ecgRowsAuto==='boolean')?s.ecgRowsAuto:true; } else { ecgRows=[]; ecgRowsAuto=true; }
     if(typeof ecgTableRender==='function')ecgTableRender();   // reconstruir filas antes de aplicar valores
+    /* SE VACÍA EL FORMULARIO ANTES DE APLICAR.
+
+       Este bucle recorre las claves DEL REGISTRO, no los controles: lo que el registro no
+       trae, queda como estaba. Mientras todo registro venía de recolectarEstado() —que
+       barre todos los inputs— no se notaba, porque vals siempre pisaba todo. Un estudio
+       importado desde Excel trae 17 claves y rompe esa invariante: abrirlo dejaba en
+       pantalla el informe, el resultado, la FEVI y la hemodinámica del paciente anterior,
+       y «🗂 Guardados → 📄 PDF» genera el informe en el acto, sin pasar por ninguna
+       pantalla donde se pudiera ver la mezcla. Verificado: importar a BBB (neg) con AAA
+       (pos) abierto dejaba res-global='pos' y el IMC de AAA. */
+    /* Se excluyen las cuatro páginas que NO son del estudio: #page-config guarda la
+       configuración de la app (institución, ciudad, médicos, módulos activos) y borrarla
+       al abrir un estudio guardado sería peor que el problema; las otras tres son
+       calculadoras y material de consulta. */
+    var _noEstudio='#page-config,#page-calc,#page-ref,#page-trials,#page-lab';
+    document.querySelectorAll('.page input:not([type=file]), .page select, .page textarea').forEach(function(el){
+      if(!el.id||el.closest(_noEstudio))return;
+      if(el.type==='checkbox'||el.type==='radio')el.checked=false;
+      else if(el.tagName==='SELECT')el.selectedIndex=0;
+      else el.value='';
+    });
     if(s.vals)Object.keys(s.vals).forEach(function(id){ var el=document.getElementById(id); if(!el)return; var v=s.vals[id]; if(el.type==='checkbox')el.checked=!!v; else el.value=v; });
+    /* Los campos calculados (IMC, superficie corporal, FC máx. teórica, FC objetivo) son
+       readonly y sólo se recalculan en los oninput de peso/talla/edad. Asignar el value no
+       los dispara, así que un registro que no los traiga —o que traiga peso nuevo con el
+       IMC viejo, como pasa al fusionar desde Excel— los dejaría en un número plausible y
+       equivocado, que es el que se imprime en el PDF. Se recalculan siempre. */
+    if(typeof calcAntro==='function')calcAntro();
+    if(typeof sincronizarSC==='function')sincronizarSC();
+    if(typeof onEdadChange==='function')onEdadChange();
     var _ci=document.getElementById('inf-caso-interes'); if(_ci)_ci.checked=(s.caso_interes==='1'||(s.vals&&s.vals['inf-caso-interes']===true));   // caso de interés
     if(s.bull){ ['basal','low','pico','recup','extra'].forEach(function(k){ bull[k]=Array.isArray(s.bull[k])?s.bull[k].slice():Array(17).fill(1); }); }
+    /* El bull's eye de strain también: applyEstado no lo restauraba y al abrir un estudio
+       desde Guardados quedaba en pantalla el del estudio anterior. Volver a guardar lo
+       metía adentro del estudio abierto, y la auditoría lo contaba como completado. */
+    if(typeof strainBull!=='undefined'){
+      ['basal','pico'].forEach(function(k){
+        strainBull[k]=(s.strainBull&&Array.isArray(s.strainBull[k]))?s.strainBull[k].slice():Array(17).fill(0);
+      });
+      if(typeof initStrainBulls==='function')initStrainBulls();
+    }
     if(Array.isArray(s.ecgSlots)){ ecgSlots=s.ecgSlots.map(function(x){return {name:x.name,img:x.img};}); ecgSlotsAuto=(typeof s.ecgSlotsAuto==='boolean')?s.ecgSlotsAuto:!ecgSlots.some(function(x){return x&&x.img;}); }
     if(Array.isArray(s.ettSlots)){ ettSlots=s.ettSlots.map(function(x){return {img:x.img,txt:x.txt};}); }
     if(s.ettPerPage)ettPerPage=s.ettPerPage;
-    if(s.dobuData&&typeof dobuData!=='undefined'){ Object.keys(dobuData).forEach(function(k){delete dobuData[k];}); Object.assign(dobuData,s.dobuData); }
-    if(s.peState&&typeof peState!=='undefined'){ Object.keys(peState).forEach(function(k){delete peState[k];}); Object.assign(peState,s.peState); }
-    if(s.bvInclude&&typeof bvInclude!=='undefined'){ Object.keys(bvInclude).forEach(function(k){delete bvInclude[k];}); Object.assign(bvInclude,s.bvInclude); }
-    if(s.bullExtra&&typeof bullExtra!=='undefined'){ Object.assign(bullExtra,s.bullExtra); }
+    /* Se CLONA lo que entra. Object.assign copia un solo nivel: dobuData[i] y
+       peState.stages[i] son objetos, así que sin clonar el formulario quedaría escribiendo
+       adentro del estudio guardado —tocar una celda de la tabla de dobutamina modificaría
+       el estudio en el archivo antes de que nadie apriete «guardar», y sin poder cancelar. */
+    if(s.dobuData&&typeof dobuData!=='undefined'){ Object.keys(dobuData).forEach(function(k){delete dobuData[k];}); Object.assign(dobuData,_eeClonEstado(s.dobuData)); }
+    if(s.peState&&typeof peState!=='undefined'){ Object.keys(peState).forEach(function(k){delete peState[k];}); Object.assign(peState,_eeClonEstado(s.peState)); }
+    if(s.bvInclude&&typeof bvInclude!=='undefined'){ Object.keys(bvInclude).forEach(function(k){delete bvInclude[k];}); Object.assign(bvInclude,_eeClonEstado(s.bvInclude)); }
+    if(s.bullExtra&&typeof bullExtra!=='undefined'){ Object.assign(bullExtra,_eeClonEstado(s.bullExtra)); }
     if(typeof peInit==='function')peInit();
     if(typeof bvBuild==='function')bvBuild();
     if(typeof ecgImgRender==='function')ecgImgRender();
@@ -4951,16 +5047,51 @@ function ebTextoInforme(){
           +'</div>';
       }).join('');
     }
+    /* El contador dice lo mismo que se ve en la lista, y el Excel exporta TODOS: se
+       aclara para que nadie exporte creyendo que se lleva sólo lo filtrado. */
+    var cont=document.getElementById('eeg-contador');
+    if(cont){
+      cont.textContent = (filt.length===R.length) ? (R.length+(R.length===1?' estudio':' estudios'))
+                                                  : ('Mostrando '+filt.length+' de '+R.length);
+      cont.title = (filt.length===R.length)?'':'El Excel exporta los '+R.length+', no sólo los filtrados';
+    }
     var bar=document.getElementById('eeg-comparebar');
     if(bar){ bar.innerHTML = (_sel.length? '<div class="eea-note" style="margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>'+_sel.length+'/2 seleccionados para comparar.</span>'+(_sel.length===2?'<button class="btn btn-primary" style="padding:5px 12px" onclick="eeComparar()">🔬 Comparar estudios</button>':'')+'</div>' : ''); }
   };
 
   window.eeGuardadosOpen=function(){
     var body=document.getElementById('ee-guardados-body'); if(!body)return;
+    /* El velo vive en el <body>, así que este innerHTML se lleva los menús pero NO al velo:
+       quedaría una capa invisible a pantalla completa comiéndose todos los clics de la app
+       una vez cerrado el modal, sin nada visible que explique por qué no responde. */
+    eeioCerrar();
     body.innerHTML=
       '<div class="eeg-top">'
         +'<button class="btn btn-primary" onclick="eeSaveStudy(true)">➕ Guardar como nuevo</button>'
         +(_editId?'<button class="btn btn-teal" onclick="eeSaveStudy(false)">♻️ Actualizar este estudio</button><span class="eeg-editing">Editando un estudio guardado</span>':'')
+      +'</div>'
+      /* Las dos vías de datos del CONJUNTO guardado. No se mezclan acá el ⬇️/⬆️ del
+         encabezado ni el «backup JSON» de Ajustes: esos trabajan sobre el estudio ABIERTO
+         en el formulario, no sobre la lista, y tenerlos en el mismo menú invita a usar
+         «importar» esperando que agregue estudios cuando en realidad pisa el que está en
+         pantalla. */
+      +'<div class="eeg-io">'
+        +'<span id="eeg-contador" class="eeg-cont"></span>'
+        +'<div class="eeio-wrap">'
+          +'<button class="btn btn-ghost eeio-btn" id="eeio-b-exp" aria-haspopup="true" aria-expanded="false" onclick="eeioToggle(event,\'exp\')">📤 Exportar ▾</button>'
+          +'<div class="eeio-menu" id="eeio-m-exp" role="menu">'
+            +'<button role="menuitem" onclick="eeioCerrar();eeExportarXLSX()">📊 Excel (.xlsx)</button>'
+            +'<button role="menuitem" onclick="eeioCerrar();exportarEcoEstresAnalytics()">📈 Para Analytics (.json)</button>'
+          +'</div>'
+        +'</div>'
+        +'<div class="eeio-wrap">'
+          +'<button class="btn btn-ghost eeio-btn" id="eeio-b-imp" aria-haspopup="true" aria-expanded="false" onclick="eeioToggle(event,\'imp\')">📥 Importar ▾</button>'
+          +'<div class="eeio-menu" id="eeio-m-imp" role="menu">'
+            +'<button role="menuitem" onclick="eeioCerrar();eeioSubXLSX()">📊 Excel (.xlsx)</button>'
+            +'<button role="menuitem" onclick="eeioCerrar();eePlantillaXLSX()">📋 Descargar plantilla Excel</button>'
+          +'</div>'
+        +'</div>'
+        +'<input type="file" id="eeio-file-xlsx" accept=".xlsx,.xls" style="display:none" onchange="eeImportarXLSX(this.files[0]);this.value=\'\'">'
       +'</div>'
       +'<div class="eeg-filters">'
         +'<input id="eeg-fnom" placeholder="Filtrar por paciente o HC…" oninput="eeGuardadosList()">'
@@ -4973,7 +5104,637 @@ function ebTextoInforme(){
     eeGuardadosList();
     document.getElementById('ee-guardados').classList.add('open');
   };
-  window.eeGuardadosClose=function(){ var m=document.getElementById('ee-guardados'); if(m)m.classList.remove('open'); };
+  /* ══════════════════════════════════════════════════════════════════════════════
+     PLANTILLA E IMPORTACIÓN DESDE EXCEL
+
+     Misma lógica que el importador de EcoSmart: validación por fila con el número de
+     fila de Excel, vista previa antes de escribir nada y deduplicación compartida.
+
+     DIFERENCIA IMPORTANTE con EcoSmart y ErgoSmart, y la razón de que la planilla sea
+     de identificación y resumen: acá el registro no es plano. Los datos del paciente
+     viven en `vals` indexados por el id del control, el id es una cadena (`rep_…`) y el
+     núcleo clínico del estudio es el bull's eye —5 etapas × 17 segmentos—, que no entra
+     en una fila legible. Un estudio importado por planilla entra SIN motilidad: el
+     bull's eye queda en «No eval.» y hay que abrirlo para cargarlo.
+
+     Se rellena con 0 («No eval.») y NO con 1 («Normal»), que es el valor por defecto
+     del formulario: poner «Normal» en los 17 segmentos sería afirmar un hallazgo que el
+     archivo no trae. La vista previa y la hoja de Instrucciones lo dicen, porque la
+     auditoría del Laboratorio cuenta estos estudios y hay que saber que están a medias.
+     ══════════════════════════════════════════════════════════════════════════════ */
+  var EE_XLS_MAP = [
+    ['ID',                    '@id',            'id'],
+    ['Nombre',                'p-nombre',       'texto'],
+    ['HC',                    'p-hc',           'texto'],
+    ['Fecha estudio',         'p-fecha',        'fecha'],
+    ['Fecha solicitud',       'p-fecha-sol',    'fecha'],
+    ['Edad',                  'p-edad',         'num:0:120'],
+    ['Sexo',                  'p-sexo',         'vocab:sexo'],
+    ['Peso (kg)',             'p-peso',         'num:1:400'],
+    ['Talla (cm)',            'p-talla',        'num:30:260'],
+    ['Médico solicitante',    'p-medico',       'texto'],
+    ['Centro',                'p-centro',       'texto'],
+    ['Indicación',            'p-ind',          'texto'],
+    ['Tipo de estrés',        'p-estres',       'vocab:estres'],
+    ['Contraste',             'p-contraste',    'vocab:contraste'],
+    ['Medicación relevante',  'p-medicacion',   'texto'],
+    ['Betabloqueantes susp.', 'p-bb',           'vocab:bb'],
+    /* El resultado va a res-global, que es el campo CANÓNICO: de ahí leen la distribución
+       de la auditoría (4098), el score ABCD-FLPR (4197), el comparativo (4865), la ficha
+       del estudio (4683) y el guard del PDF (6771). `informe-result` es sólo el espejo del
+       selector grande de la pestaña Informe y se sincroniza por onchange, así que
+       escribirlo desde el importador no dispara nada; peor todavía, entrar a la pestaña
+       Informe llama a informeResultSync() y lo pisa con res-global. Un estudio importado
+       como positivo quedaba, para toda la app, sin resultado. Se escriben los dos. */
+    ['Resultado',             'res-global',     'vocab:result', 'informe-result'],
+    ['Informe',               'informe-txt',    'texto'],
+    ['Caso de interés',       '@caso_interes',  'bin01']
+  ];
+  /* Vocabularios: se acepta el CÓDIGO que guarda el control y también la etiqueta que
+     ve el médico. Guardar la etiqueta rompería los filtros y la auditoría, que comparan
+     contra el código. */
+  var EE_XLS_VOCAB = {
+    sexo:      {'m':'M','masculino':'M','f':'F','femenino':'F'},
+    estres:    {'ejercicio':'ejercicio','esfuerzo':'ejercicio','esfuerzo fisico':'ejercicio',
+                'dobutamina':'dobutamina','dipiridamol':'dipiridamol','adenosina':'adenosina'},
+    contraste: {'no':'no','sin contraste':'no','si':'si','con contraste':'si','con contraste (realce endocardico)':'si'},
+    bb:        {'':'','si':'si','si - 48h antes':'si','no':'no','no suspendidos':'no','no aplica':''},
+    result:    {'pos':'pos','positivo':'pos','positivo para isquemia':'pos',
+                'neg':'neg','negativo':'neg','negativo para isquemia':'neg',
+                'inc':'inc','indeterminado':'inc','indeterminado / no concluyente':'inc','no concluyente':'inc',
+                'via':'via','viabilidad presente':'via','novia':'novia','sin viabilidad':'novia'}
+  };
+  /* La vista previa muestra la etiqueta que ve el médico, no el código: una columna que
+     dice «pos» obliga a traducir mentalmente justo en el momento de decidir si confirma. */
+  var EE_RES_LABEL = {pos:'Positivo', neg:'Negativo', inc:'Indeterminado',
+                      via:'Viabilidad presente', novia:'Sin viabilidad'};
+  var EE_XLS_OPCIONES = {
+    sexo:'M / F', estres:'ejercicio / dobutamina / dipiridamol / adenosina',
+    contraste:'si / no', bb:'si / no / vacío',
+    result:'pos / neg / inc / via / novia'
+  };
+  var EE_XLS_EJEMPLO='— FILA DE EJEMPLO: borrala antes de importar —';
+  var EE_XLS_LARGO_MAX=4000;
+  function _eeNormCab(h){ return String(h).trim().replace(/\s+/g,' ').toLowerCase(); }
+  function _eeNorm(v){
+    return String(v==null?'':v).trim().toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');
+  }
+  /* Número: acepta coma o punto decimal y RECHAZA cualquier otra cosa. Sin el rechazo,
+     parseFloat('70 kg') devuelve 70 y el error entra como dato bueno. */
+  function _eeXlsNum(v){
+    if(v===null||v===undefined||String(v).trim()==='')return null;
+    if(typeof v==='number')return isFinite(v)?v:NaN;
+    var t=String(v).trim().replace(/\s/g,'');
+    if(!/^-?\d+(?:[.,]\d+)?$/.test(t))return NaN;
+    var n=parseFloat(t.replace(',','.'));
+    return isNaN(n)?NaN:n;
+  }
+  /* Fecha: ISO, DD/MM/AAAA y el serial de Excel, VALIDANDO que exista. Sin validar, un
+     archivo hecho en un Excel en inglés entrega "3/15/2026" y quedaría "2026-15-03": el
+     filtro por fecha de Guardados compara la cadena exacta y el estudio sería
+     inencontrable. */
+  function _eeXlsFecha(v){
+    if(v===null||v===undefined||String(v).trim()==='')return '';
+    function arma(y,m,d){
+      if(!(y>=1900&&y<=2200&&m>=1&&m<=12&&d>=1&&d<=31))return null;
+      var dt=new Date(y,m-1,d);
+      if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d)return null;  // 31 de febrero
+      return y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    }
+    if(v instanceof Date&&!isNaN(v))return arma(v.getFullYear(),v.getMonth()+1,v.getDate());
+    if(typeof v==='number'&&isFinite(v)){
+      var d2=new Date(Date.UTC(1899,11,30)+v*86400000);
+      return isNaN(d2)?null:arma(d2.getUTCFullYear(),d2.getUTCMonth()+1,d2.getUTCDate());
+    }
+    var t=String(v).trim(), m2;
+    m2=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:\D|$)/);
+    if(m2)return arma(+m2[1],+m2[2],+m2[3]);
+    m2=t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\D|$)/);
+    if(m2){
+      /* AMBIGUA: «3/5/2026» es el 5 de marzo en un Excel en español y el 3 de mayo en uno
+         en inglés, y no hay nada en el archivo que lo diga. Adivinar DD/MM corría la fecha
+         dos meses sin ningún aviso, y esa fecha va al PDF, es media clave de deduplicación
+         y es la clave del filtro por fecha de Guardados (comparación de cadena exacta):
+         una fecha corrida crea un duplicado en vez de actualizar y deja el estudio
+         inencontrable. Sólo se acepta cuando el orden es inequívoco. */
+      var a=+m2[1], b=+m2[2], y=+m2[3];
+      if(a>12&&b>12)return null;                  // ninguno puede ser mes
+      if(a<=12&&b<=12&&a!==b)return undefined;    // undefined = AMBIGUA (null = inválida)
+      if(a>12)return arma(y,b,a);                 // A es el día → DD/MM
+      if(b>12)return arma(y,a,b);                 // B es el día → MM/DD
+      return arma(y,a,b);                         // a===b: da igual el orden
+    }
+    return null;
+  }
+  /* Devuelve '1', '0' o '' (columna ausente/vacía). El 0 explícito NO puede colapsarse con
+     el vacío: si lo hiciera, el ida y vuelta no podría quitar una marca de caso de interés
+     —exportás con 0, reimportás, y la estrella sigue puesta—. null = valor no entendido. */
+  function _eeXlsBin(v){
+    var t=_eeNorm(v);
+    if(t==='')return '';
+    if(t==='1'||t==='si'||t==='x'||t==='true')return '1';
+    if(t==='0'||t==='no'||t==='false')return '0';
+    return null;
+  }
+  function _eeXlsVocab(nombre,v){
+    var voc=EE_XLS_VOCAB[nombre]; if(!voc)return null;
+    var n=_eeNorm(v);
+    if(n==='')return '';
+    if(Object.prototype.hasOwnProperty.call(voc,n))return voc[n];
+    var corta=n.split('(')[0].trim();             // "con contraste (realce…)" → "con contraste"
+    return Object.prototype.hasOwnProperty.call(voc,corta)?voc[corta]:null;
+  }
+  /* Identidad para deduplicar: HC + fecha cuando hay HC, si no nombre + fecha. Sólo por
+     nombre+fecha, dos pacientes con el mismo apellido estudiados el mismo día contarían
+     como el mismo estudio y uno pisaría al otro. */
+  /* «4.512.887», «4512887» y «4.512.887 » son el mismo HC. Una sola función para que la
+     clave de deduplicación y la comparación de discrepancia no puedan divergir. */
+  function _eeNormHC(v){ return String(v==null?'':v).trim().replace(/[.\-\s]/g,'').toLowerCase(); }
+  function _eeDupKeys(r){
+    var f=String(F(r,'p-fecha')||'').trim();
+    var hc=_eeNormHC(F(r,'p-hc'));
+    var nom=String(F(r,'p-nombre')||'').trim().toLowerCase();
+    var ks=[];
+    if(hc) ks.push('H:'+hc+'|'+f);
+    if(nom)ks.push('N:'+nom+'|'+f);
+    return ks;
+  }
+  /* IDENTIDAD ÚNICA de una fila, para detectar repeticiones DENTRO del archivo. Distinta de
+     _eeDupKeys, que devuelve las dos claves porque al buscar contra lo guardado hay que
+     probar las dos (un estudio viejo puede no tener HC). Acá, en cambio, usar las dos hace
+     chocar entre sí a dos homónimas con HC distinto estudiadas el mismo día —que es
+     justamente el caso legítimo que hay que dejar pasar—: si la fila trae HC, manda el HC. */
+  function _eeIdent(r){
+    var f=String(F(r,'p-fecha')||'').trim();
+    var hc=_eeNormHC(F(r,'p-hc'));
+    if(hc)return 'H:'+hc+'|'+f;
+    var nom=String(F(r,'p-nombre')||'').trim().toLowerCase();
+    return nom?('N:'+nom+'|'+f):null;
+  }
+  function _eeBullVacio(){
+    /* 0 = «No eval.» en SEG_LABELS. El formulario arranca en 1 («Normal»), pero un
+       estudio que llega por planilla no trae motilidad: decir «Normal» en los 17
+       segmentos sería inventar el hallazgo central del estudio. */
+    function z(){ var a=[],i; for(i=0;i<17;i++)a.push(0); return a; }
+    return {basal:z(),low:z(),pico:z(),recup:z(),extra:z()};
+  }
+
+  /* Desplegables de Guardados. El velo (#eeio-ov) va al <body> y NO adentro de .eeg-io,
+     porque eeGuardadosList() reescribe ese bloque: un velo dentro del HTML reescrito
+     sobrevive como capa invisible a pantalla completa que se come todos los clics. Por lo
+     mismo se cierra el menú antes de cualquier acción que redibuje. */
+  window.eeioCerrar=function(){
+    ['exp','imp'].forEach(function(k){
+      var m=document.getElementById('eeio-m-'+k), b=document.getElementById('eeio-b-'+k);
+      if(m){ m.classList.remove('open'); m.style.transform=''; }
+      if(b) b.setAttribute('aria-expanded','false');
+    });
+    var ov=document.getElementById('eeio-ov'); if(ov)ov.remove();
+  };
+  function eeioEncuadrar(m){
+    /* Si el menú se sale por el borde, se DESPLAZA en vez de cambiarlo de lado: anclarlo
+       a la derecha lo mandaría debajo del otro botón en pantallas angostas. */
+    m.style.transform='';
+    var M=8, W=document.documentElement.clientWidth||window.innerWidth;
+    var r=m.getBoundingClientRect(), dx=0;
+    if(r.left<M)dx=M-r.left; else if(r.right>W-M)dx=(W-M)-r.right;
+    if(dx)m.style.transform='translateX('+Math.round(dx)+'px)';
+  }
+  window.eeioToggle=function(ev,cual){
+    if(ev&&ev.stopPropagation)ev.stopPropagation();
+    var m=document.getElementById('eeio-m-'+cual); if(!m)return;
+    var abierto=m.classList.contains('open');
+    eeioCerrar();
+    if(abierto)return;
+    m.classList.add('open');
+    var b=document.getElementById('eeio-b-'+cual); if(b)b.setAttribute('aria-expanded','true');
+    eeioEncuadrar(m);
+    var ov=document.createElement('div'); ov.id='eeio-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:8990;background:transparent';
+    ov.addEventListener('click',function(){ eeioCerrar(); });
+    document.body.appendChild(ov);
+  };
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape')eeioCerrar(); });
+  window.eeioSubXLSX=function(){
+    var i=document.getElementById('eeio-file-xlsx'); if(i)i.click();
+  };
+
+  window.eePlantillaXLSX=function(){
+    if(typeof XLSX==='undefined'){ eeToast('❌ Librería Excel (XLSX) no disponible','err'); return; }
+    var headers=EE_XLS_MAP.map(function(m){return m[0];});
+    var ej={'ID':'','Nombre':EE_XLS_EJEMPLO,'HC':'123456','Fecha estudio':'2026-08-30',
+      'Fecha solicitud':'2026-08-20','Edad':'62','Sexo':'M','Peso (kg)':'78','Talla (cm)':'172',
+      'Médico solicitante':'Dr. Pérez','Centro':'Hospital Artigas','Indicación':'Dolor torácico atípico',
+      'Tipo de estrés':'ejercicio','Contraste':'no','Medicación relevante':'Atenolol 50 mg',
+      'Betabloqueantes susp.':'si','Resultado':'neg',
+      'Informe':'Eco estrés negativo para isquemia inducible.','Caso de interés':'0'};
+    var ws=XLSX.utils.aoa_to_sheet([headers,headers.map(function(h){return ej[h]!==undefined?ej[h]:'';})]);
+    ws['!cols']=headers.map(function(h){return {wch:Math.min(32,Math.max(11,h.length+3))};});
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Estudios');
+    var inst=[
+      ['PLANTILLA DE IMPORTACIÓN — EcoEstrés Smart'],[''],
+      ['1. Escribí un estudio por fila en la hoja «Estudios».'],
+      ['2. BORRÁ la fila de ejemplo antes de importar (la que dice «FILA DE EJEMPLO»).'],
+      ['3. Guardá como .xlsx y usá 📥 Importar → Excel en 🗂 Guardados.'],[''],
+      ['LO MÁS IMPORTANTE'],
+      ['', 'Esta planilla trae la IDENTIFICACIÓN y el RESUMEN del estudio, no la motilidad.'],
+      ['', 'El bull\'s eye (5 etapas × 17 segmentos) NO viaja acá: un estudio importado entra'],
+      ['', 'con los 17 segmentos en «No eval.» y hay que abrirlo para cargar la motilidad.'],
+      ['', 'La auditoría del Laboratorio va a contar estos estudios como guardados, así que'],
+      ['', 'tenelo presente si los usás para indicadores.'],[''],
+      ['COLUMNAS OBLIGATORIAS'],
+      ['Fecha estudio','AAAA-MM-DD. Acepta el formato fecha de Excel y DD/MM/AAAA, pero rechaza'],
+      ['','las ambiguas: «3/5/2026» puede ser 5 de marzo o 3 de mayo según el idioma del Excel'],
+      ['','que la escribió, y adivinar corre la fecha dos meses. Escribila AAAA-MM-DD y listo.'],
+      ['Nombre o HC','Hace falta al menos uno: sin ninguno el estudio no se puede identificar.'],[''],
+      ['CÓMO SE EVITAN LOS DUPLICADOS'],
+      ['','Primero por ID; si no hay ID, por HC + Fecha; si no hay HC, por Nombre + Fecha.'],
+      ['','Si una fila coincide por nombre + fecha pero trae OTRO HC, no se fusiona: se marca'],
+      ['','como error, porque son dos pacientes distintos estudiados el mismo día.'],
+      ['ID','Lo escribe la app al exportar. NO lo edites: si lo cambiás, el estudio entra'],
+      ['','como nuevo en vez de actualizar el que ya estaba. Para altas, dejalo vacío.'],[''],
+      ['VALORES ACEPTADOS'],
+      ['Sexo',EE_XLS_OPCIONES.sexo],
+      ['Tipo de estrés',EE_XLS_OPCIONES.estres],
+      ['Contraste',EE_XLS_OPCIONES.contraste],
+      ['Betabloqueantes susp.',EE_XLS_OPCIONES.bb],
+      ['Resultado',EE_XLS_OPCIONES.result+'  (también acepta el texto largo: «Positivo para isquemia», etc.)'],
+      ['Caso de interés','1 o 0. El 0 explícito quita la estrella; dejar la celda vacía no la toca.'],
+      ['Edad / Peso / Talla','Edad 0–120 · Peso 1–400 kg · Talla 30–260 cm. Fuera de rango se rechaza la fila.'],
+      ['','La talla va en CENTÍMETROS: «1,72» se rechaza con ese aviso, porque en metros daría'],
+      ['','un IMC de 236.000 y una superficie corporal de 0,06 m², que alimenta los indexados.'],
+      ['Texto','Hasta '+EE_XLS_LARGO_MAX+' caracteres por celda.'],[''],
+      ['CAMPOS CALCULADOS'],
+      ['','El IMC, la superficie corporal y la FC máxima teórica NO se importan: los calcula la'],
+      ['','app con el peso, la talla y la edad. Si los escribís en la planilla, se ignoran; y si'],
+      ['','actualizás el peso, la talla o la edad de un estudio que ya existe, se recalculan.']
+    ];
+    var wsI=XLSX.utils.aoa_to_sheet(inst);
+    wsI['!cols']=[{wch:24},{wch:88}];
+    XLSX.utils.book_append_sheet(wb,wsI,'Instrucciones');
+    XLSX.writeFile(wb,'ecoestres_plantilla_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    eeToast('✅ Plantilla descargada','ok');
+  };
+
+  /* Exportar con las MISMAS columnas que la plantilla, para que el ida y vuelta sirva. */
+  window.eeExportarXLSX=function(){
+    if(typeof XLSX==='undefined'){ eeToast('❌ Librería Excel (XLSX) no disponible','err'); return; }
+    var arr=recs();
+    if(!arr.length){ eeToast('⚠️ No hay estudios para exportar','err'); return; }
+    var headers=EE_XLS_MAP.map(function(m){return m[0];});
+    var filas=arr.map(function(r){
+      return EE_XLS_MAP.map(function(m){
+        var campo=m[1];
+        if(campo==='@id')return String(r.id==null?'':r.id);
+        if(campo==='@caso_interes')return String(r.caso_interes||'')==='1'?'1':'0';
+        /* Se lee el canónico y se cae al espejo: los estudios viejos, guardados antes de
+           que la app sincronizara los dos selectores, pueden tener sólo uno de los dos.
+           Sin el fallback la columna Resultado salía vacía en esos, y una planilla con la
+           columna en blanco parece un estudio sin concluir. */
+        var v=F(r,campo);
+        if((v==null||v==='')&&m[3])v=F(r,m[3]);
+        return v==null?'':String(v);
+      });
+    });
+    var ws=XLSX.utils.aoa_to_sheet([headers].concat(filas));
+    /* La columna de ID se fuerza a TEXTO. Acá los id son `rep_…` y Excel ya los trata
+       como texto, pero dejarlo explícito evita que un id futuro que sea sólo numérico
+       salga en notación científica y deje de emparejar al reimportar —que es exactamente
+       lo que pasó en ErgoSmart, donde los id son Date.now(). */
+    for(var rr=1;rr<=filas.length;rr++){
+      var ref=XLSX.utils.encode_cell({c:0,r:rr});
+      if(ws[ref]){ ws[ref].t='s'; ws[ref].z='@'; }
+    }
+    ws['!cols']=headers.map(function(h){return {wch:Math.min(32,Math.max(11,h.length+3))};});
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Estudios');
+    /* Va la MISMA hoja de advertencia que la plantilla. Un archivo llamado
+       «ecoestres_estudios_2026-08-30.xlsx» con 19 columnas y N filas es indistinguible de
+       un respaldo completo. Si se usa para restaurar después de una pérdida, vuelven las
+       identificaciones y se pierden en silencio los 5×17 segmentos de motilidad, las
+       imágenes, el ECG por etapa, el strain y la hemodinámica. */
+    var wsL=XLSX.utils.aoa_to_sheet([
+      ['⚠️ ESTE ARCHIVO NO ES UN RESPALDO COMPLETO'],[''],
+      ['Trae','la identificación del paciente y el resumen del estudio (las 19 columnas de la hoja «Estudios»).'],
+      ['NO trae','el bull\'s eye de motilidad (5 etapas × 17 segmentos), el Bull\'s Eye de strain,'],
+      ['','las imágenes de eco y de ECG, la tabla eco por etapas, la hemodinámica por etapa,'],
+      ['','los datos de dobutamina, el protocolo de esfuerzo ni la FEVI.'],[''],
+      ['Para respaldar todo','usá 📤 Exportar → «Para Analytics (.json)», que sí lleva el estudio completo.'],[''],
+      ['Si reimportás este archivo','los estudios que ya existen se actualizan sin tocarles la motilidad;'],
+      ['','los que no existan entran con el bull\'s eye en «No eval.» y hay que completarlos a mano.']
+    ]);
+    wsL['!cols']=[{wch:24},{wch:92}];
+    XLSX.utils.book_append_sheet(wb,wsL,'LEEME');
+    XLSX.writeFile(wb,'ecoestres_estudios_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    eeToast('✅ Excel exportado — '+arr.length+' estudios (identificación y resumen; sin motilidad ni imágenes)','ok');
+  };
+
+  var _eeImpDatos=null;
+  window.eeImportarXLSX=function(file){
+    if(!file)return;
+    if(typeof XLSX==='undefined'){ eeToast('❌ Librería Excel (XLSX) no disponible','err'); return; }
+    var reader=new FileReader();
+    reader.onerror=function(){ eeToast('❌ No se pudo leer el archivo','err'); };
+    reader.onload=function(e){
+      var wb;
+      try{ wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true}); }
+      catch(err){ eeToast('❌ El archivo no se pudo abrir como Excel','err'); return; }
+      /* La hoja se busca por NOMBRE: la plantilla trae además «Instrucciones», y si
+         alguien reordena las pestañas se importarían sus filas de texto como estudios. */
+      var nomHoja=wb.SheetNames.find(function(n){return /estudios/i.test(n);})||wb.SheetNames[0];
+      var ws=wb.Sheets[nomHoja];
+      if(!ws){ eeToast('❌ El archivo no tiene ninguna hoja','err'); return; }
+      var filas=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false,blankrows:false});
+      /* raw:false devuelve el texto YA FORMATEADO con el formato de número de la celda, no
+         el valor. Una celda de tipo fecha de Excel llega como «5/2/26» —formato local, año
+         de dos dígitos—, así que las ramas de Date y de serial de _eeXlsFecha eran código
+         muerto y una fecha escrita normalmente en Excel se rechazaba, justo lo que las
+         Instrucciones prometen aceptar. Se guarda aparte el valor crudo de las columnas de
+         fecha, que para t==='d' es un Date de verdad. */
+      var crudas=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true,blankrows:false});
+      /* SheetJS es muy tolerante: a un archivo que no es Excel le devuelve igual un libro
+         con una hoja vacía en vez de tirar error. Decir sólo «la hoja no tiene filas»
+         manda a buscar el problema adentro de la planilla cuando lo más probable es que
+         el archivo no sea el que se cree. */
+      if(!filas.length){ eeToast('⚠️ La hoja «'+nomHoja+'» no tiene filas de datos — ¿es un .xlsx guardado desde Excel?','err'); return; }
+      if(filas.length>1000&&!confirm('El archivo tiene '+filas.length+' filas. Procesarlo puede tardar y la pantalla va a quedar sin responder unos segundos.\n\n¿Continuar?'))return;
+
+      /* Encabezados NORMALIZADOS: "HC " con un espacio de más no matchea y la columna se
+         descartaría en silencio — y perder justo la de HC degrada la deduplicación a
+         nombre+fecha. */
+      var porNorm=new Map();
+      Object.keys(filas[0]).forEach(function(h){ var n=_eeNormCab(h); if(!porNorm.has(n))porNorm.set(n,h); });
+      var conocidas=EE_XLS_MAP.filter(function(m){return porNorm.has(_eeNormCab(m[0]));})
+        .map(function(m){return [porNorm.get(_eeNormCab(m[0])),m[1],m[2],m[0],m[3]||null];});
+      if(!conocidas.length){ eeToast('❌ Ninguna columna reconocida — usá «📋 Plantilla Excel»','err'); return; }
+
+      var existentes=recs();
+      var porId=new Map();
+      existentes.forEach(function(x,i){ if(x&&x.id!=null)porId.set(String(x.id),i); });
+      var keys=new Map(), repetidosPrevios=new Set();
+      existentes.forEach(function(x,i){ _eeDupKeys(x).forEach(function(k){
+        if(keys.has(k))repetidosPrevios.add(k); else keys.set(k,i); }); });
+
+      var ok=[], errores=[], vistas=new Map(), ejemplos=0;
+      filas.forEach(function(row,i){
+        var nFila=i+2;   // +1 encabezado, +1 porque Excel numera desde 1
+        var colNom=porNorm.get('nombre');
+        var nombreCrudo=String(colNom!=null&&row[colNom]!=null?row[colNom]:'').trim();
+        if(nombreCrudo.indexOf('FILA DE EJEMPLO')>=0||nombreCrudo===EE_XLS_EJEMPLO){ ejemplos++; return; }
+        if(conocidas.every(function(c){return String(row[c[0]]==null?'':row[c[0]]).trim()==='';}))return;
+
+        var errs=[], vals={}, idExcel=null, casoInteres='';
+        conocidas.forEach(function(c){
+          var colReal=c[0], campo=c[1], tipo=c[2], colVis=c[3], espejo=c[4];
+          var bruto=row[colReal];
+          var vacio=(bruto===null||bruto===undefined||String(bruto).trim()==='');
+          if(tipo==='id'){ if(!vacio)idExcel=String(bruto).trim(); return; }
+          if(tipo==='bin01'){
+            var b=_eeXlsBin(bruto);
+            if(b===null){ errs.push('«'+colVis+'»: "'+String(bruto).slice(0,20)+'" no es 0 ni 1'); return; }
+            casoInteres=b; return;
+          }
+          if(tipo.indexOf('num')===0){
+            if(vacio)return;
+            var n=_eeXlsNum(bruto);
+            if(isNaN(n)){ errs.push('«'+colVis+'»: "'+String(bruto).slice(0,20)+'" no es un número'); return; }
+            /* Rango de plausibilidad. Cargando a mano, un disparate se ve al instante
+               porque el IMC se recalcula al lado en pantalla; por importación no hay ese
+               lazo. La talla en metros es el error clásico de planilla: 1,72 en vez de 172
+               da IMC 236.000 y superficie corporal 0,06 m², y esa SC alimenta la masa VI y
+               el volumen AI indexados, que sí se imprimen en el informe. */
+            var lim=tipo.split(':');
+            if(lim.length===3){
+              var lo=+lim[1], hi=+lim[2];
+              if(n<lo||n>hi){
+                var extra=(campo==='p-talla'&&n>=0.5&&n<=3)?' — parece estar en metros y la columna es en centímetros':'';
+                errs.push('«'+colVis+'»: '+n+' está fuera de rango ('+lo+'–'+hi+')'+extra); return;
+              }
+            }
+            vals[campo]=String(n); return;
+          }
+          if(tipo==='fecha'){
+            /* Se prueba primero el valor crudo: si Excel guardó la celda como fecha, ahí
+               hay un Date sin ambigüedad de orden ni de siglo. El texto formateado es el
+               plan B, para las planillas donde la fecha se escribió como texto. */
+            var cr=(crudas[i]||{})[colReal];
+            var f=(cr instanceof Date||typeof cr==='number')?_eeXlsFecha(cr):_eeXlsFecha(bruto);
+            if(f===undefined){ errs.push('«'+colVis+'»: "'+String(bruto).slice(0,20)+'" es ambigua — puede ser día/mes o mes/día. Escribila como AAAA-MM-DD'); return; }
+            if(f===null){ errs.push('«'+colVis+'»: "'+String(bruto).slice(0,20)+'" no es una fecha (usá AAAA-MM-DD)'); return; }
+            if(f!=='')vals[campo]=f; return;
+          }
+          if(tipo.indexOf('vocab:')===0){
+            if(vacio)return;
+            var voc=tipo.slice(6);
+            var vv=_eeXlsVocab(voc,bruto);
+            if(vv===null){ errs.push('«'+colVis+'»: "'+String(bruto).slice(0,20)+'" no es un valor válido ('+EE_XLS_OPCIONES[voc]+')'); return; }
+            if(vv!==''){ vals[campo]=vv; if(espejo)vals[espejo]=vv; }   // el espejo, o la pestaña Informe lo pisa
+            return;
+          }
+          if(vacio)return;
+          var t=String(bruto).trim();
+          if(t.length>EE_XLS_LARGO_MAX){ errs.push('«'+colVis+'»: son '+t.length+' caracteres y el máximo es '+EE_XLS_LARGO_MAX); return; }
+          vals[campo]=t;
+        });
+
+        var reg={vals:vals, caso_interes:casoInteres};
+        if(!vals['p-fecha']&&!errs.some(function(x){return x.indexOf('«Fecha estudio»')>=0;}))errs.push('falta «Fecha estudio»');
+        if(!vals['p-nombre']&&!vals['p-hc'])errs.push('falta «Nombre» y «HC»: sin uno de los dos el estudio no se puede identificar');
+        if(errs.length){ errores.push({fila:nFila,nombre:nombreCrudo||'(sin nombre)',errs:errs}); return; }
+
+        var mias=_eeDupKeys(reg);
+        var ident=_eeIdent(reg);
+        if(ident&&vistas.has(ident)){ errores.push({fila:nFila,nombre:nombreCrudo||vals['p-hc'],errs:['repite la identidad de la fila '+vistas.get(ident)+' (mismo '+(ident.charAt(0)==='H'?'HC':'nombre')+' y misma fecha)']}); return; }
+
+        var idx=-1, via='';
+        if(idExcel&&porId.has(idExcel)){ idx=porId.get(idExcel); via='ID'; }
+        if(idx<0){
+          for(var q=0;q<mias.length;q++){
+            var k2=mias[q];
+            if(keys.has(k2)){
+              if(repetidosPrevios.has(k2)){
+                errores.push({fila:nFila,nombre:nombreCrudo||vals['p-hc'],
+                  errs:['ya hay MÁS DE UN estudio guardado con esta identidad: actualizar tocaría sólo uno. Resolvelo en Guardados antes de importar']});
+                return;
+              }
+              /* Si el emparejamiento fue por NOMBRE y los dos tienen HC pero distinto, son
+                 dos pacientes: dos homónimos estudiados el mismo día, que en un servicio
+                 chico pasa. Fusionar dejaría un registro con la motilidad de una y la
+                 identificación y el informe de la otra —la motilidad sobrevive porque el
+                 commit fusiona en vez de reemplazar—. El HC es el dato que los distingue,
+                 así que si discrepa manda él y la fila no se toca. */
+              var cand=existentes[keys.get(k2)];
+              var hcFila=String(vals['p-hc']||'').trim(), hcCand=String(F(cand,'p-hc')||'').trim();
+              if(k2.charAt(0)==='N' && hcFila && hcCand && _eeNormHC(hcFila)!==_eeNormHC(hcCand)){
+                errores.push({fila:nFila,nombre:nombreCrudo||hcFila,
+                  errs:['coincide por nombre + fecha con un estudio guardado, pero el HC no coincide (planilla «'+hcFila+'» / guardado «'+hcCand+'»). Si son la misma persona, corregí el HC; si son dos pacientes distintos, cambiá la fecha o el nombre']});
+                return;
+              }
+              idx=keys.get(k2); via=(k2.charAt(0)==='H'?'HC + fecha':'nombre + fecha'); break;
+            }
+          }
+        }
+        if(idExcel&&idx<0)via='ID no encontrado — entra como nuevo';
+        /* La identidad se reclama recién ACÁ: si se hiciera antes, una fila rechazada por
+           HC discrepante se llevaría la clave y la fila siguiente —la correcta— saldría
+           rechazada como repetida. */
+        if(ident)vistas.set(ident,nFila);
+        ok.push({reg:reg,fila:nFila,idx:idx,via:via,idExcel:idExcel});
+      });
+
+      if(!ok.length&&!errores.length){
+        eeToast(ejemplos?'⚠️ La planilla sólo tenía la fila de ejemplo: reemplazala por tus estudios'
+                        :'⚠️ No hay filas con datos para importar','err');
+        return;
+      }
+      _eeImpDatos={filas:ok,errores:errores,ejemplos:ejemplos,hoja:nomHoja};
+      eeImpRender();
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  function eeImpRender(){
+    var d=_eeImpDatos; if(!d)return;
+    /* La cabecera y la columna «Acción» leen el MODO elegido, no el máximo teórico. Antes
+       decían «12 actualizan uno existente» mientras el radio venía en «Omitir», así que el
+       médico leía una cosa, apretaba Importar y recibía «0 actualizados · 12 sin cambios».
+       La interfaz afirmaba una acción que el código no iba a hacer. */
+    var modo=d.modo||'omitir';
+    var nuevos=d.filas.filter(function(f){return f.idx<0;}).length;
+    var repes=d.filas.length-nuevos;
+    var aEscribir=nuevos+(modo==='actualizar'?repes:0);
+    var ov=document.getElementById('ee-imp-ov');
+    if(!ov){ ov=document.createElement('div'); ov.id='ee-imp-ov'; ov.className='ee-modal';
+      document.body.appendChild(ov); }
+    var prev=d.filas.slice(0,12).map(function(f){
+      var accion = f.idx<0 ? ('nuevo'+(f.via?' — '+esc(f.via):''))
+                 : (modo==='actualizar' ? ('actualiza (por '+esc(f.via)+')')
+                                        : ('<span style="color:var(--amber,#F59E0B)">se omite — ya existe (por '+esc(f.via)+')</span>'));
+      return '<tr><td style="padding:3px 6px">'+f.fila+'</td>'+
+        '<td style="padding:3px 6px">'+esc(f.reg.vals['p-nombre']||'—')+'</td>'+
+        '<td style="padding:3px 6px">'+esc(f.reg.vals['p-fecha']||'—')+'</td>'+
+        '<td style="padding:3px 6px">'+esc(f.reg.vals['p-hc']||'—')+'</td>'+
+        '<td style="padding:3px 6px">'+esc(EE_RES_LABEL[f.reg.vals['res-global']]||'—')+'</td>'+
+        '<td style="padding:3px 6px;font-size:11px;color:var(--text2)">'+accion+'</td></tr>';
+    }).join('');
+    ov.innerHTML='<div class="ee-modal-box" style="max-width:780px">'+
+      '<h3>📥 Importar desde Excel <button class="x" aria-label="Cerrar" onclick="eeImpCerrar()">✕</button></h3>'+
+      '<div style="font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:10px">Hoja «'+esc(d.hoja)+'». Todavía no se escribió nada.'+
+        (d.ejemplos?' Se salteó la fila de ejemplo de la plantilla.':'')+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:12px">'+
+        '<span style="background:rgba(34,197,94,.15);padding:4px 10px;border-radius:6px">'+nuevos+' nuevos</span>'+
+        (repes?'<span style="background:rgba(59,130,246,.15);padding:4px 10px;border-radius:6px">'+repes+' ya existen · '+(modo==='actualizar'?'se actualizan':'se omiten')+'</span>':'')+
+        (d.errores.length?'<span style="background:rgba(239,68,68,.15);padding:4px 10px;border-radius:6px">'+d.errores.length+' con error</span>':'')+
+      '</div>'+
+      '<div class="eea-note" style="border-left:3px solid var(--amber,#F59E0B)">⚠️ La planilla no trae la motilidad: los estudios <b>nuevos</b> entran con el bull\'s eye en «No eval.» en las 5 etapas y hay que abrirlos para cargarla. Al <b>actualizar</b> uno existente, su motilidad NO se toca.</div>'+
+      (d.filas.length?'<div style="overflow:auto;max-height:240px;border:1px solid var(--border);border-radius:8px;margin-top:10px">'+
+        '<table style="width:100%;border-collapse:collapse;font-size:12px">'+
+        '<thead><tr style="color:var(--text2);text-align:left"><th style="padding:4px 6px">Fila</th><th style="padding:4px 6px">Nombre</th>'+
+        '<th style="padding:4px 6px">Fecha</th><th style="padding:4px 6px">HC</th><th style="padding:4px 6px">Resultado</th><th style="padding:4px 6px">Acción</th></tr></thead>'+
+        '<tbody>'+prev+'</tbody></table></div>'+
+        (d.filas.length>12?'<div style="font-size:11px;color:var(--text2);margin-top:6px">Se muestran las primeras 12 de '+d.filas.length+'. Se importan todas.</div>':''):'')+
+      (d.errores.length?'<div style="margin-top:12px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);border-radius:8px;padding:10px">'+
+        '<b style="color:var(--red,#DC2626)">'+d.errores.length+' fila(s) con problemas — no se van a importar</b>'+
+        '<ul style="margin:6px 0 0 18px;font-size:12px;line-height:1.55;max-height:180px;overflow:auto">'+
+        d.errores.slice(0,80).map(function(e){return '<li><b>Fila '+e.fila+'</b> ('+esc(e.nombre)+'): '+e.errs.map(esc).join('; ')+'</li>';}).join('')+
+        (d.errores.length>80?'<li>… y '+(d.errores.length-80)+' más</li>':'')+'</ul></div>':'')+
+      '<div style="margin-top:12px;font-size:12px">Con los que ya existen: '+
+        '<label style="margin-right:12px"><input type="radio" name="ee-imp-dup" value="omitir" onchange="eeImpModo(this.value)"'+(modo==='omitir'?' checked':'')+'> Omitir</label>'+
+        '<label><input type="radio" name="ee-imp-dup" value="actualizar" onchange="eeImpModo(this.value)"'+(modo==='actualizar'?' checked':'')+'> Actualizar (fusiona campos)</label></div>'+
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'+
+        '<button class="btn btn-ghost" onclick="eeImpCerrar()">Cancelar</button>'+
+        '<button class="btn btn-primary" onclick="eeImpEjecutar()"'+(aEscribir?'':' disabled')+'>'+
+          (aEscribir?('Importar '+aEscribir):'Nada para importar')+'</button>'+
+      '</div></div>';
+    ov.classList.add('open');
+  }
+  window.eeImpModo=function(v){ if(_eeImpDatos){ _eeImpDatos.modo=v; eeImpRender(); } };
+  window.eeImpCerrar=function(){
+    var ov=document.getElementById('ee-imp-ov'); if(ov)ov.classList.remove('open');
+    _eeImpDatos=null;
+  };
+  window.eeImpEjecutar=function(){
+    var d=_eeImpDatos; if(!d)return;
+    var modo=(document.querySelector('input[name="ee-imp-dup"]:checked')||{}).value||'omitir';
+    /* Se relee el almacenamiento AHORA y no la foto de la vista previa: entre abrir el
+       diálogo y confirmar pudo guardarse un estudio desde el formulario, y escribir sobre
+       la lista vieja lo borraría. */
+    var arr=recs();
+    var porId=new Map(); arr.forEach(function(x,i){ if(x&&x.id!=null)porId.set(String(x.id),i); });
+    /* Se reconstruye TAMBIÉN el conjunto de identidades repetidas. La vista previa rechaza
+       las filas cuya identidad matchea más de un estudio guardado, porque actualizar
+       tocaría uno de los dos al azar; si esa relectura sólo se quedara con el primero,
+       reintroduciría acá la misma ambigüedad que la vista previa bloquea. */
+    var keys=new Map(), repes=new Set();
+    arr.forEach(function(x,i){ _eeDupKeys(x).forEach(function(k){
+      if(keys.has(k))repes.add(k); else keys.set(k,i); }); });
+    var nuevos=0,actualizados=0,omitidos=0,sinCambios=0,ambiguos=0;
+
+    d.filas.forEach(function(f){
+      var idx=-1, kk=_eeDupKeys(f.reg);
+      if(f.idExcel&&porId.has(f.idExcel))idx=porId.get(f.idExcel);
+      if(idx<0){
+        for(var q=0;q<kk.length;q++) if(keys.has(kk[q])){
+          if(repes.has(kk[q])){ ambiguos++; return; }   // apareció un segundo homónimo mientras el diálogo estaba abierto
+          idx=keys.get(kk[q]); break;
+        }
+      }
+      if(idx>=0){
+        if(modo!=='actualizar'){ omitidos++; return; }
+        var prev=arr[idx];
+        /* Se FUSIONA, no se reemplaza: `vals` tiene cientos de claves del formulario y el
+           registro guardado además tiene bull, ecgSlots, ettSlots y dobuData. Un
+           reemplazo borraría el estudio entero y dejaría sólo las 19 columnas. */
+        var mergVals=Object.assign({},prev.vals||{},f.reg.vals);
+        /* Los campos calculados se BORRAN cuando cambia alguno de sus insumos, en vez de
+           quedarse con el valor viejo. p-imc, p-sc, b-fc-teo y a-fc-obj son readonly y sólo
+           los recalcula el oninput de peso/talla/edad, que este camino nunca dispara:
+           fusionar un peso de 68 a 94 kg dejaba el IMC del peso anterior, y ese número se
+           imprime en el informe. Vacío es honesto; viejo es mentira. applyEstado los
+           recalcula al abrir el estudio. */
+        if(f.reg.vals['p-peso']!==undefined||f.reg.vals['p-talla']!==undefined){ delete mergVals['p-imc']; delete mergVals['p-sc']; }
+        if(f.reg.vals['p-edad']!==undefined){ delete mergVals['b-fc-teo']; delete mergVals['a-fc-obj']; }
+        var merged=Object.assign({},prev,{vals:mergVals,updated:Date.now()});
+        /* '0' explícito debe poder DESMARCAR la estrella; '' es «la columna no vino». */
+        if(f.reg.caso_interes==='1')merged.caso_interes='1';
+        else if(f.reg.caso_interes==='0')merged.caso_interes='';
+        var prevSinUpd=Object.assign({},prev); delete prevSinUpd.updated;
+        var mergSinUpd=Object.assign({},merged); delete mergSinUpd.updated;
+        if(JSON.stringify(mergSinUpd)===JSON.stringify(prevSinUpd)){ sinCambios++; return; }
+        arr[idx]=merged; actualizados++; return;
+      }
+      var rec=Object.assign({}, f.reg, {
+        caso_interes:(f.reg.caso_interes==='1'?'1':''),
+        id:'rep_'+Date.now()+'_'+Math.floor(Math.random()*1000000),
+        ts:Date.now(),
+        bull:_eeBullVacio(),
+        ecgSlots:[], ecgSlotsAuto:true, ecgRows:[], ecgRowsAuto:true,
+        ettSlots:[], ettPerPage:4, dobuData:{}, bvInclude:{}
+      });
+      arr.push(rec);
+      porId.set(String(rec.id),arr.length-1);
+      _eeDupKeys(rec).forEach(function(k){ if(!keys.has(k))keys.set(k,arr.length-1); });
+      nuevos++;
+    });
+
+    eeImpCerrar();
+    CeiboStore.setAll(arr).then(function(okGuardado){
+      if(okGuardado===false)return;    // CeiboStore ya avisó el motivo
+      if(typeof eeGuardadosList==='function')eeGuardadosList();
+      /* «Omitido» y «sin cambios» se contaban juntos, y son cosas distintas: uno es «no lo
+         toqué porque elegiste omitir» y el otro «lo fusioné y quedó igual». */
+      var p=[nuevos+' nuevos', actualizados+' actualizados'];
+      if(omitidos)p.push(omitidos+' omitidos');
+      if(sinCambios)p.push(sinCambios+' sin cambios');
+      if(ambiguos)p.push(ambiguos+' ambiguos');
+      if(d.errores.length)p.push(d.errores.length+' con error');
+      eeToast('✅ '+p.join(' · '),'ok');
+    });
+  };
+
+  window.eeGuardadosClose=function(){ eeioCerrar(); var m=document.getElementById('ee-guardados'); if(m)m.classList.remove('open'); };
   window.eeGuardados=function(){ eeGuardadosOpen(); };
 
   // Al limpiar el estudio, se deja de editar el registro guardado
